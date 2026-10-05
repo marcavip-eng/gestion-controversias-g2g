@@ -1,0 +1,2974 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sistema de Gestión de Controversias G2G | Despacho Digital</title>
+  
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- SheetJS para Exportación/Importación de Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Estilos para pulso y scrollbar suave */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-danger { animation: pulse-ring 2s infinite ease-in-out; }
+  </style>
+</head>
+<body class="h-full text-slate-800 antialiased flex flex-col font-sans transition-colors duration-200">
+
+  <!-- TOP BAR INSTITUCIONAL -->
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Identidad y Proyecto -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
+            <i data-lucide="scale" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-base sm:text-lg tracking-tight text-white">Controversias G2G</span>
+              <span class="px-2 py-0.5 text-xs font-semibold bg-brand-500/20 text-brand-300 rounded border border-brand-500/30">V2.2 Web</span>
+            </div>
+            <p class="text-xs text-slate-400 hidden sm:block">Megaproyectos de Inversión Pública: NCC · EV4 · VESR · PSR</p>
+          </div>
+        </div>
+
+        <!-- Clúster de Acciones Rápidas -->
+        <div class="flex items-center space-x-2">
+          
+          <!-- Estado de Sincronización en Nube -->
+          <button id="btnSyncCloud" onclick="abrirConfigNube()" title="Configuración de Nube / Google Sheets" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="hidden md:inline" id="cloudStatusText">Nube / Sheets Activo</span>
+            <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
+          </button>
+
+          <!-- Botón Panel de Configuración del Sistema / Catálogos -->
+          <button onclick="abrirModalConfiguracion()" title="Configuración de Catálogos, Parámetros, Ponderaciones y Plazos Fatales" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 hover:border-amber-400/40 transition">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span class="hidden lg:inline">Catálogos & Configuración</span>
+          </button>
+
+          <!-- Botón Exportar Excel (50 Columnas Oficiales) -->
+          <button onclick="exportarExcel()" title="Descargar Matriz Excel Oficial (50 Columnas Completas)" class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/50 transition">
+            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Exportar Excel (50 Col)</span>
+          </button>
+
+          <!-- Botón + Nuevo Caso (Abogado) -->
+          <button onclick="abrirModalCaso()" class="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white shadow-sm shadow-brand-600/50 transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Nuevo Caso</span>
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
+
+    <!-- TABLERO EJECUTIVO (KPIs DE IMPACTO PARA DIRECCIÓN) -->
+    <section>
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-600"></i>
+            Tablero Ejecutivo en Tiempo Real
+          </h2>
+          <p class="text-xs text-slate-400">Indicadores consolidados para la toma de decisiones inmediata</p>
+        </div>
+        <span class="text-xs text-slate-400 font-mono" id="lblFechaCorte">Corte: Hoy</span>
+      </div>
+
+      <!-- Tarjetas KPI -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        
+        <!-- 1. Total Casos -->
+        <div onclick="aplicarFiltroRapido('todos')" class="cursor-pointer bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm hover:border-slate-300 hover:shadow transition">
+          <div class="flex items-center justify-between text-slate-500 mb-1">
+            <span class="text-xs font-medium">Casos Abiertos</span>
+            <i data-lucide="folder-open" class="w-4 h-4 text-slate-400"></i>
+          </div>
+          <div class="text-2xl font-extrabold text-slate-800" id="kpiCasosAbiertos">0</div>
+          <p class="text-[11px] text-slate-400 mt-0.5">En seguimiento activo</p>
+        </div>
+
+        <!-- 2. Alertas Críticas (P1) -->
+        <div onclick="aplicarFiltroRapido('criticos')" class="cursor-pointer bg-rose-50/70 p-3.5 rounded-xl border border-rose-200 shadow-sm hover:border-rose-300 hover:shadow transition">
+          <div class="flex items-center justify-between text-rose-600 mb-1">
+            <span class="text-xs font-bold flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-rose-500 pulse-danger"></span>
+              P1 - Críticos
+            </span>
+            <i data-lucide="alert-octagon" class="w-4 h-4 text-rose-500"></i>
+          </div>
+          <div class="text-2xl font-extrabold text-rose-700" id="kpiCriticos">0</div>
+          <p class="text-[11px] text-rose-600 font-medium mt-0.5">Atención obligatoria</p>
+        </div>
+
+        <!-- 3. Vencidos / Por Vencer -->
+        <div onclick="aplicarFiltroRapido('vencidos')" class="cursor-pointer bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 shadow-sm hover:border-amber-300 hover:shadow transition">
+          <div class="flex items-center justify-between text-amber-700 mb-1">
+            <span class="text-xs font-bold">Vencidos / Semana</span>
+            <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+          </div>
+          <div class="text-2xl font-extrabold text-amber-800" id="kpiVencidos">0</div>
+          <p class="text-[11px] text-amber-600 font-medium mt-0.5" id="kpiSubVencidos">0 vencidos | 0 esta sem.</p>
+        </div>
+
+        <!-- 4. En Ruta Crítica -->
+        <div onclick="aplicarFiltroRapido('rutacritica')" class="cursor-pointer bg-purple-50/70 p-3.5 rounded-xl border border-purple-200 shadow-sm hover:border-purple-300 hover:shadow transition">
+          <div class="flex items-center justify-between text-purple-700 mb-1">
+            <span class="text-xs font-bold">Ruta Crítica WBS</span>
+            <i data-lucide="git-commit" class="w-4 h-4 text-purple-500"></i>
+          </div>
+          <div class="text-2xl font-extrabold text-purple-800" id="kpiRutaCritica">0</div>
+          <p class="text-[11px] text-purple-600 font-medium mt-0.5">Impacto en plazo de obra</p>
+        </div>
+
+        <!-- 5. Exposición Probable -->
+        <div onclick="aplicarFiltroRapido('todos')" class="cursor-pointer bg-blue-50/70 p-3.5 rounded-xl border border-blue-200 shadow-sm hover:border-blue-300 hover:shadow transition">
+          <div class="flex items-center justify-between text-blue-700 mb-1">
+            <span class="text-xs font-bold">Exposición Prob.</span>
+            <i data-lucide="dollar-sign" class="w-4 h-4 text-blue-500"></i>
+          </div>
+          <div class="text-lg sm:text-xl font-extrabold text-blue-900 truncate" id="kpiExposicion">S/ 0.00</div>
+          <p class="text-[11px] text-blue-600 mt-0.5" id="kpiSubPretension">Pretensión: S/ 0</p>
+        </div>
+
+        <!-- 6. Brecha Presupuestal OPP -->
+        <div onclick="aplicarFiltroRapido('brecha')" class="cursor-pointer bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200 shadow-sm hover:border-emerald-300 hover:shadow transition">
+          <div class="flex items-center justify-between text-emerald-700 mb-1">
+            <span class="text-xs font-bold">Brecha Presupuestal</span>
+            <i data-lucide="wallet" class="w-4 h-4 text-emerald-500"></i>
+          </div>
+          <div class="text-lg sm:text-xl font-extrabold text-emerald-900 truncate" id="kpiBrecha">S/ 0.00</div>
+          <p class="text-[11px] text-emerald-600 font-medium mt-0.5">Déficit a fondear (OPP)</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- GRÁFICOS EJECUTIVOS DIRECTIVOS (CASOS POR PROYECTO Y CARGA POR INSTANCIA) -->
+    <section class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 text-brand-600"></i>
+          Distribución de Controversias y Carga Procesal en Tiempo Real
+        </h3>
+        <button onclick="toggleGraficosEjecutivos()" id="btnToggleGraficos" class="text-xs text-brand-600 hover:text-brand-800 font-semibold flex items-center gap-1 transition">
+          <span id="lblToggleGraficos">Ocultar Gráficos</span>
+          <i data-lucide="chevron-up" class="w-3.5 h-3.5" id="icoToggleGraficos"></i>
+        </button>
+      </div>
+
+      <div id="contenedorGraficos" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+        
+        <!-- Gráfico 1: Casos Abiertos por Megaproyecto -->
+        <div class="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-600"></i>
+              Casos Abiertos por Megaproyecto
+            </span>
+            <span class="text-[11px] text-slate-400 font-mono" id="lblTotalCasosProy">0 casos</span>
+          </div>
+          <div id="graficoCasosPorProyecto" class="space-y-2">
+            <!-- Renderizado dinámico de barras -->
+          </div>
+        </div>
+
+        <!-- Gráfico 2: Carga Procesal por Instancia Actual (Cuellos de Botella) -->
+        <div class="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+              <i data-lucide="git-branch" class="w-3.5 h-3.5 text-brand-600"></i>
+              Carga Procesal por Instancia (Cuellos de Botella)
+            </span>
+            <span class="text-[11px] text-slate-400 font-mono" id="lblTotalCasosInst">0 casos</span>
+          </div>
+          <div id="graficoCargaPorInstancia" class="space-y-2">
+            <!-- Renderizado dinámico de barras -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- BARRA DE FILTROS TÁCTILES RÁPIDOS Y BÚSQUEDA -->
+    <section class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+      
+      <!-- Fila 1: Píldoras Táctiles de Filtro Rápido (Ideales para Celular) -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+        <button onclick="aplicarFiltroRapido('todos')" id="pill-todos" class="px-3 py-1.5 rounded-lg font-semibold bg-slate-900 text-white whitespace-nowrap transition">
+          Todos (<span id="cnt-todos">0</span>)
+        </button>
+        <button onclick="aplicarFiltroRapido('criticos')" id="pill-criticos" class="px-3 py-1.5 rounded-lg font-semibold bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 whitespace-nowrap transition">
+          🚨 P1 - Críticos (<span id="cnt-criticos">0</span>)
+        </button>
+        <button onclick="aplicarFiltroRapido('vencidos')" id="pill-vencidos" class="px-3 py-1.5 rounded-lg font-semibold bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 whitespace-nowrap transition">
+          ⏰ Vencidos (<span id="cnt-vencidos">0</span>)
+        </button>
+        <button onclick="aplicarFiltroRapido('preclusivos')" id="pill-preclusivos" title="Plazos con vencimiento fatal de caducidad que extinguen derechos definitivamente (NEC Cl. 61.3 / FIDIC Cl. 20.1/21.4)" class="px-3 py-1.5 rounded-lg font-semibold bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-800 whitespace-nowrap transition">
+          ⏱️ Plazos Fatales / Caducidad (<span id="cnt-preclusivos">0</span>)
+        </button>
+        <button onclick="aplicarFiltroRapido('rutacritica')" id="pill-rutacritica" class="px-3 py-1.5 rounded-lg font-semibold bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-800 whitespace-nowrap transition">
+          🚧 Ruta Crítica (<span id="cnt-rutacritica">0</span>)
+        </button>
+        <button onclick="aplicarFiltroRapido('semana')" id="pill-semana" class="px-3 py-1.5 rounded-lg font-semibold bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-800 whitespace-nowrap transition">
+          📅 Vencen esta Semana (<span id="cnt-semana">0</span>)
+        </button>
+        <button onclick="aplicarFiltroRapido('brecha')" id="pill-brecha" class="px-3 py-1.5 rounded-lg font-semibold bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 whitespace-nowrap transition">
+          💰 Brecha Descubierta (<span id="cnt-brecha">0</span>)
+        </button>
+      </div>
+
+      <!-- Fila 2: Filtros Combinados y Búsqueda -->
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs">
+        
+        <!-- Búsqueda textual -->
+        <div class="sm:col-span-5 relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+          <input type="text" id="txtBuscar" oninput="renderizarCasos()" placeholder="Buscar por código, asunto, responsable, contraparte..." class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 text-slate-800">
+        </div>
+
+        <!-- Filtro Proyecto -->
+        <div class="sm:col-span-2">
+          <select id="selFiltroProyecto" onchange="renderizarCasos()" class="w-full py-2 px-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 text-slate-800">
+            <option value="">Proyecto: Todos</option>
+            <option value="NCC">NCC (Nueva Carretera Central)</option>
+            <option value="EV4">EV4 (Eje Vial 4)</option>
+            <option value="VESR">VESR (Vía Expresa Santa Rosa)</option>
+            <option value="PSR">PSR (Puentes Sierra)</option>
+          </select>
+        </div>
+
+        <!-- Filtro Instancia Actual -->
+        <div class="sm:col-span-3">
+          <select id="selFiltroInstancia" onchange="renderizarCasos()" class="w-full py-2 px-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 text-slate-800">
+            <option value="">Instancia: Todas</option>
+            <option value="PMO">PMO (Asistencia Técnica)</option>
+            <option value="Dirección de Estudios">Dirección de Estudios / Conducción</option>
+            <option value="OAJ">OAJ (Asesoría Jurídica)</option>
+            <option value="OPP">OPP (Presupuesto y Planificación)</option>
+            <option value="Procuraduría del MTC">Procuraduría Pública MTC</option>
+            <option value="MTC / Alta Dirección">MTC / Alta Dirección</option>
+          </select>
+        </div>
+
+        <!-- Botón Limpiar Filtros -->
+        <div class="sm:col-span-2 flex justify-end">
+          <button onclick="limpiarFiltros()" class="w-full py-2 px-3 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 font-medium transition flex items-center justify-center gap-1.5">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>Limpiar</span>
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- BANDEJA DE CASOS (VISTA DUAL: CARDS MÓVIL / TABLA DESKTOP) -->
+    <section class="space-y-3">
+      
+      <!-- BARRA DE ACCIÓN PRINCIPAL DE CARTERA -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-sm shrink-0 border border-brand-200">
+            <i data-lucide="folder-kanban" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2 truncate">
+              <span>Expedientes y Controversias en Cartera</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs bg-brand-100 text-brand-800 font-mono font-bold" id="lblTotalListados">0</span>
+            </h3>
+            <p class="text-[11px] text-slate-500 hidden sm:block">Control procesal, alertas preclusivas e impacto presupuestal</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-2 shrink-0">
+          <!-- BOTÓN PROMINENTE Y DESTACADO: REGISTRAR NUEVO CASO -->
+          <button onclick="abrirModalCaso()" class="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-md shadow-brand-500/30 hover:shadow-lg transition transform active:scale-95 border border-white/20">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-white"></i>
+            <span>+ Registrar Nuevo Caso</span>
+          </button>
+
+          <!-- Alternar columnas en Tabla: Ejecutiva (9) vs Matriz Maestra (50) -->
+          <div id="selectorColumnasTabla" class="hidden sm:flex items-center space-x-1 bg-slate-100 p-0.5 rounded-lg text-xs border border-slate-200">
+            <button onclick="cambiarModoColumnas('ejecutiva')" id="btnColsEjecutiva" class="px-2.5 py-1 rounded-md font-bold bg-white text-slate-800 shadow-sm transition" title="Vista Ejecutiva compacta (9 columnas clave)">
+              💼 Ejecutiva (9)
+            </button>
+            <button onclick="cambiarModoColumnas('completa')" id="btnColsCompleta" class="px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition" title="Vista Oficial Matriz Maestra (50 columnas completas con scroll horizontal)">
+              📊 Matriz Maestra (50 cols)
+            </button>
+          </div>
+
+          <!-- Alternar vista (Tabla vs Tarjetas) -->
+          <div class="flex items-center space-x-1 bg-slate-100 p-0.5 rounded-lg text-xs border border-slate-200">
+            <button onclick="cambiarModoVista('tabla')" id="btnVistaTabla" class="px-2.5 py-1 rounded-md font-bold bg-white text-slate-800 shadow-sm transition">Tabla</button>
+            <button onclick="cambiarModoVista('cards')" id="btnVistaCards" class="px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition">Tarjetas</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA TABLA (DESKTOP / HORIZONTAL SCROLL) -->
+      <div id="contenedorTabla" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto max-w-full">
+          <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
+            <thead id="tablaCasosHead" class="bg-slate-900 text-slate-200 font-semibold uppercase text-[10px] tracking-wider border-b border-slate-800 sticky top-0 z-10">
+              <!-- Renderizado dinámico según modo (9 cols vs 50 cols) -->
+            </thead>
+            <tbody id="tablaCasosBody" class="divide-y divide-slate-100 text-slate-700">
+              <!-- Renderizado dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VISTA TARJETAS (MÓVIL & TABLET & DESKTOP ALTERNATIVO) -->
+      <div id="contenedorCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5" style="display: none;">
+        <!-- Renderizado dinámico -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL: REGISTRO / EDICIÓN DE CASO (WIZARD PARA EL ABOGADO) -->
+  <div id="modalCaso" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+      
+      <!-- Cabecera Modal -->
+      <div class="bg-slate-900 px-5 py-3.5 text-white flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white">
+            <i data-lucide="scale" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-white" id="modalTitulo">Registro de Caso de Controversia</h3>
+            <p class="text-xs text-slate-400">Control unificado bajo gobernanza G2G e Invierte.pe</p>
+          </div>
+        </div>
+        <button onclick="cerrarModalCaso()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Navegación por Pestañas del Wizard (Amigable para Abogados) -->
+      <div class="bg-slate-100 px-5 border-b border-slate-200 flex items-center space-x-4 text-xs font-semibold overflow-x-auto no-scrollbar">
+        <button onclick="cambiarTabWizard(1)" id="tabBtn1" class="py-3 border-b-2 border-brand-600 text-brand-700 flex items-center gap-1.5 whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-brand-600 text-white flex items-center justify-center text-[10px]">1</span>
+          Identificación y Asunto
+        </button>
+        <button onclick="cambiarTabWizard(2)" id="tabBtn2" class="py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[10px]">2</span>
+          Instancia y Plazos Legales
+        </button>
+        <button onclick="cambiarTabWizard(3)" id="tabBtn3" class="py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[10px]">3</span>
+          Cronograma y Ruta Crítica
+        </button>
+        <button onclick="cambiarTabWizard(4)" id="tabBtn4" class="py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
+          <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[10px]">4</span>
+          Cuantificación Económica y OPP
+        </button>
+      </div>
+
+      <!-- Formulario Wizard Body -->
+      <form id="formCaso" onsubmit="guardarCaso(event)" class="p-5 overflow-y-auto space-y-4 flex-1 text-xs">
+        
+        <input type="hidden" id="editIndex" value="-1">
+
+        <!-- TAB 1: IDENTIFICACIÓN Y ASUNTO -->
+        <div id="tabContent1" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">ID Caso <span class="text-rose-500">*</span></label>
+              <input type="text" id="inpIdCaso" required placeholder="Ej. NCC-TD-01" class="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold uppercase focus:ring-2 focus:ring-brand-500">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Proyecto G2G <span class="text-rose-500">*</span></label>
+              <select id="inpProyecto" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                <option value="NCC">NCC - Nueva Carretera Central</option>
+                <option value="EV4">EV4 - Eje Vial 4</option>
+                <option value="VESR">VESR - Vía Expresa Santa Rosa</option>
+                <option value="PSR">PSR - Puentes Sierra Central</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Fase del Ciclo</label>
+              <select id="inpFase" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                <option value="Diseño/Estudios">Diseño / Estudios Definitivos</option>
+                <option value="Ejecución">Ejecución de Obra</option>
+                <option value="Contratación">Contratación / Procura</option>
+                <option value="Cierre">Cierre y Liquidación</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Tipo de Atención <span class="text-rose-500">*</span></label>
+              <select id="inpTipoAtencion" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                <option value="Trato directo">Trato Directo</option>
+                <option value="Evento de Compensación (CE)">Evento de Compensación (NEC - CE)</option>
+                <option value="DAB">Dispute Board (DAB / DAAB)</option>
+                <option value="Arbitraje">Arbitraje Nacional / Internacional</option>
+                <option value="Controversia contractual">Controversia Contractual</option>
+                <option value="Consulta legal">Consulta Legal Especializada</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Régimen Contractual</label>
+              <select id="inpRegimen" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                <option value="NEC4 ECC Opción C (Target)">NEC4 ECC Opción C (Target Cost)</option>
+                <option value="NEC3/4 ECC Opción A">NEC3/NEC4 ECC Opción A (Precio Fijo)</option>
+                <option value="FIDIC Libro Rojo">FIDIC Libro Rojo (Construcción)</option>
+                <option value="FIDIC Libro Amarillo">FIDIC Libro Amarillo (Diseño y Construcción)</option>
+                <option value="Ley N° 32069 / TUO 30225">Ley de Contrataciones del Estado</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Generador / Solicitante</label>
+              <input type="text" id="inpGenerador" placeholder="Ej. Consorcio Constructor / PMO" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Asunto / Descripción del Reclamo <span class="text-rose-500">*</span></label>
+            <textarea id="inpAsunto" rows="2" required placeholder="Detalle sintético del objeto de la controversia y antecedentes..." class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Documento de Inicio</label>
+              <input type="text" id="inpDocInicio" placeholder="Ej. Carta N° 123-2026 / Acta de Trato Directo N° 01" class="w-full p-2 border border-slate-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Fecha de Inicio / Notificación</label>
+              <input type="date" id="inpFechaInicio" class="w-full p-2 border border-slate-300 rounded-lg">
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: INSTANCIA Y PLAZOS LEGALES -->
+        <div id="tabContent2" class="space-y-4 hidden">
+          <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[11px] flex items-start gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600 mt-0.5 shrink-0"></i>
+            <div>
+              <strong>Principio de Conducción Continua:</strong> Si el caso se deriva a OAJ, OPP o Procuraduría, la Entidad mantiene la titularidad del seguimiento. No marcar como "Cerrado" hasta contar con la resolución o laudo ejecutado.
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Instancia Actual <span class="text-rose-500">*</span></label>
+              <select id="inpInstanciaActual" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 font-semibold">
+                <option value="PMO">PMO (Asistencia Técnica Internacional)</option>
+                <option value="Dirección de Estudios">Dirección de Estudios (Entidad PVN)</option>
+                <option value="OAJ">OAJ (Oficina de Asesoría Jurídica)</option>
+                <option value="OPP">OPP (Planificación y Presupuesto)</option>
+                <option value="Procuraduría del MTC">Procuraduría Pública del MTC</option>
+                <option value="MTC / Alta Dirección">MTC / Despacho Ministerial</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Responsable Nominal Asignado</label>
+              <input type="text" id="inpResponsable" placeholder="Ej. Dr. Carlos Vega (Especialista Legal)" class="w-full p-2 border border-slate-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Estado Operativo</label>
+              <select id="inpEstado" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                <option value="En curso">En curso / En evaluación</option>
+                <option value="En OAJ">En evaluación legal (OAJ)</option>
+                <option value="En OPP">En evaluación presupuestal (OPP)</option>
+                <option value="En Procuraduría">En defensa litigiosa (Procuraduría)</option>
+                <option value="En PMO">En evaluación técnica (PMO)</option>
+                <option value="Cerrado">Cerrado / Implementado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Tipo de Plazo <span class="text-rose-500">*</span></label>
+              <select id="inpTipoPlazo" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                <option value="Preclusivo / Caducidad (Fatal)">⏱️ Preclusivo / Caducidad (Time-Bar Fatal)</option>
+                <option value="Contractual Ordinario">Contractual Ordinario</option>
+                <option value="Acuerdo de Acta">Acuerdo de Acta de Trato Directo</option>
+                <option value="Interno / Administrativo">Interno / Administrativo</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Fecha de Derivación</label>
+              <input type="date" id="inpFechaDerivacion" class="w-full p-2 border border-slate-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Fecha Límite <span class="text-rose-500">*</span></label>
+              <input type="date" id="inpFechaLimite" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 font-bold">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Acción Pendiente por la Instancia</label>
+            <input type="text" id="inpAccionPendiente" placeholder="Ej. Emitir opinión legal sobre alcance de cláusula y elevar posición" class="w-full p-2 border border-slate-300 rounded-lg">
+          </div>
+        </div>
+
+        <!-- TAB 3: CRONOGRAMA Y RUTA CRÍTICA -->
+        <div id="tabContent3" class="space-y-4 hidden">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">¿Afecta Ruta Crítica? <span class="text-rose-500">*</span></label>
+              <select id="inpRutaCritica" required class="w-full p-2 border border-slate-300 rounded-lg font-bold">
+                <option value="Sí">SÍ (Impacta Ruta Crítica)</option>
+                <option value="No">NO (Actividad Secundaria)</option>
+                <option value="Por determinar">POR DETERMINAR (En análisis TIA con PMO)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Código WBS / EDT</label>
+              <input type="text" id="inpWbs" placeholder="Ej. WBS-EST-04.02" class="w-full p-2 border border-slate-300 rounded-lg font-mono">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Hito / Entregable Afectado</label>
+              <input type="text" id="inpHito" placeholder="Ej. Aprobación Entregable E3" class="w-full p-2 border border-slate-300 rounded-lg">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Holgura Total Disponible (Días)</label>
+              <input type="number" id="inpHolgura" value="0" min="0" class="w-full p-2 border border-slate-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Afectación Estimada de Plazo (Días)</label>
+              <input type="number" id="inpAfectacionDias" value="0" min="0" class="w-full p-2 border border-slate-300 rounded-lg">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Medida de Mitigación / Acción Preventiva</label>
+            <textarea id="inpMitigacion" rows="2" placeholder="Estrategia para evitar impacto en plazo o reprogramación de ruta crítica..." class="w-full p-2 border border-slate-300 rounded-lg"></textarea>
+          </div>
+        </div>
+
+        <!-- TAB 4: CUANTIFICACIÓN ECONÓMICA Y OPP -->
+        <div id="tabContent4" class="space-y-4 hidden">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Moneda Origen</label>
+              <select id="inpMoneda" class="w-full p-2 border border-slate-300 rounded-lg">
+                <option value="PEN">Soles (PEN)</option>
+                <option value="USD">Dólares (USD)</option>
+                <option value="EUR">Euros (EUR)</option>
+                <option value="GBP">Libras (GBP)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Monto Reclamado (Pretensión)</label>
+              <input type="number" step="0.01" id="inpMontoReclamado" placeholder="0.00" oninput="calcularBrecha()" class="w-full p-2 border border-slate-300 rounded-lg font-mono">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">¿Incluye IGV (18%)?</label>
+              <select id="inpIncluyeIgv" class="w-full p-2 border border-slate-300 rounded-lg">
+                <option value="Sí">SÍ (Con IGV)</option>
+                <option value="No">NO (Sin IGV - Costo Directo)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Escenarios de Exposición Probable -->
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+            <span class="font-bold text-slate-700 block">Evaluación de Exposición de la Entidad (PEN):</span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-0.5">Escenario Bajo (Mínimo)</label>
+                <input type="number" step="0.01" id="inpEscenarioBajo" placeholder="0.00" class="w-full p-2 border border-slate-300 rounded-lg font-mono">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-blue-700 mb-0.5">Escenario Probable (Punto Focal) *</label>
+                <input type="number" step="0.01" id="inpEscenarioProbable" required placeholder="0.00" oninput="calcularBrecha()" class="w-full p-2 border border-blue-400 bg-blue-50/50 rounded-lg font-mono font-bold">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-0.5">Escenario Alto (Máximo Riesgo)</label>
+                <input type="number" step="0.01" id="inpEscenarioAlto" placeholder="0.00" class="w-full p-2 border border-slate-300 rounded-lg font-mono">
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Cobertura Presupuestal Disponible (PEN)</label>
+              <input type="number" step="0.01" id="inpCobertura" placeholder="0.00" oninput="calcularBrecha()" class="w-full p-2 border border-slate-300 rounded-lg font-mono">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Brecha Descubierta (PEN)</label>
+              <input type="number" step="0.01" id="inpBrechaCalculada" readonly class="w-full p-2 border border-slate-200 bg-slate-100 rounded-lg font-mono font-bold text-rose-600">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Fuente de Financiamiento</label>
+              <select id="inpFuente" class="w-full p-2 border border-slate-300 rounded-lg">
+                <option value="RO">RO (Recursos Ordinarios)</option>
+                <option value="ROOC">ROOC (Endeudamiento Externo)</option>
+                <option value="RDR">RDR (Recursos Determinados)</option>
+                <option value="Por definir">Por Definir con OPP</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Enlace a Expediente en Nube (Autodesk Construction Cloud - ACC / CDE)</label>
+            <input type="url" id="inpEnlaceAcc" placeholder="https://acc.autodesk.com/docs/..." class="w-full p-2 border border-slate-300 rounded-lg text-brand-600 font-mono">
+          </div>
+        </div>
+
+        <!-- Botones de Acción del Modal -->
+        <div class="pt-4 border-t border-slate-200 flex items-center justify-between">
+          <button type="button" onclick="cerrarModalCaso()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 rounded-lg font-medium text-slate-700 transition">
+            Cancelar
+          </button>
+          <div class="flex items-center space-x-2">
+            <button type="button" id="btnWizardPrev" onclick="navegarWizard(-1)" class="px-3 py-2 border border-slate-300 rounded-lg font-medium text-slate-600 hover:bg-slate-100 hidden">
+              Anterior
+            </button>
+            <button type="button" id="btnWizardNext" onclick="navegarWizard(1)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-bold">
+              Siguiente
+            </button>
+            <button type="submit" id="btnWizardSave" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-bold shadow-md shadow-brand-600/30 hidden">
+              Guardar Caso
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DERIVACIÓN RÁPIDA DE CASO (1 CLIC PARA EL ABOGADO) -->
+  <div id="modalDerivar" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden text-xs">
+      <div class="bg-slate-900 px-5 py-3 text-white flex items-center justify-between">
+        <h3 class="font-bold flex items-center gap-2">
+          <i data-lucide="send" class="w-4 h-4 text-brand-400"></i>
+          Derivar Caso entre Instancias
+        </h3>
+        <button onclick="cerrarModalDerivar()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="formDerivar" onsubmit="ejecutarDerivacion(event)" class="p-5 space-y-3.5">
+        <input type="hidden" id="derivarCasoId">
+        
+        <div>
+          <span class="text-slate-500 block mb-0.5">Caso a Derivar:</span>
+          <span class="font-bold text-sm text-slate-800 font-mono" id="lblDerivarCasoInfo">NCC-TD-01</span>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nueva Instancia Destino <span class="text-rose-500">*</span></label>
+          <select id="selDerivarDestino" required class="w-full p-2 border border-slate-300 rounded-lg font-semibold focus:ring-2 focus:ring-brand-500">
+            <option value="PMO">PMO (Asistencia Técnica)</option>
+            <option value="Dirección de Estudios">Dirección de Estudios (PVN)</option>
+            <option value="OAJ">OAJ (Oficina de Asesoría Jurídica)</option>
+            <option value="OPP">OPP (Planificación y Presupuesto)</option>
+            <option value="Procuraduría del MTC">Procuraduría Pública del MTC</option>
+            <option value="MTC / Alta Dirección">MTC / Alta Dirección</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Documento de Derivación <span class="text-rose-500">*</span></label>
+          <input type="text" id="inpDerivarDoc" required placeholder="Ej. Memorando N° 450-2026-MTC/20" class="w-full p-2 border border-slate-300 rounded-lg">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Fecha Derivación</label>
+            <input type="date" id="inpDerivarFecha" required class="w-full p-2 border border-slate-300 rounded-lg">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Nuevo Plazo Límite</label>
+            <input type="date" id="inpDerivarNuevoLimite" required class="w-full p-2 border border-slate-300 rounded-lg font-bold">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Instrucción / Acción Solicitada</label>
+          <input type="text" id="inpDerivarAccion" required placeholder="Ej. Emitir opinión sobre disponibilidad presupuestal" class="w-full p-2 border border-slate-300 rounded-lg">
+        </div>
+
+        <div class="pt-2 flex justify-end space-x-2">
+          <button type="button" onclick="cerrarModalDerivar()" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700">Cancelar</button>
+          <button type="submit" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-bold shadow-sm">Registrar Pase</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: FICHA EJECUTIVA DE 1 PÁGINA (COMPARTIR CON DIRECTOR) -->
+  <div id="modalFicha" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col text-xs">
+      <div class="bg-slate-900 px-5 py-3 text-white flex items-center justify-between">
+        <h3 class="font-bold flex items-center gap-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-brand-400"></i>
+          Ficha Ejecutiva de Controversia (1 Página)
+        </h3>
+        <div class="flex items-center space-x-2">
+          <button onclick="window.print()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[11px] text-slate-200 flex items-center gap-1">
+            <i data-lucide="printer" class="w-3 h-3"></i> Imprimir
+          </button>
+          <button onclick="cerrarModalFicha()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+      <div id="fichaContenido" class="p-6 space-y-4 overflow-y-auto max-h-[80vh]">
+        <!-- Contenido dinámico inyectado -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIGURACIÓN DE NUBE / ZERO-OTI GOOGLE SHEETS -->
+  <div id="modalNube" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 text-xs">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-slate-900 px-5 py-3 text-white flex items-center justify-between">
+        <h3 class="font-bold flex items-center gap-2">
+          <i data-lucide="cloud-cog" class="w-4 h-4 text-emerald-400"></i>
+          Conexión Nube en Tiempo Real (Cero OTI)
+        </h3>
+        <button onclick="cerrarModalNube()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-5 space-y-3.5">
+        <p class="text-slate-600">
+          Esta aplicación se conecta directamente a un <strong>Google Sheets institucional</strong> o servicio sin servidores para compartir datos en tiempo real entre el abogado y la Dirección sin depender de la OTI.
+        </p>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">URL Webhook / Google Apps Script</label>
+          <input type="url" id="inpUrlScript" placeholder="https://script.google.com/macros/s/.../exec" class="w-full p-2 border border-slate-300 rounded-lg font-mono text-[11px]">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">PIN de Seguridad Institucional</label>
+          <input type="password" id="inpPinSeguridad" placeholder="••••••" class="w-full p-2 border border-slate-300 rounded-lg text-center font-mono tracking-widest">
+        </div>
+
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px]">
+          <strong>Estado actual:</strong> Almacenamiento local persistente activo (los datos no se borran al cerrar el navegador). Con el webhook configurado, se sincroniza automáticamente con el celular del Director.
+        </div>
+
+        <div class="pt-2 flex justify-end space-x-2">
+          <button onclick="cerrarModalNube()" class="px-3 py-1.5 border border-slate-300 rounded-lg">Cerrar</button>
+          <button onclick="guardarConfigNube()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold">Guardar Conexión</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PANEL DE CONFIGURACIÓN DEL SISTEMA, CATÁLOGOS Y MENSAJES FATALES -->
+  <div id="modalConfiguracion" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] text-xs">
+      
+      <!-- Cabecera -->
+      <div class="bg-slate-900 px-5 py-3.5 text-white flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-white">Panel de Configuración del Sistema y Catálogos G2G</h3>
+            <p class="text-xs text-slate-400">Administración de listas desplegables, plazos preclusivos, alertas fatales y ponderaciones</p>
+          </div>
+        </div>
+        <button onclick="cerrarModalConfiguracion()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Navegación por Pestañas de Configuración -->
+      <div class="bg-slate-100 px-5 border-b border-slate-200 flex items-center space-x-3 text-xs font-semibold overflow-x-auto no-scrollbar">
+        <button onclick="cambiarTabConfig(1)" id="tabCfgBtn1" class="py-3 border-b-2 border-brand-600 text-brand-700 flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="list-checks" class="w-4 h-4"></i>
+          1. Catálogos de Listas
+        </button>
+        <button onclick="cambiarTabConfig(2)" id="tabCfgBtn2" class="py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-500"></i>
+          2. Plazos Preclusivos y Alertas Fatales
+        </button>
+        <button onclick="cambiarTabConfig(3)" id="tabCfgBtn3" class="py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="calculator" class="w-4 h-4"></i>
+          3. Ponderaciones de Prioridad
+        </button>
+        <button onclick="cambiarTabConfig(4)" id="tabCfgBtn4" class="py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          4. Enlaces CDE / Autodesk ACC
+        </button>
+      </div>
+
+      <!-- Contenido de Configuración -->
+      <div class="p-5 overflow-y-auto space-y-4 flex-1">
+        
+        <!-- PESTAÑA 1: CATÁLOGOS DE LISTAS -->
+        <div id="tabCfgContent1" class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-2 gap-2">
+            <div>
+              <span class="font-bold text-slate-800 text-sm">Listas Desplegables del Sistema</span>
+              <p class="text-slate-500 text-[11px]">Seleccione la categoría para agregar, modificar o dar de baja opciones del Wizard y filtros</p>
+            </div>
+            <select id="selCatSeccion" onchange="cambiarSeccionCatalogo()" class="p-2 border border-slate-300 rounded-lg font-bold text-slate-700 bg-slate-50">
+              <option value="proyectos">Proyectos G2G</option>
+              <option value="instancias">Instancias Administrativas</option>
+              <option value="tiposAtencion">Tipos de Atención / Reclamo</option>
+              <option value="regimenes">Regímenes Contractuales</option>
+              <option value="fases">Fases del Ciclo</option>
+              <option value="estados">Estados Operativos</option>
+            </select>
+          </div>
+
+          <!-- Formulario Agregar Item -->
+          <div class="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <input type="text" id="inpNuevoItemCat" placeholder="Nombre de la nueva opción..." class="flex-1 p-2 border border-slate-300 rounded-lg text-xs">
+            <button onclick="agregarItemCatalogo()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-bold flex items-center gap-1 shadow-sm">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Agregar Opción
+            </button>
+          </div>
+
+          <!-- Lista de Elementos Actuales -->
+          <div class="space-y-1.5" id="listaItemsCatalogo">
+            <!-- Renderizado dinámico -->
+          </div>
+        </div>
+
+        <!-- PESTAÑA 2: PLAZOS PRECLUSIVOS Y MENSAJES FATALES -->
+        <div id="tabCfgContent2" class="space-y-4 hidden">
+          <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 space-y-1">
+            <div class="flex items-center gap-1.5 font-bold text-rose-800">
+              <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i>
+              Gobernanza de Plazos Preclusivos y Time-Bars Fatales (Doctrina Contractual G2G)
+            </div>
+            <p class="text-[11px] text-rose-700">
+              Bajo la Cláusula 61.3 de NEC3/4 ECC, el Contratista o la Entidad pierde todo derecho si no notifica un Evento de Compensación dentro de las 8 semanas. De igual forma, en contratos FIDIC rigen los plazos perentorios de 28 días ante el DAAB. Todo caso marcado como <strong>Preclusivo / Fatal</strong> dispara alertas inmediatas de máxima prioridad (P1) y un badge visible en el sistema.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Texto de la Alerta Fatal (Badge en pantalla y tarjetas):</label>
+              <input type="text" id="cfgMensajeFatal" class="w-full p-2 border border-slate-300 rounded-lg font-bold text-rose-600 bg-rose-50/30">
+              <span class="text-[10px] text-slate-400 mt-1 block">Aparece parpadeando en la ficha, tablas y tarjetas del caso.</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Días Alerta Crítica (P1 Rojo)</label>
+                <input type="number" id="cfgDiasCritica" min="1" max="15" class="w-full p-2 border border-slate-300 rounded-lg font-bold text-center">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Días Alerta Próxima (Naranja)</label>
+                <input type="number" id="cfgDiasProxima" min="1" max="30" class="w-full p-2 border border-slate-300 rounded-lg font-bold text-center">
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <span class="font-bold text-slate-800 block text-xs">Clasificación de Tipos de Plazos y Condición de Fatalidad:</span>
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-100 text-slate-700 font-semibold">
+                  <tr>
+                    <th class="py-2 px-3">Tipo de Plazo</th>
+                    <th class="py-2 px-3 text-center">¿Preclusivo / Fatal?</th>
+                    <th class="py-2 px-3">Comportamiento en Sistema</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaPlazosConfig" class="divide-y divide-slate-100">
+                  <!-- Renderizado dinámico -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA 3: PONDERACIONES Y PARÁMETROS DE PRIORIDAD -->
+        <div id="tabCfgContent3" class="space-y-4 hidden">
+          <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 space-y-1">
+            <div class="flex items-center gap-1.5 font-bold text-blue-800">
+              <i data-lucide="sliders" class="w-4 h-4 text-blue-600"></i>
+              Fórmula de Cálculo del Índice de Prioridad (Matriz Maestra Col. 38)
+            </div>
+            <p class="text-[11px] text-blue-700">
+              El índice consolida 4 variables ponderadas de 1 a 5. La suma de los 4 pesos debe ser exactamente 1.00 (100%).
+              <br><code class="font-mono font-bold">Índice = (Puntaje_Plazo × Peso_Plazo) + (Puntaje_RC × Peso_RC) + (Puntaje_Costo × Peso_Costo) + (Puntaje_Escalamiento × Peso_Escalamiento)</code>
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <label class="block font-bold text-slate-700 mb-1">Peso Plazo</label>
+              <input type="number" step="0.05" min="0" max="1" id="cfgPesoPlazo" oninput="validarSumaPesos()" class="w-full p-2 border border-slate-300 rounded-lg text-center font-bold">
+              <span class="text-[10px] text-slate-400 mt-1 block">Oficial: 0.30 (30%)</span>
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <label class="block font-bold text-slate-700 mb-1">Peso Ruta Crítica</label>
+              <input type="number" step="0.05" min="0" max="1" id="cfgPesoRC" oninput="validarSumaPesos()" class="w-full p-2 border border-slate-300 rounded-lg text-center font-bold">
+              <span class="text-[10px] text-slate-400 mt-1 block">Oficial: 0.30 (30%)</span>
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <label class="block font-bold text-slate-700 mb-1">Peso Costo / Exposición</label>
+              <input type="number" step="0.05" min="0" max="1" id="cfgPesoCosto" oninput="validarSumaPesos()" class="w-full p-2 border border-slate-300 rounded-lg text-center font-bold">
+              <span class="text-[10px] text-slate-400 mt-1 block">Oficial: 0.25 (25%)</span>
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <label class="block font-bold text-slate-700 mb-1">Peso Escalamiento</label>
+              <input type="number" step="0.05" min="0" max="1" id="cfgPesoEscalamiento" oninput="validarSumaPesos()" class="w-full p-2 border border-slate-300 rounded-lg text-center font-bold">
+              <span class="text-[10px] text-slate-400 mt-1 block">Oficial: 0.15 (15%)</span>
+            </div>
+          </div>
+
+          <div id="boxSumaPesos" class="p-2.5 rounded-xl border flex items-center justify-between text-xs font-bold">
+            <span>Suma de Ponderaciones:</span>
+            <span id="lblSumaPesos">1.00 (100% - Conforme)</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Umbral P1 (Crítica)</label>
+              <input type="number" step="0.1" id="cfgUmbralP1" class="w-full p-2 border border-slate-300 rounded-lg text-center font-bold" value="4.0">
+              <span class="text-[10px] text-slate-400 mt-1 block">Índice ≥ 4.0 o Plazo Vencido/Fatal</span>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Umbral P2 (Alta)</label>
+              <input type="number" step="0.1" id="cfgUmbralP2" class="w-full p-2 border border-slate-300 rounded-lg text-center font-bold" value="3.0">
+              <span class="text-[10px] text-slate-400 mt-1 block">Índice ≥ 3.0</span>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Umbral P3 (Media)</label>
+              <input type="number" step="0.1" id="cfgUmbralP3" class="w-full p-2 border border-slate-300 rounded-lg text-center font-bold" value="2.0">
+              <span class="text-[10px] text-slate-400 mt-1 block">Índice ≥ 2.0 (Menores = P4)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA 4: ENLACES CDE / AUTODESK ACC -->
+        <div id="tabCfgContent4" class="space-y-4 hidden">
+          <div class="p-3.5 bg-indigo-50 border border-indigo-200 rounded-xl text-indigo-900 space-y-1">
+            <div class="flex items-center gap-1.5 font-bold text-indigo-800">
+              <i data-lucide="folder-git-2" class="w-4 h-4 text-indigo-600"></i>
+              Configuración de Enlaces al Entorno Común de Datos (Autodesk ACC - ISO 19650)
+            </div>
+            <p class="text-[11px] text-indigo-700">
+              En el Excel original, el enlace ACC estaba fijo en la celda <code class="font-mono font-bold">$W$5</code>. Aquí puede definir la URL base de cada proyecto para que los nuevos casos generen automáticamente su hipervínculo auditable.
+            </p>
+          </div>
+
+          <div class="space-y-2" id="listaAccProyectos">
+            <!-- Renderizado dinámico de URLs ACC por proyecto -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pie del Modal -->
+      <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex items-center justify-between">
+        <button onclick="restablecerConfigOficial()" class="px-3 py-1.5 border border-slate-300 hover:bg-slate-200 rounded-lg text-slate-600 font-medium text-xs transition flex items-center gap-1.5">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Restablecer Valores Oficiales
+        </button>
+        <div class="flex items-center space-x-2">
+          <button onclick="cerrarModalConfiguracion()" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700">Cancelar</button>
+          <button onclick="guardarConfiguracionSistema()" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-bold shadow-sm flex items-center gap-1.5">
+            <i data-lucide="save" class="w-3.5 h-3.5"></i> Guardar Cambios
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SCRIPT LÓGICO DE LA APLICACIÓN -->
+  <script>
+    // DATASET INICIAL REALISTA (Sincronizado con la Matriz G2G oficial)
+    const CASOS_DEFAULT = [
+      {
+        id: "NCC-TD-01",
+        proyecto: "NCC",
+        fase: "Diseño/Estudios",
+        tipoAtencion: "Trato directo",
+        regimen: "NEC4 ECC Opción C (Target)",
+        generador: "Contratista",
+        asunto: "Trato Directo 1: Interpretación de obligación contractual sobre geología y trazado de túneles",
+        docInicio: "Acta de Reunión N.° 01",
+        fechaInicio: "2026-09-18",
+        instanciaActual: "OAJ",
+        responsable: "Dr. Carlos Vega (Especialista Legal)",
+        estado: "En OAJ",
+        tipoPlazo: "Acuerdo de Acta",
+        fechaDerivacion: "2026-09-23",
+        fechaLimite: "2026-09-29",
+        accionPendiente: "Emitir opinión legal vinculante para definir posición institucional",
+        rutaCritica: "Sí",
+        wbs: "WBS-NCC-03.01",
+        hito: "Aprobación Entregable Técnico Geotécnico",
+        holgura: 0,
+        afectacionDias: 7,
+        mitigacion: "Escalar opinión legal urgente y mantener validación técnica paralela con PMO",
+        moneda: "PEN",
+        montoReclamado: 2500000,
+        incluyeIgv: "Sí",
+        escenarioBajo: 500000,
+        escenarioProbable: 1200000,
+        escenarioAlto: 2500000,
+        cobertura: 900000,
+        brecha: 300000,
+        fuente: "RO",
+        enlaceAcc: "https://acc.autodesk.com/docs/projects/ncc-g2g",
+        historial: [
+          { fecha: "2026-09-18", origen: "Contratista", destino: "PMO", doc: "Carta N° 045-2026", obs: "Ingreso de solicitud de trato directo" },
+          { fecha: "2026-09-23", origen: "Dirección de Estudios", destino: "OAJ", doc: "Memorando N° 112-2026", obs: "Solicitud de opinión legal" }
+        ]
+      },
+      {
+        id: "NCC-TD-02",
+        proyecto: "NCC",
+        fase: "Diseño/Estudios",
+        tipoAtencion: "Trato directo",
+        regimen: "NEC4 ECC Opción C (Target)",
+        generador: "Supervisor",
+        asunto: "Trato Directo 2: Reconocimiento de costos por mayor permanencia e impacto presupuestal",
+        docInicio: "Acta de Reunión N.° 02",
+        fechaInicio: "2026-09-23",
+        instanciaActual: "OPP",
+        responsable: "Lic. Maritza Gómez (Presupuesto)",
+        estado: "En OPP",
+        tipoPlazo: "Acuerdo de Acta",
+        fechaDerivacion: "2026-09-25",
+        fechaLimite: "2026-10-08",
+        accionPendiente: "Evaluar incidencia presupuestal y disponibilidad de recursos",
+        rutaCritica: "Sí",
+        wbs: "WBS-NCC-02.04",
+        hito: "Continuidad del servicio de supervisión",
+        holgura: 2,
+        afectacionDias: 5,
+        mitigacion: "Definir escenario preventivo de reprogramación de partidas",
+        moneda: "PEN",
+        montoReclamado: 4800000,
+        incluyeIgv: "Sí",
+        escenarioBajo: 900000,
+        escenarioProbable: 2000000,
+        escenarioAlto: 3800000,
+        cobertura: 1300000,
+        brecha: 700000,
+        fuente: "ROOC",
+        enlaceAcc: "https://acc.autodesk.com/docs/projects/ncc-g2g",
+        historial: [
+          { fecha: "2026-09-23", origen: "Supervisor", destino: "Dirección de Estudios", doc: "Acta N° 02", obs: "Acuerdos registrados" },
+          { fecha: "2026-09-25", origen: "Dirección de Estudios", destino: "OPP", doc: "Memorando N° 120-2026", obs: "Pase para certificación presupuestal" }
+        ]
+      },
+      {
+        id: "EV4-DAB-01",
+        proyecto: "EV4",
+        fase: "Ejecución",
+        tipoAtencion: "DAB",
+        regimen: "FIDIC Libro Rojo",
+        generador: "Contratista",
+        asunto: "Sometimiento a DAAB por liberación tardía de interferencias de redes de alta tensión",
+        docInicio: "Reference Memorial N° 01",
+        fechaInicio: "2026-08-10",
+        instanciaActual: "Procuraduría del MTC",
+        responsable: "Dr. Jorge Mendoza (Procurador Adjunto)",
+        estado: "En Procuraduría",
+        tipoPlazo: "Preclusivo / Caducidad (Fatal)",
+        fechaDerivacion: "2026-09-15",
+        fechaLimite: "2026-10-14",
+        accionPendiente: "Formular contestación y preparar audiencia técnica ante el Board",
+        rutaCritica: "Sí",
+        wbs: "WBS-EV4-05.01",
+        hito: "Habilitación de Tramo 2 y Puente Principal",
+        holgura: 0,
+        afectacionDias: 25,
+        mitigacion: "Coordinación estrecha con PMO para peritaje de demoras concurrentes",
+        moneda: "USD",
+        montoReclamado: 3200000,
+        incluyeIgv: "Sí",
+        escenarioBajo: 600000,
+        escenarioProbable: 1500000,
+        escenarioAlto: 3000000,
+        cobertura: 800000,
+        brecha: 700000,
+        fuente: "ROOC",
+        enlaceAcc: "https://acc.autodesk.com/docs/projects/ev4-g2g",
+        historial: [
+          { fecha: "2026-08-10", origen: "Contratista", destino: "DAB / Entidad", doc: "Reference N° 01", obs: "Inicio formal de controversia ante DAB" },
+          { fecha: "2026-09-15", origen: "Dirección de Obras", destino: "Procuraduría", doc: "Oficio N° 580-2026", obs: "Traslado de antecedentes para defensa" }
+        ]
+      },
+      {
+        id: "VESR-CE-03",
+        proyecto: "VESR",
+        fase: "Ejecución",
+        tipoAtencion: "Evento de Compensación (CE)",
+        regimen: "NEC4 ECC Opción C (Target)",
+        generador: "PMO",
+        asunto: "Instrucción de cambio por adecuación ambiental y rediseño de accesos viarios",
+        docInicio: "Instrucción PMO N° 018",
+        fechaInicio: "2026-09-01",
+        instanciaActual: "PMO",
+        responsable: "Ing. Pierre Dumont (PMO Vías)",
+        estado: "En PMO",
+        tipoPlazo: "Contractual Ordinario",
+        fechaDerivacion: "2026-09-20",
+        fechaLimite: "2026-10-25",
+        accionPendiente: "Auditar cotización de Costo Definido y validar impacto en Accepted Programme",
+        rutaCritica: "No",
+        wbs: "WBS-VESR-08.02",
+        hito: "Pavimentación y Señalización de Ramal A",
+        holgura: 14,
+        afectacionDias: 0,
+        mitigacion: "Optimizar subcontratación local",
+        moneda: "PEN",
+        montoReclamado: 1200000,
+        incluyeIgv: "Sí",
+        escenarioBajo: 400000,
+        escenarioProbable: 750000,
+        escenarioAlto: 1100000,
+        cobertura: 800000,
+        brecha: 0,
+        fuente: "RO",
+        enlaceAcc: "https://acc.autodesk.com/docs/projects/vesr-g2g",
+        historial: [
+          { fecha: "2026-09-01", origen: "PMO", destino: "Contratista", doc: "Instrucción N° 018", obs: "Notificación de CE" }
+        ]
+      }
+    ];
+
+    // CONFIGURACIÓN OFICIAL POR DEFECTO DEL SISTEMA (Catálogos y Parámetros)
+    const CONFIG_DEFAULT = {
+      proyectos: [
+        { codigo: "NCC", nombre: "Nueva Carretera Central (G2G)", accUrl: "https://acc.autodesk.com/docs/projects/ncc-g2g" },
+        { codigo: "EV4", nombre: "Eje Vial 4 (G2G)", accUrl: "https://acc.autodesk.com/docs/projects/ev4-g2g" },
+        { codigo: "VESR", nombre: "Vía Expresa Santa Rosa (G2G)", accUrl: "https://acc.autodesk.com/docs/projects/vesr-g2g" },
+        { codigo: "PSR", nombre: "Puentes Sierra Central", accUrl: "https://acc.autodesk.com/docs/projects/psr-g2g" }
+      ],
+      instancias: [
+        "PMO",
+        "Dirección de Estudios",
+        "OAJ",
+        "OPP",
+        "Procuraduría del MTC",
+        "MTC / Alta Dirección"
+      ],
+      tiposAtencion: [
+        "Trato directo",
+        "Evento de Compensación (CE)",
+        "DAB",
+        "Arbitraje",
+        "Controversia contractual",
+        "Consulta legal"
+      ],
+      regimenes: [
+        "NEC4 ECC Opción C (Target)",
+        "NEC3/4 ECC Opción A",
+        "FIDIC Libro Rojo",
+        "FIDIC Libro Amarillo",
+        "Ley N° 32069 / TUO 30225"
+      ],
+      fases: [
+        "Diseño/Estudios",
+        "Ejecución",
+        "Contratación",
+        "Cierre"
+      ],
+      estados: [
+        "En curso",
+        "En OAJ",
+        "En OPP",
+        "En Procuraduría",
+        "En PMO",
+        "Cerrado"
+      ],
+      plazos: [
+        { nombre: "Preclusivo / Caducidad (Fatal)", esFatal: true, descripcion: "Caducidad de derecho (NEC Cl. 61.3 / FIDIC Cl. 20.1/21.4)" },
+        { nombre: "Contractual Ordinario", esFatal: false, descripcion: "Procedimiento contractual general" },
+        { nombre: "Acuerdo de Acta", esFatal: false, descripcion: "Compromiso de mesa de trato directo" },
+        { nombre: "Interno / Administrativo", esFatal: false, descripcion: "Trámite de gestión interna" }
+      ],
+      mensajeFatal: "⏱️ PLAZO FATAL / CADUCIDAD PRECLUSIVA",
+      diasAlertaCritica: 3,
+      diasAlertaProxima: 7,
+      pesos: {
+        plazo: 0.30,
+        rutaCritica: 0.30,
+        costo: 0.25,
+        escalamiento: 0.15
+      },
+      umbrales: {
+        p1: 4.0,
+        p2: 3.0,
+        p3: 2.0
+      }
+    };
+
+    // ESTADO DE LA APLICACIÓN
+    let casos = [];
+    let configSistema = {};
+    let filtroRapidoActivo = 'todos';
+    let tabWizardActual = 1;
+    let tabConfigActual = 1;
+    let seccionCatalogoActual = 'proyectos';
+    let modoColumnasTabla = 'ejecutiva'; // 'ejecutiva' (9 cols) | 'completa' (50 cols)
+
+    // INICIALIZACIÓN
+    document.addEventListener("DOMContentLoaded", () => {
+      cargarConfiguracionSistema();
+      cargarCasosDesdeAlmacenamiento();
+      poblarSelectsDesdeConfiguracion();
+      document.getElementById('lblFechaCorte').textContent = `Corte: ${formatearFechaHoy()}`;
+      if (window.innerWidth < 768) {
+        cambiarModoVista('cards');
+      } else {
+        cambiarModoVista('tabla');
+      }
+      lucide.createIcons();
+    });
+
+    function formatearFechaHoy() {
+      const hoy = new Date();
+      return hoy.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function cargarConfiguracionSistema() {
+      const guardada = localStorage.getItem("controversias_g2g_config");
+      if (guardada) {
+        try {
+          configSistema = JSON.parse(guardada);
+        } catch (e) {
+          configSistema = JSON.parse(JSON.stringify(CONFIG_DEFAULT));
+        }
+      } else {
+        configSistema = JSON.parse(JSON.stringify(CONFIG_DEFAULT));
+        localStorage.setItem("controversias_g2g_config", JSON.stringify(configSistema));
+      }
+    }
+
+    function poblarSelectsDesdeConfiguracion() {
+      // 1. Filtro y Wizard Proyectos
+      const selFiltroP = document.getElementById('selFiltroProyecto');
+      const inpP = document.getElementById('inpProyecto');
+      if (selFiltroP && inpP) {
+        const valFiltro = selFiltroP.value;
+        const valInp = inpP.value;
+        selFiltroP.innerHTML = '<option value="">Proyecto: Todos</option>';
+        inpP.innerHTML = '';
+        (configSistema.proyectos || []).forEach(p => {
+          const opt1 = document.createElement('option');
+          opt1.value = p.codigo;
+          opt1.textContent = `${p.codigo} (${p.nombre})`;
+          selFiltroP.appendChild(opt1);
+
+          const opt2 = document.createElement('option');
+          opt2.value = p.codigo;
+          opt2.textContent = `${p.codigo} - ${p.nombre}`;
+          inpP.appendChild(opt2);
+        });
+        if (valFiltro) selFiltroP.value = valFiltro;
+        if (valInp) inpP.value = valInp;
+      }
+
+      // 2. Filtro y Wizard Instancias
+      const selFiltroI = document.getElementById('selFiltroInstancia');
+      const inpI = document.getElementById('inpInstanciaActual');
+      const selDest = document.getElementById('selDerivarDestino');
+      if (selFiltroI && inpI && selDest) {
+        const valFiltro = selFiltroI.value;
+        const valInp = inpI.value;
+        const valDest = selDest.value;
+        selFiltroI.innerHTML = '<option value="">Instancia: Todas</option>';
+        inpI.innerHTML = '';
+        selDest.innerHTML = '';
+        (configSistema.instancias || []).forEach(inst => {
+          const opt1 = document.createElement('option');
+          opt1.value = inst;
+          opt1.textContent = inst;
+          selFiltroI.appendChild(opt1);
+
+          const opt2 = document.createElement('option');
+          opt2.value = inst;
+          opt2.textContent = inst;
+          inpI.appendChild(opt2);
+
+          const opt3 = document.createElement('option');
+          opt3.value = inst;
+          opt3.textContent = inst;
+          selDest.appendChild(opt3);
+        });
+        if (valFiltro) selFiltroI.value = valFiltro;
+        if (valInp) inpI.value = valInp;
+        if (valDest) selDest.value = valDest;
+      }
+
+      // 3. Tipos de Atención
+      const inpTipo = document.getElementById('inpTipoAtencion');
+      if (inpTipo) {
+        const valTipo = inpTipo.value;
+        inpTipo.innerHTML = '';
+        (configSistema.tiposAtencion || []).forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t;
+          opt.textContent = t;
+          inpTipo.appendChild(opt);
+        });
+        if (valTipo) inpTipo.value = valTipo;
+      }
+
+      // 4. Regímenes
+      const inpReg = document.getElementById('inpRegimen');
+      if (inpReg) {
+        const valReg = inpReg.value;
+        inpReg.innerHTML = '';
+        (configSistema.regimenes || []).forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r;
+          opt.textContent = r;
+          inpReg.appendChild(opt);
+        });
+        if (valReg) inpReg.value = valReg;
+      }
+
+      // 5. Fases
+      const inpFase = document.getElementById('inpFase');
+      if (inpFase) {
+        const valFase = inpFase.value;
+        inpFase.innerHTML = '';
+        (configSistema.fases || []).forEach(f => {
+          const opt = document.createElement('option');
+          opt.value = f;
+          opt.textContent = f;
+          inpFase.appendChild(opt);
+        });
+        if (valFase) inpFase.value = valFase;
+      }
+
+      // 6. Estados
+      const inpEst = document.getElementById('inpEstado');
+      if (inpEst) {
+        const valEst = inpEst.value;
+        inpEst.innerHTML = '';
+        (configSistema.estados || []).forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e;
+          opt.textContent = e;
+          inpEst.appendChild(opt);
+        });
+        if (valEst) inpEst.value = valEst;
+      }
+
+      // 7. Tipos de Plazos
+      const inpPlazo = document.getElementById('inpTipoPlazo');
+      if (inpPlazo) {
+        const valPlazo = inpPlazo.value;
+        inpPlazo.innerHTML = '';
+        (configSistema.plazos || []).forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.nombre;
+          opt.textContent = (p.esFatal ? '⏱️ ' : '') + p.nombre;
+          inpPlazo.appendChild(opt);
+        });
+        if (valPlazo) inpPlazo.value = valPlazo;
+      }
+    }
+
+    function cargarCasosDesdeAlmacenamiento() {
+      const guardados = localStorage.getItem("controversias_g2g_db");
+      if (guardados) {
+        try {
+          casos = JSON.parse(guardados);
+        } catch (e) {
+          casos = [...CASOS_DEFAULT];
+        }
+      } else {
+        casos = [...CASOS_DEFAULT];
+        guardarEnStorage();
+      }
+      actualizarDashboard();
+      renderizarCasos();
+    }
+
+    function guardarEnStorage() {
+      localStorage.setItem("controversias_g2g_db", JSON.stringify(casos));
+    }
+
+    // MOTOR DE CÁLCULO DE LAS 11 FÓRMULAS OFICIALES DE LA MATRIZ MAESTRA
+    function calcularCamposOficialesMatriz(c) {
+      const hoy = new Date();
+      
+      // Col 18: Días en instancia (TODAY() - FechaDerivacion)
+      let diasInstancia = 0;
+      if (c.fechaDerivacion) {
+        const fDeriv = new Date(c.fechaDerivacion + "T00:00:00");
+        diasInstancia = Math.max(0, Math.floor((hoy - fDeriv) / (1000 * 60 * 60 * 24)));
+      }
+
+      // Col 19: Días disponibles (FechaLimite - TODAY())
+      let diasDisponibles = 0;
+      if (c.fechaLimite) {
+        const fLim = new Date(c.fechaLimite + "T23:59:59");
+        diasDisponibles = Math.ceil((fLim - hoy) / (1000 * 60 * 60 * 24));
+      }
+
+      // Col 34: Puntaje plazo (1 a 5)
+      let puntajePlazo = 1;
+      if (!c.fechaLimite) puntajePlazo = 1;
+      else if (diasDisponibles < 0) puntajePlazo = 5;
+      else if (diasDisponibles <= 3) puntajePlazo = 4;
+      else if (diasDisponibles <= 7) puntajePlazo = 3;
+      else if (diasDisponibles <= 15) puntajePlazo = 2;
+      else puntajePlazo = 1;
+
+      // Col 35: Puntaje ruta crítica (1 a 5)
+      let puntajeRC = 1;
+      if (c.rutaCritica === "Sí") puntajeRC = 5;
+      else if (c.rutaCritica === "Por determinar") puntajeRC = 3;
+      else puntajeRC = 1;
+
+      // Col 36: Puntaje costo (1 a 5)
+      const exp = c.escenarioProbable || 0;
+      let puntajeCosto = 1;
+      if (exp >= 10000000) puntajeCosto = 5;
+      else if (exp >= 1000000) puntajeCosto = 4;
+      else if (exp >= 250000) puntajeCosto = 3;
+      else if (exp > 0) puntajeCosto = 2;
+      else puntajeCosto = 1;
+
+      // Col 37: Puntaje escalamiento (1 a 5)
+      let puntajeEscalamiento = 1;
+      if (c.instanciaActual === "Procuraduría del MTC" || c.tipoAtencion === "Arbitraje" || c.tipoAtencion === "DAB") {
+        puntajeEscalamiento = 5;
+      } else if (["OAJ", "OPP", "MTC / Alta Dirección"].includes(c.instanciaActual)) {
+        puntajeEscalamiento = 3;
+      } else {
+        puntajeEscalamiento = 1;
+      }
+
+      // Col 38: Índice prioridad (Ponderado oficial configurable)
+      const pesos = configSistema.pesos || { plazo: 0.30, rutaCritica: 0.30, costo: 0.25, escalamiento: 0.15 };
+      const indice = Number((puntajePlazo * pesos.plazo + puntajeRC * pesos.rutaCritica + puntajeCosto * pesos.costo + puntajeEscalamiento * pesos.escalamiento).toFixed(2));
+
+      // Verificación de condición preclusiva / fatal
+      const plazoCfg = (configSistema.plazos || []).find(p => p.nombre === c.tipoPlazo);
+      const esPlazoFatal = (plazoCfg && plazoCfg.esFatal) || (c.tipoPlazo && (c.tipoPlazo.includes("Preclusivo") || c.tipoPlazo.includes("Fatal")));
+
+      const diasCrit = configSistema.diasAlertaCritica || 3;
+      const diasProx = configSistema.diasAlertaProxima || 7;
+      const umbrales = configSistema.umbrales || { p1: 4.0, p2: 3.0, p3: 2.0 };
+
+      // Col 39: Prioridad (P1, P2, P3, P4)
+      let prioridad = "P4 - Ordinaria";
+      if (diasDisponibles < 0 || (c.rutaCritica === "Sí" && diasDisponibles <= diasCrit) || (c.brecha && c.brecha > 0) || (esPlazoFatal && diasDisponibles <= diasProx)) {
+        prioridad = "P1 - Crítica";
+      } else if (indice >= umbrales.p2) {
+        prioridad = "P2 - Alta";
+      } else if (indice >= umbrales.p3) {
+        prioridad = "P3 - Media";
+      } else {
+        prioridad = "P4 - Ordinaria";
+      }
+
+      // Col 40: Semáforo
+      let semaforoColor = "Verde";
+      let semaforoLabel = `En plazo (${diasDisponibles}d)`;
+      let semaforoBadge = "bg-emerald-100 text-emerald-800 border-emerald-300";
+
+      if (c.estado === "Cerrado") {
+        semaforoColor = "Gris";
+        semaforoLabel = "Cerrado";
+        semaforoBadge = "bg-slate-100 text-slate-700 border-slate-300";
+      } else if (diasDisponibles < 0) {
+        semaforoColor = "Rojo";
+        semaforoLabel = `Vencido (${Math.abs(diasDisponibles)}d)`;
+        semaforoBadge = "bg-rose-100 text-rose-800 border-rose-300 font-bold";
+      } else if (esPlazoFatal && diasDisponibles <= diasProx) {
+        semaforoColor = "Rojo";
+        semaforoLabel = `Fatal (${diasDisponibles}d)`;
+        semaforoBadge = "bg-rose-100 text-rose-800 border-rose-300 font-bold animate-pulse";
+      } else if (c.rutaCritica === "Sí" && diasDisponibles <= diasCrit) {
+        semaforoColor = "Naranja";
+        semaforoLabel = `Ruta Crítica (${diasDisponibles}d)`;
+        semaforoBadge = "bg-amber-100 text-amber-800 border-amber-300 font-bold";
+      } else if (diasDisponibles <= diasCrit) {
+        semaforoColor = "Naranja";
+        semaforoLabel = `Vence en ${diasDisponibles}d`;
+        semaforoBadge = "bg-amber-100 text-amber-800 border-amber-300";
+      } else if (diasDisponibles <= diasProx) {
+        semaforoColor = "Amarillo";
+        semaforoLabel = `Atención (${diasDisponibles}d)`;
+        semaforoBadge = "bg-yellow-100 text-yellow-800 border-yellow-300";
+      }
+
+      // Col 47: Alerta de vencimiento
+      let alertaVencimiento = "DENTRO DE PLAZO";
+      if (c.estado === "Cerrado") alertaVencimiento = "SIN ALERTA";
+      else if (!c.fechaLimite) alertaVencimiento = "PLAZO NO REGISTRADO";
+      else if (diasDisponibles < 0) alertaVencimiento = `VENCIDO: ${Math.abs(diasDisponibles)} día(s)`;
+      else if (diasDisponibles === 0) alertaVencimiento = "VENCE HOY";
+      else if (diasDisponibles <= diasCrit) alertaVencimiento = `VENCE EN ${diasDisponibles} día(s)`;
+      else if (diasDisponibles <= diasProx) alertaVencimiento = `PRÓXIMO A VENCER: ${diasDisponibles} día(s)`;
+
+      // Col 48: Alerta de ruta crítica
+      let alertaRC = "FUERA DE RUTA CRÍTICA";
+      if (c.estado === "Cerrado") alertaRC = "SIN ALERTA";
+      else if (c.rutaCritica === "Sí") {
+        if (diasDisponibles < 0 || (c.afectacionDias || 0) > (c.holgura || 0)) {
+          alertaRC = "RUTA CRÍTICA: IMPACTO INMEDIATO";
+        } else {
+          alertaRC = "RUTA CRÍTICA: SEGUIMIENTO PRIORITARIO";
+        }
+      } else if (c.rutaCritica === "Por determinar") {
+        alertaRC = "VALIDAR RUTA CRÍTICA";
+      }
+
+      // Col 49: Alerta consolidada
+      let alertaConsolidada = "SIN ALERTA INMEDIATA";
+      if (c.estado === "Cerrado") alertaConsolidada = "CERRADO";
+      else if (diasDisponibles < 0 || (c.rutaCritica === "Sí" && diasDisponibles <= diasCrit) || (c.rutaCritica === "Sí" && (c.afectacionDias || 0) > (c.holgura || 0)) || (esPlazoFatal && diasDisponibles <= diasProx)) {
+        alertaConsolidada = "ALERTA CRÍTICA";
+      } else if (diasDisponibles <= diasProx || c.rutaCritica === "Sí" || c.rutaCritica === "Por determinar") {
+        alertaConsolidada = "REQUIERE ATENCIÓN";
+      }
+
+      // Col 50: Acción inmediata sugerida
+      let accionInmediata = "Mantener seguimiento programado";
+      if (c.estado === "Cerrado") accionInmediata = "Archivado en CDE / Sin acción pendiente";
+      else if (alertaConsolidada === "ALERTA CRÍTICA") accionInmediata = "Escalar y definir acción inmediata con el responsable actual";
+      else if (alertaVencimiento === "PLAZO NO REGISTRADO") accionInmediata = "Registrar fecha límite y tipo de plazo";
+      else if (alertaRC === "VALIDAR RUTA CRÍTICA") accionInmediata = "Validar con PMO el WBS, holgura y afectación";
+      else if (alertaConsolidada === "REQUIERE ATENCIÓN") accionInmediata = "Confirmar compromiso, responsable y fecha de respuesta";
+
+      return {
+        diasInstancia,
+        diasDisponibles,
+        puntajePlazo,
+        puntajeRC,
+        puntajeCosto,
+        puntajeEscalamiento,
+        indice,
+        prioridad,
+        semaforoColor,
+        semaforoLabel,
+        semaforoBadge,
+        esPlazoFatal,
+        alertaVencimiento,
+        alertaRC,
+        alertaConsolidada,
+        accionInmediata
+      };
+    }
+
+    function calcularDiasDisponibles(fechaLimite) {
+      if (!fechaLimite) return 0;
+      const limite = new Date(fechaLimite + "T23:59:59");
+      const hoy = new Date();
+      return Math.ceil((limite - hoy) / (1000 * 60 * 60 * 24));
+    }
+
+    function calcularSemaforo(caso) {
+      const calcs = calcularCamposOficialesMatriz(caso);
+      return {
+        color: calcs.semaforoColor,
+        label: calcs.semaforoLabel,
+        badge: calcs.semaforoBadge
+      };
+    }
+
+    function esP1Critico(caso) {
+      if (caso.estado === "Cerrado") return false;
+      const calcs = calcularCamposOficialesMatriz(caso);
+      return calcs.prioridad === "P1 - Crítica";
+    }
+
+    // ACTUALIZACIÓN DE KPIS DEL TABLERO
+    function actualizarDashboard() {
+      let abiertos = 0;
+      let criticos = 0;
+      let vencidos = 0;
+      let vencenSemana = 0;
+      let rutaCritica = 0;
+      let exposicionTotal = 0;
+      let pretensionTotal = 0;
+      let brechaTotal = 0;
+      let preclusivos = 0;
+
+      casos.forEach(c => {
+        if (c.estado !== "Cerrado") {
+          abiertos++;
+          const calcs = calcularCamposOficialesMatriz(c);
+          if (calcs.prioridad === "P1 - Crítica") criticos++;
+          if (calcs.diasDisponibles < 0) vencidos++;
+          if (calcs.diasDisponibles >= 0 && calcs.diasDisponibles <= (configSistema.diasAlertaProxima || 7)) vencenSemana++;
+          if (c.rutaCritica === "Sí") rutaCritica++;
+          if (calcs.esPlazoFatal) preclusivos++;
+          
+          exposicionTotal += (c.escenarioProbable || 0);
+          pretensionTotal += (c.montoReclamado || 0);
+          if (c.brecha > 0) brechaTotal += c.brecha;
+        }
+      });
+
+      document.getElementById('kpiCasosAbiertos').textContent = abiertos;
+      document.getElementById('kpiCriticos').textContent = criticos;
+      document.getElementById('kpiVencidos').textContent = vencidos;
+      document.getElementById('kpiSubVencidos').textContent = `${vencidos} vencidos | ${vencenSemana} esta sem.`;
+      document.getElementById('kpiRutaCritica').textContent = rutaCritica;
+      document.getElementById('kpiExposicion').textContent = `S/ ${exposicionTotal.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+      document.getElementById('kpiSubPretension').textContent = `Pretensión: S/ ${pretensionTotal.toLocaleString('es-PE')}`;
+      document.getElementById('kpiBrecha').textContent = `S/ ${brechaTotal.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+
+      // Contadores en las píldoras
+      document.getElementById('cnt-todos').textContent = casos.length;
+      document.getElementById('cnt-criticos').textContent = criticos;
+      document.getElementById('cnt-vencidos').textContent = vencidos;
+      document.getElementById('cnt-preclusivos').textContent = preclusivos;
+      document.getElementById('cnt-rutacritica').textContent = rutaCritica;
+      document.getElementById('cnt-semana').textContent = vencenSemana;
+      document.getElementById('cnt-brecha').textContent = casos.filter(c => c.brecha > 0 && c.estado !== "Cerrado").length;
+      renderizarGraficosEjecutivos();
+    }
+
+    // GESTIÓN DE GRÁFICOS EJECUTIVOS DIRECTIVOS (CASOS POR PROYECTO Y CARGA POR INSTANCIA)
+    let graficosColapsados = false;
+    function toggleGraficosEjecutivos() {
+      graficosColapsados = !graficosColapsados;
+      const cont = document.getElementById('contenedorGraficos');
+      const lbl = document.getElementById('lblToggleGraficos');
+      const ico = document.getElementById('icoToggleGraficos');
+      if (graficosColapsados) {
+        cont.classList.add('hidden');
+        lbl.textContent = 'Mostrar Gráficos';
+        ico.setAttribute('data-lucide', 'chevron-down');
+      } else {
+        cont.classList.remove('hidden');
+        lbl.textContent = 'Ocultar Gráficos';
+        ico.setAttribute('data-lucide', 'chevron-up');
+      }
+      lucide.createIcons();
+    }
+
+    function renderizarGraficosEjecutivos() {
+      const gProy = document.getElementById('graficoCasosPorProyecto');
+      const gInst = document.getElementById('graficoCargaPorInstancia');
+      if (!gProy || !gInst) return;
+
+      const casosAbiertos = casos.filter(c => c.estado !== 'Cerrado');
+      const totalAbiertos = casosAbiertos.length || 1;
+
+      // 1. Gráfico por Proyecto
+      const conteoProy = {};
+      const expProy = {};
+      (configSistema.proyectos || []).forEach(p => {
+        conteoProy[p.codigo] = 0;
+        expProy[p.codigo] = 0;
+      });
+
+      casosAbiertos.forEach(c => {
+        const proy = c.proyecto || 'Otro';
+        conteoProy[proy] = (conteoProy[proy] || 0) + 1;
+        expProy[proy] = (expProy[proy] || 0) + (c.escenarioProbable || 0);
+      });
+
+      document.getElementById('lblTotalCasosProy').textContent = `${casosAbiertos.length} casos en cartera`;
+      gProy.innerHTML = '';
+
+      Object.keys(conteoProy).forEach(cod => {
+        const cant = conteoProy[cod];
+        const pct = Math.round((cant / totalAbiertos) * 100);
+        const exp = expProy[cod] || 0;
+        const colorBarra = cod === 'NCC' ? 'bg-blue-600' : cod === 'EV4' ? 'bg-indigo-600' : cod === 'VESR' ? 'bg-purple-600' : 'bg-emerald-600';
+
+        const item = document.createElement('div');
+        item.className = "cursor-pointer group p-1.5 hover:bg-slate-100 rounded-lg transition";
+        item.onclick = () => {
+          document.getElementById('selFiltroProyecto').value = cod;
+          renderizarCasos();
+        };
+        item.innerHTML = `
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="font-bold text-slate-800 flex items-center gap-1.5 group-hover:text-brand-600 transition">
+              <span class="w-2.5 h-2.5 rounded-full ${colorBarra}"></span>
+              ${cod}
+            </span>
+            <div class="flex items-center gap-2 font-mono text-[11px]">
+              <span class="font-bold text-slate-800">${cant} caso(s) (${pct}%)</span>
+              <span class="text-slate-400">· S/ ${exp.toLocaleString('es-PE', { maximumFractionDigits: 0 })}</span>
+            </div>
+          </div>
+          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div class="${colorBarra} h-full rounded-full transition-all duration-500" style="width: ${cant > 0 ? Math.max(pct, 6) : 0}%"></div>
+          </div>
+        `;
+        gProy.appendChild(item);
+      });
+
+      // 2. Gráfico por Instancia Actual (Cuellos de Botella)
+      const conteoInst = {};
+      (configSistema.instancias || []).forEach(inst => {
+        conteoInst[inst] = 0;
+      });
+
+      casosAbiertos.forEach(c => {
+        const inst = c.instanciaActual || 'Sin asignar';
+        conteoInst[inst] = (conteoInst[inst] || 0) + 1;
+      });
+
+      document.getElementById('lblTotalCasosInst').textContent = `${casosAbiertos.length} casos derivados`;
+      gInst.innerHTML = '';
+
+      const ordenados = Object.keys(conteoInst).sort((a, b) => conteoInst[b] - conteoInst[a]);
+
+      ordenados.forEach(inst => {
+        const cant = conteoInst[inst];
+        const pct = Math.round((cant / totalAbiertos) * 100);
+        const esCuello = cant >= 2;
+        const colorBarra = esCuello ? 'bg-amber-500' : 'bg-brand-500';
+
+        const item = document.createElement('div');
+        item.className = "cursor-pointer group p-1.5 hover:bg-slate-100 rounded-lg transition";
+        item.onclick = () => {
+          document.getElementById('selFiltroInstancia').value = inst;
+          renderizarCasos();
+        };
+        item.innerHTML = `
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="font-bold text-slate-800 flex items-center gap-1.5 group-hover:text-brand-600 transition truncate max-w-[200px]" title="${inst}">
+              <span class="w-2.5 h-2.5 rounded-full ${colorBarra}"></span>
+              ${inst}
+              ${esCuello ? '<span class="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold">Carga Alta</span>' : ''}
+            </span>
+            <span class="font-mono text-[11px] font-bold text-slate-800">${cant} caso(s) (${pct}%)</span>
+          </div>
+          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div class="${colorBarra} h-full rounded-full transition-all duration-500" style="width: ${cant > 0 ? Math.max(pct, 6) : 0}%"></div>
+          </div>
+        `;
+        gInst.appendChild(item);
+      });
+    }
+
+    // ALTERNAR MODO DE COLUMNAS EN TABLA
+    function cambiarModoColumnas(modo) {
+      modoColumnasTabla = modo;
+      const btnE = document.getElementById('btnColsEjecutiva');
+      const btnC = document.getElementById('btnColsCompleta');
+      if (modo === 'ejecutiva') {
+        if (btnE) btnE.className = 'px-2.5 py-1 rounded-md font-bold bg-white text-slate-800 shadow-sm transition';
+        if (btnC) btnC.className = 'px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition';
+      } else {
+        if (btnC) btnC.className = 'px-2.5 py-1 rounded-md font-bold bg-white text-slate-800 shadow-sm transition';
+        if (btnE) btnE.className = 'px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition';
+      }
+      renderizarCasos();
+    }
+
+    // FILTROS Y BÚSQUEDA
+    function aplicarFiltroRapido(tipo) {
+      filtroRapidoActivo = tipo;
+      document.querySelectorAll("[id^='pill-']").forEach(btn => {
+        btn.classList.remove('bg-slate-900', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-700');
+      });
+      const act = document.getElementById(`pill-${tipo}`);
+      if (act) {
+        act.classList.add('bg-slate-900', 'text-white');
+        act.classList.remove('bg-slate-100', 'text-slate-700');
+      }
+      renderizarCasos();
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('txtBuscar').value = '';
+      document.getElementById('selFiltroProyecto').value = '';
+      document.getElementById('selFiltroInstancia').value = '';
+      aplicarFiltroRapido('todos');
+    }
+
+    function filtrarCasos() {
+      const q = document.getElementById('txtBuscar').value.toLowerCase().trim();
+      const fProy = document.getElementById('selFiltroProyecto').value;
+      const fInst = document.getElementById('selFiltroInstancia').value;
+
+      return casos.filter(c => {
+        const calcs = calcularCamposOficialesMatriz(c);
+
+        if (filtroRapidoActivo === 'criticos' && calcs.prioridad !== 'P1 - Crítica') return false;
+        if (filtroRapidoActivo === 'vencidos' && calcs.diasDisponibles >= 0) return false;
+        if (filtroRapidoActivo === 'preclusivos' && !calcs.esPlazoFatal) return false;
+        if (filtroRapidoActivo === 'rutacritica' && c.rutaCritica !== 'Sí') return false;
+        if (filtroRapidoActivo === 'semana') {
+          if (calcs.diasDisponibles < 0 || calcs.diasDisponibles > (configSistema.diasAlertaProxima || 7)) return false;
+        }
+        if (filtroRapidoActivo === 'brecha' && (c.brecha <= 0 || c.estado === 'Cerrado')) return false;
+
+        // Filtro Proyecto e Instancia
+        if (fProy && c.proyecto !== fProy) return false;
+        if (fInst && c.instanciaActual !== fInst) return false;
+
+        // Búsqueda libre
+        if (q) {
+          const contenido = `${c.id} ${c.proyecto} ${c.asunto} ${c.responsable} ${c.instanciaActual} ${c.generador}`.toLowerCase();
+          if (!contenido.includes(q)) return false;
+        }
+
+        return true;
+      });
+    }
+
+    // RENDERIZADO PRINCIPAL DE LA BANDEJA (TABLA DUAL 9/50 COLS Y TARJETAS MÓVILES)
+    function renderizarCasos() {
+      const lista = filtrarCasos();
+      document.getElementById('lblTotalListados').textContent = `${lista.length} caso(s)`;
+      
+      const thead = document.getElementById('tablaCasosHead');
+      const tbody = document.getElementById('tablaCasosBody');
+      const cardsCont = document.getElementById('contenedorCards');
+      tbody.innerHTML = '';
+      cardsCont.innerHTML = '';
+
+      // 1. GENERACIÓN DINÁMICA DE CABECERAS SEGÚN MODO DE COLUMNAS
+      if (modoColumnasTabla === 'ejecutiva') {
+        thead.innerHTML = `
+          <tr>
+            <th class="py-3 px-3">Semáforo</th>
+            <th class="py-3 px-3">Código / Proyecto</th>
+            <th class="py-3 px-4">Asunto / Tipo Atención</th>
+            <th class="py-3 px-3">Instancia Actual</th>
+            <th class="py-3 px-3">Fecha Límite / Días</th>
+            <th class="py-3 px-2 text-center">Ruta Crítica</th>
+            <th class="py-3 px-3 text-right">Exposición PEN</th>
+            <th class="py-3 px-3 text-right">Brecha OPP</th>
+            <th class="py-3 px-3 text-center">Acciones</th>
+          </tr>
+        `;
+      } else {
+        thead.innerHTML = `
+          <tr>
+            <th class="py-2.5 px-3 bg-slate-950 text-amber-300 font-bold sticky left-0 z-20 shadow-r">Acciones</th>
+            <th class="py-2.5 px-3" title="Columna 1 (A)">1. ID Caso</th>
+            <th class="py-2.5 px-3" title="Columna 2 (B)">2. Proyecto</th>
+            <th class="py-2.5 px-3" title="Columna 3 (C)">3. Fase</th>
+            <th class="py-2.5 px-3" title="Columna 4 (D)">4. Tipo Atención</th>
+            <th class="py-2.5 px-4" title="Columna 5 (E)">5. Asunto / Descripción</th>
+            <th class="py-2.5 px-3" title="Columna 6 (F)">6. Generador</th>
+            <th class="py-2.5 px-3" title="Columna 7 (G)">7. Contraparte</th>
+            <th class="py-2.5 px-3" title="Columna 8 (H)">8. Doc. Inicio</th>
+            <th class="py-2.5 px-3" title="Columna 9 (I)">9. Fecha Inicio</th>
+            <th class="py-2.5 px-3" title="Columna 10 (J)">10. Base Contractual</th>
+            <th class="py-2.5 px-3" title="Columna 11 (K)">11. Resp. Conducción</th>
+            <th class="py-2.5 px-3" title="Columna 12 (L)">12. Instancia Actual</th>
+            <th class="py-2.5 px-3" title="Columna 13 (M)">13. Resp. Acción</th>
+            <th class="py-2.5 px-3" title="Columna 14 (N)">14. Acción Pendiente</th>
+            <th class="py-2.5 px-3" title="Columna 15 (O)">15. Tipo Plazo</th>
+            <th class="py-2.5 px-3" title="Columna 16 (P)">16. Fecha Derivación</th>
+            <th class="py-2.5 px-3" title="Columna 17 (Q)">17. Fecha Límite</th>
+            <th class="py-2.5 px-3 text-center bg-slate-800" title="Columna 18 (R) - Calculado">18. Días Instancia</th>
+            <th class="py-2.5 px-3 text-center bg-slate-800" title="Columna 19 (S) - Calculado">19. Días Disponibles</th>
+            <th class="py-2.5 px-3" title="Columna 20 (T)">20. Estado</th>
+            <th class="py-2.5 px-3" title="Columna 21 (U)">21. Próx. Hito</th>
+            <th class="py-2.5 px-3" title="Columna 22 (V)">22. Próx. Revisión</th>
+            <th class="py-2.5 px-3" title="Columna 23 (W)">23. Hito Afectado</th>
+            <th class="py-2.5 px-3" title="Columna 24 (X)">24. Código WBS</th>
+            <th class="py-2.5 px-2 text-center" title="Columna 25 (Y)">25. ¿Ruta Crítica?</th>
+            <th class="py-2.5 px-2 text-center" title="Columna 26 (Z)">26. Holgura (d)</th>
+            <th class="py-2.5 px-2 text-center" title="Columna 27 (AA)">27. Afectación (d)</th>
+            <th class="py-2.5 px-3" title="Columna 28 (AB)">28. Tipo Impacto</th>
+            <th class="py-2.5 px-3 text-right" title="Columna 29 (AC)">29. Monto Reclamado</th>
+            <th class="py-2.5 px-2 text-center" title="Columna 30 (AD)">30. Moneda</th>
+            <th class="py-2.5 px-3 text-right" title="Columna 31 (AE)">31. Exposición PEN</th>
+            <th class="py-2.5 px-3 text-right" title="Columna 32 (AF)">32. Brecha OPP PEN</th>
+            <th class="py-2.5 px-2 text-center" title="Columna 33 (AG)">33. Probabilidad</th>
+            <th class="py-2.5 px-2 text-center bg-slate-800" title="Columna 34 (AH) - Calculado">34. Puntaje Plazo</th>
+            <th class="py-2.5 px-2 text-center bg-slate-800" title="Columna 35 (AI) - Calculado">35. Puntaje RC</th>
+            <th class="py-2.5 px-2 text-center bg-slate-800" title="Columna 36 (AJ) - Calculado">36. Puntaje Costo</th>
+            <th class="py-2.5 px-2 text-center bg-slate-800" title="Columna 37 (AK) - Calculado">37. Puntaje Escalamiento</th>
+            <th class="py-2.5 px-2 text-center bg-amber-950 text-amber-300 font-bold" title="Columna 38 (AL) - Calculado">38. Índice Prioridad</th>
+            <th class="py-2.5 px-3 text-center bg-slate-800" title="Columna 39 (AM) - Calculado">39. Prioridad</th>
+            <th class="py-2.5 px-3 text-center bg-slate-800" title="Columna 40 (AN) - Calculado">40. Semáforo</th>
+            <th class="py-2.5 px-3" title="Columna 41 (AO)">41. Medida Mitigación</th>
+            <th class="py-2.5 px-3" title="Columna 42 (AP)">42. Resp. Mitigación</th>
+            <th class="py-2.5 px-3" title="Columna 43 (AQ)">43. Límite Mitigación</th>
+            <th class="py-2.5 px-3" title="Columna 44 (AR)">44. Última Actualización</th>
+            <th class="py-2.5 px-3" title="Columna 45 (AS)">45. Enlace ACC</th>
+            <th class="py-2.5 px-3" title="Columna 46 (AT)">46. Observaciones</th>
+            <th class="py-2.5 px-3 text-center bg-slate-800" title="Columna 47 (AU) - Calculado">47. Alerta Vencimiento</th>
+            <th class="py-2.5 px-3 text-center bg-slate-800" title="Columna 48 (AV) - Calculado">48. Alerta Ruta Crítica</th>
+            <th class="py-2.5 px-3 text-center bg-rose-950 text-rose-300 font-bold" title="Columna 49 (AW) - Calculado">49. Alerta Consolidada</th>
+            <th class="py-2.5 px-4 bg-slate-800" title="Columna 50 (AX) - Calculado">50. Acción Inmediata Sugerida</th>
+          </tr>
+        `;
+      }
+
+      if (lista.length === 0) {
+        const colSpan = modoColumnasTabla === 'ejecutiva' ? 9 : 51;
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="${colSpan}" class="text-center py-10 px-4">
+              <div class="max-w-md mx-auto space-y-3">
+                <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                  <i data-lucide="folder-search" class="w-6 h-6"></i>
+                </div>
+                <p class="text-slate-600 font-medium text-xs">No se encontraron casos con los criterios seleccionados.</p>
+                <div class="flex items-center justify-center gap-2 pt-1">
+                  <button onclick="limpiarFiltros()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs hover:bg-slate-50">Limpiar Filtros</button>
+                  <button onclick="abrirModalCaso()" class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white font-bold text-xs hover:bg-brand-500 shadow-sm flex items-center gap-1.5">
+                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                    <span>+ Registrar Nuevo Caso</span>
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+        cardsCont.innerHTML = `
+          <div class="col-span-full text-center py-10 px-4 bg-white rounded-xl border border-slate-200 space-y-3">
+            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+              <i data-lucide="folder-search" class="w-6 h-6"></i>
+            </div>
+            <p class="text-slate-600 font-medium text-xs">No se encontraron casos con los filtros aplicados.</p>
+            <div class="flex items-center justify-center gap-2 pt-1">
+              <button onclick="limpiarFiltros()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs">Limpiar Filtros</button>
+              <button onclick="abrirModalCaso()" class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white font-bold text-xs shadow-sm flex items-center gap-1.5">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>+ Registrar Nuevo Caso</span>
+              </button>
+            </div>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      lista.forEach((c) => {
+        const calcs = calcularCamposOficialesMatriz(c);
+        const dias = calcs.diasDisponibles;
+        const esCritico = calcs.prioridad === 'P1 - Crítica';
+
+        // 2. FILA DE TABLA (EJECUTIVA O MATRIZ COMPLETA DE 50 COLS)
+        const tr = document.createElement('tr');
+        tr.className = `hover:bg-slate-50/80 transition ${esCritico ? 'bg-rose-50/20' : ''}`;
+
+        if (modoColumnasTabla === 'ejecutiva') {
+          tr.innerHTML = `
+            <td class="py-3 px-3">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${calcs.semaforoBadge}">
+                ${calcs.semaforoLabel}
+              </span>
+            </td>
+            <td class="py-3 px-3">
+              <div class="font-bold text-slate-900 font-mono flex items-center gap-1.5">
+                <span>${c.id}</span>
+                ${calcs.esPlazoFatal ? `<span title="${configSistema.mensajeFatal}" class="text-rose-600 font-bold">⏱️</span>` : ''}
+              </div>
+              <span class="text-[11px] text-slate-500 font-semibold">${c.proyecto}</span>
+            </td>
+            <td class="py-3 px-4 max-w-xs">
+              <p class="font-medium text-slate-800 line-clamp-1" title="${c.asunto}">${c.asunto}</p>
+              <span class="text-[10px] text-slate-400">${c.tipoAtencion} · ${c.regimen || 'G2G'}</span>
+            </td>
+            <td class="py-3 px-3">
+              <span class="font-bold text-slate-800">${c.instanciaActual}</span>
+              <p class="text-[10px] text-slate-500 truncate max-w-[120px]">${c.responsable || 'Sin asignar'}</p>
+            </td>
+            <td class="py-3 px-3 whitespace-nowrap">
+              <span class="font-mono text-slate-800 font-semibold">${c.fechaLimite || '-'}</span>
+              <div class="text-[10px] ${dias < 0 ? 'text-rose-600 font-bold' : dias <= 3 ? 'text-amber-600 font-bold' : 'text-slate-500'}">
+                ${dias < 0 ? `Vencido hace ${Math.abs(dias)}d` : `${dias} días restantes`}
+              </div>
+            </td>
+            <td class="py-3 px-2 text-center">
+              ${c.rutaCritica === 'Sí' ? '<span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-bold text-[10px]">SÍ (WBS)</span>' : '<span class="text-slate-400">No</span>'}
+            </td>
+            <td class="py-3 px-3 text-right font-mono font-bold text-slate-900">
+              S/ ${(c.escenarioProbable || 0).toLocaleString('es-PE')}
+            </td>
+            <td class="py-3 px-3 text-right font-mono font-bold ${c.brecha > 0 ? 'text-rose-600' : 'text-slate-400'}">
+              ${c.brecha > 0 ? `S/ ${c.brecha.toLocaleString('es-PE')}` : 'Cubierto'}
+            </td>
+            <td class="py-3 px-3 text-center whitespace-nowrap">
+              <div class="flex items-center justify-center space-x-1">
+                <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Ejecutiva" class="p-1 rounded hover:bg-slate-200 text-slate-600">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+                <button onclick="abrirModalDerivar('${c.id}')" title="Derivar a otra Instancia" class="p-1 rounded hover:bg-brand-100 text-brand-600">
+                  <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+                <button onclick="editarCaso('${c.id}')" title="Editar Expediente" class="p-1 rounded hover:bg-amber-100 text-amber-600">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                </button>
+                ${c.enlaceAcc ? `<a href="${c.enlaceAcc}" target="_blank" title="Abrir en Autodesk ACC" class="p-1 rounded hover:bg-blue-100 text-blue-600"><i data-lucide="external-link" class="w-4 h-4"></i></a>` : ''}
+              </div>
+            </td>
+          `;
+        } else {
+          // VISTA COMPLETA: 50 COLUMNAS OFICIALES IDÉNTICAS AL EXCEL
+          tr.innerHTML = `
+            <td class="py-2.5 px-3 bg-white sticky left-0 z-10 border-r border-slate-200 text-center shadow-sm">
+              <div class="flex items-center justify-center space-x-1">
+                <button onclick="verFichaCaso('${c.id}')" title="Ficha" class="p-1 hover:bg-slate-200 rounded text-slate-600"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
+                <button onclick="abrirModalDerivar('${c.id}')" title="Derivar" class="p-1 hover:bg-brand-100 rounded text-brand-600"><i data-lucide="send" class="w-3.5 h-3.5"></i></button>
+                <button onclick="editarCaso('${c.id}')" title="Editar" class="p-1 hover:bg-amber-100 rounded text-amber-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+              </div>
+            </td>
+            <td class="py-2.5 px-3 font-mono font-bold text-slate-900">${c.id}</td>
+            <td class="py-2.5 px-3 font-semibold text-slate-700">${c.proyecto}</td>
+            <td class="py-2.5 px-3 text-slate-600">${c.fase || 'Ejecución'}</td>
+            <td class="py-2.5 px-3 font-medium text-slate-800">${c.tipoAtencion}</td>
+            <td class="py-2.5 px-4 text-slate-800 max-w-xs truncate" title="${c.asunto}">${c.asunto}</td>
+            <td class="py-2.5 px-3 text-slate-600">${c.generador || 'Contratista'}</td>
+            <td class="py-2.5 px-3 text-slate-600">${c.solicitanteContraparte || c.generador || '-'}</td>
+            <td class="py-2.5 px-3 text-slate-600">${c.docInicio || '-'}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-600">${c.fechaInicio || '-'}</td>
+            <td class="py-2.5 px-3 text-slate-600">${c.baseContractual || c.regimen || '-'}</td>
+            <td class="py-2.5 px-3 text-slate-600">${c.responsableConduccion || 'Dirección de Estudios'}</td>
+            <td class="py-2.5 px-3 font-bold text-slate-800">${c.instanciaActual}</td>
+            <td class="py-2.5 px-3 text-slate-600">${c.responsable || 'Sin asignar'}</td>
+            <td class="py-2.5 px-3 text-slate-600 max-w-xs truncate" title="${c.accionPendiente}">${c.accionPendiente || '-'}</td>
+            <td class="py-2.5 px-3 font-medium ${calcs.esPlazoFatal ? 'text-rose-600 font-bold' : 'text-slate-700'}">${c.tipoPlazo || '-'}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-600">${c.fechaDerivacion || '-'}</td>
+            <td class="py-2.5 px-3 font-mono font-bold text-slate-900">${c.fechaLimite || '-'}</td>
+            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-700 bg-slate-50/80">${calcs.diasInstancia}d</td>
+            <td class="py-2.5 px-3 text-center font-mono font-bold ${calcs.diasDisponibles < 0 ? 'text-rose-600 bg-rose-50' : 'text-emerald-700 bg-slate-50/80'}">${calcs.diasDisponibles}d</td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">${c.estado || 'En curso'}</span></td>
+            <td class="py-2.5 px-3 text-slate-600">${c.proximoHitoDecision || '-'}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-600">${c.fechaProximaRevision || '-'}</td>
+            <td class="py-2.5 px-3 text-slate-600">${c.hito || '-'}</td>
+            <td class="py-2.5 px-3 font-mono text-purple-700">${c.wbs || '-'}</td>
+            <td class="py-2.5 px-2 text-center font-bold ${c.rutaCritica === 'Sí' ? 'text-purple-700' : 'text-slate-400'}">${c.rutaCritica || 'No'}</td>
+            <td class="py-2.5 px-2 text-center font-mono">${c.holgura ?? 0}</td>
+            <td class="py-2.5 px-2 text-center font-mono">${c.afectacionDias ?? 0}</td>
+            <td class="py-2.5 px-3 text-slate-600">${c.tipoImpacto || (c.rutaCritica === 'Sí' ? 'Plazo' : 'Económico')}</td>
+            <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-800">${(c.montoReclamado || 0).toLocaleString('es-PE')}</td>
+            <td class="py-2.5 px-2 text-center font-bold text-slate-600">${c.moneda || 'PEN'}</td>
+            <td class="py-2.5 px-3 text-right font-mono font-bold text-blue-900 bg-blue-50/30">S/ ${(c.escenarioProbable || 0).toLocaleString('es-PE')}</td>
+            <td class="py-2.5 px-3 text-right font-mono font-bold ${c.brecha > 0 ? 'text-rose-600 bg-rose-50/30' : 'text-slate-400'}">S/ ${(c.brecha || 0).toLocaleString('es-PE')}</td>
+            <td class="py-2.5 px-2 text-center text-slate-600">${c.probabilidad || 'Media'}</td>
+            <td class="py-2.5 px-2 text-center font-mono bg-slate-50">${calcs.puntajePlazo}</td>
+            <td class="py-2.5 px-2 text-center font-mono bg-slate-50">${calcs.puntajeRC}</td>
+            <td class="py-2.5 px-2 text-center font-mono bg-slate-50">${calcs.puntajeCosto}</td>
+            <td class="py-2.5 px-2 text-center font-mono bg-slate-50">${calcs.puntajeEscalamiento}</td>
+            <td class="py-2.5 px-2 text-center font-mono font-bold text-amber-900 bg-amber-50">${calcs.indice}</td>
+            <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${calcs.prioridad === 'P1 - Crítica' ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-slate-100 text-slate-700'}">${calcs.prioridad}</span></td>
+            <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${calcs.semaforoBadge}">${calcs.semaforoColor}</span></td>
+            <td class="py-2.5 px-3 text-slate-600 max-w-xs truncate" title="${c.mitigacion}">${c.mitigacion || '-'}</td>
+            <td class="py-2.5 px-3 text-slate-600">${c.responsableMitigacion || 'PMO / Dirección'}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-600">${c.fechaLimiteMitigacion || '-'}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-500">${new Date().toISOString().split('T')[0]}</td>
+            <td class="py-2.5 px-3">${c.enlaceAcc ? `<a href="${c.enlaceAcc}" target="_blank" class="text-blue-600 underline font-mono text-[11px]">Abrir ACC</a>` : '-'}</td>
+            <td class="py-2.5 px-3 text-slate-500 max-w-xs truncate" title="${c.observaciones}">${c.observaciones || '-'}</td>
+            <td class="py-2.5 px-3 text-center font-bold text-[10px] ${calcs.alertaVencimiento.includes('VENCIDO') ? 'text-rose-600 bg-rose-50' : 'text-slate-600'}">${calcs.alertaVencimiento}</td>
+            <td class="py-2.5 px-3 text-center font-bold text-[10px] ${calcs.alertaRC.includes('IMPACTO') ? 'text-purple-700 bg-purple-50' : 'text-slate-600'}">${calcs.alertaRC}</td>
+            <td class="py-2.5 px-3 text-center font-bold text-[10px] ${calcs.alertaConsolidada === 'ALERTA CRÍTICA' ? 'text-rose-700 bg-rose-100 rounded' : 'text-slate-600'}">${calcs.alertaConsolidada}</td>
+            <td class="py-2.5 px-4 text-slate-800 text-[11px] font-medium bg-slate-50 max-w-sm truncate" title="${calcs.accionInmediata}">${calcs.accionInmediata}</td>
+          `;
+        }
+
+        tbody.appendChild(tr);
+
+        // 3. TARJETA MÓVIL Y DESKTOP ALTERNATIVO (DINÁMICA SEGÚN EL FILTRO SELECCIONADO)
+        const card = document.createElement('div');
+        card.className = `bg-white p-4 rounded-xl border ${esCritico ? 'border-rose-300 shadow-rose-100' : 'border-slate-200'} shadow-sm space-y-3 transition`;
+
+        // BLOQUE CONTEXTUAL DINÁMICO SEGÚN EL FILTRO RÁPIDO ACTIVO
+        let bloqueDinamicoFiltro = '';
+
+        if (filtroRapidoActivo === 'vencidos' || (dias < 0 && filtroRapidoActivo === 'todos')) {
+          bloqueDinamicoFiltro = `
+            <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-rose-900 text-[11px] space-y-1">
+              <div class="flex items-center justify-between font-bold">
+                <span class="flex items-center gap-1 text-rose-700">
+                  <i data-lucide="alert-octagon" class="w-3.5 h-3.5 text-rose-600"></i> VENCIDO HACE ${Math.abs(dias)} DÍAS
+                </span>
+                <span class="font-mono text-xs text-rose-800">Expiró: ${c.fechaLimite || '-'}</span>
+              </div>
+              <p class="text-[10px] text-rose-700 leading-tight"><strong>Acción pendiente:</strong> ${calcs.accionInmediata}</p>
+            </div>
+          `;
+        } else if (filtroRapidoActivo === 'rutacritica') {
+          const holgura = c.holgura ?? 0;
+          const afectacion = c.afectacionDias ?? 0;
+          const consumeHolgura = afectacion > holgura;
+          bloqueDinamicoFiltro = `
+            <div class="p-2.5 bg-purple-50 border border-purple-200 rounded-lg text-purple-900 text-[11px] space-y-1.5">
+              <div class="flex items-center justify-between font-bold">
+                <span class="flex items-center gap-1 text-purple-700">
+                  <i data-lucide="git-commit" class="w-3.5 h-3.5 text-purple-600"></i> CRITERIO RUTA CRÍTICA (WBS)
+                </span>
+                <span class="font-mono text-[10px] px-2 py-0.5 rounded font-bold ${consumeHolgura ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-purple-100 text-purple-800 border border-purple-300'}">
+                  ${consumeHolgura ? '⚠️ Consume Holgura Total' : 'Holgura en Riesgo'}
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-1 text-[10px] text-slate-700">
+                <div><strong>WBS / EDT:</strong> <span class="font-mono text-purple-700 font-bold">${c.wbs || 'No asignado'}</span></div>
+                <div><strong>Hito afectado:</strong> ${c.hito || 'Entregable técnico'}</div>
+                <div><strong>Holgura disp.:</strong> ${holgura} días</div>
+                <div><strong>Afectación est.:</strong> ${afectacion} días</div>
+              </div>
+              <p class="text-[10px] text-purple-800 leading-tight"><strong>Mitigación programada:</strong> ${c.mitigacion || 'Validar con PMO reprogramación de actividades'}</p>
+            </div>
+          `;
+        } else if (filtroRapidoActivo === 'semana') {
+          bloqueDinamicoFiltro = `
+            <div class="p-2.5 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 text-[11px] space-y-1">
+              <div class="flex items-center justify-between font-bold">
+                <span class="flex items-center gap-1 text-blue-700">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-600"></i> VENCE EN ${dias} DÍA(S)
+                </span>
+                <span class="font-mono text-xs font-bold text-blue-900">Fecha límite: ${c.fechaLimite || '-'}</span>
+              </div>
+              <p class="text-[10px] text-blue-700"><strong>Plazo prioritario:</strong> Dentro de la ventana de seguimiento semanal.</p>
+            </div>
+          `;
+        } else if (filtroRapidoActivo === 'preclusivos') {
+          bloqueDinamicoFiltro = `
+            <div class="p-2.5 bg-red-50 border border-red-300 rounded-lg text-red-950 text-[11px] space-y-1.5 shadow-sm">
+              <div class="flex items-center justify-between font-bold">
+                <span class="flex items-center gap-1 text-red-700 animate-pulse">
+                  <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-red-600"></i> PLAZO FATAL / CADUCIDAD PRECLUSIVA
+                </span>
+                <span class="font-mono text-[10px] font-bold bg-rose-200 text-rose-900 px-2 py-0.5 rounded">${dias < 0 ? 'CADUCADO' : `${dias}d restantes`}</span>
+              </div>
+              <div class="text-[10px] text-red-800 leading-tight bg-white/70 p-2 rounded border border-red-200">
+                <strong>¿Qué significa para no-abogados?</strong> Es un plazo de <em>muerte súbita</em> (Time-Bar). Si la Entidad no notifica antes del <strong>${c.fechaLimite}</strong>, se extingue definitivamente el derecho legal de reclamo o defensa (Cl. 61.3 NEC / Cl. 20.1 FIDIC). No admite ampliación ni subsanación posterior.
+              </div>
+            </div>
+          `;
+        } else if (filtroRapidoActivo === 'criticos') {
+          const causales = [];
+          if (dias < 0) causales.push(`Plazo vencido hace ${Math.abs(dias)} días`);
+          if (calcs.esPlazoFatal && dias <= (configSistema.diasAlertaProxima || 7)) causales.push(`Plazo fatal preclusivo por vencer en ${dias} días`);
+          if (c.rutaCritica === 'Sí' && dias <= (configSistema.diasAlertaCritica || 3)) causales.push(`Afecta Ruta Crítica y vence en ≤ 3 días`);
+          if (c.brecha > 0) causales.push(`Déficit presupuestal descubierto de S/ ${c.brecha.toLocaleString('es-PE')}`);
+          if (calcs.indice >= 4.0) causales.push(`Índice de severidad ponderada muy alto (${calcs.indice} pts)`);
+
+          bloqueDinamicoFiltro = `
+            <div class="p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-rose-950 text-[11px] space-y-1.5">
+              <div class="flex items-center justify-between font-bold">
+                <span class="flex items-center gap-1 text-rose-700">
+                  <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-600"></i> CAUSAL DE CRITICIDAD P1
+                </span>
+                <span class="font-mono text-[10px] bg-rose-200 text-rose-900 px-2 py-0.5 rounded font-bold">Índice: ${calcs.indice}</span>
+              </div>
+              <ul class="text-[10px] text-rose-800 list-disc list-inside space-y-0.5 font-medium">
+                ${causales.map(m => `<li>${m}</li>`).join('')}
+              </ul>
+            </div>
+          `;
+        } else if (filtroRapidoActivo === 'brecha') {
+          bloqueDinamicoFiltro = `
+            <div class="p-2.5 bg-emerald-50 border border-emerald-300 rounded-lg text-emerald-950 text-[11px] space-y-1.5">
+              <div class="flex items-center justify-between font-bold">
+                <span class="flex items-center gap-1 text-emerald-700">
+                  <i data-lucide="wallet" class="w-3.5 h-3.5 text-emerald-600"></i> DÉFICIT PRESUPUESTAL OPP
+                </span>
+                <span class="font-mono text-xs font-bold text-rose-700">Brecha: S/ ${(c.brecha || 0).toLocaleString('es-PE')}</span>
+              </div>
+              <div class="grid grid-cols-2 gap-1 text-[10px] text-slate-700">
+                <div><strong>Exposición prob.:</strong> S/ ${(c.escenarioProbable || 0).toLocaleString('es-PE')}</div>
+                <div><strong>Cobertura OPP:</strong> S/ ${(c.cobertura || 0).toLocaleString('es-PE')}</div>
+              </div>
+              <p class="text-[10px] text-emerald-800"><strong>Fuente:</strong> ${c.fuente || 'RO'} · Requiere gestión de asignación presupuestal inmediata.</p>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-extrabold text-sm text-slate-900 font-mono">${c.id}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${c.proyecto}</span>
+                ${calcs.esPlazoFatal ? `<span class="text-rose-600 font-bold" title="${configSistema.mensajeFatal}">⏱️ FATAL</span>` : ''}
+              </div>
+              <p class="text-xs font-semibold text-slate-800 mt-1 line-clamp-2">${c.asunto}</p>
+            </div>
+            <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${calcs.semaforoBadge}">
+              ${calcs.semaforoLabel}
+            </span>
+          </div>
+
+          <!-- BLOQUE CONTEXTUAL DINÁMICO SEGÚN FILTRO -->
+          ${bloqueDinamicoFiltro}
+
+          <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+            <div>
+              <span class="text-slate-400 block text-[10px]">Instancia Actual:</span>
+              <span class="font-bold text-slate-800">${c.instanciaActual}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[10px]">Vencimiento:</span>
+              <span class="font-bold ${dias < 0 ? 'text-rose-600' : 'text-slate-800'}">${c.fechaLimite || '-'}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[10px]">Exposición Probable:</span>
+              <span class="font-bold text-blue-900 font-mono">S/ ${(c.escenarioProbable || 0).toLocaleString('es-PE')}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[10px]">Brecha OPP:</span>
+              <span class="font-bold ${c.brecha > 0 ? 'text-rose-600' : 'text-emerald-700'} font-mono">${c.brecha > 0 ? `S/ ${c.brecha.toLocaleString('es-PE')}` : 'Cubierto'}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+            <span class="text-[10px] text-slate-500 font-medium truncate max-w-[140px]">Resp: ${c.responsable || 'Sin asignar'}</span>
+            <div class="flex items-center space-x-2">
+              <button onclick="verFichaCaso('${c.id}')" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium">Ficha</button>
+              <button onclick="abrirModalDerivar('${c.id}')" class="px-2.5 py-1 rounded bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold">Derivar</button>
+              <button onclick="editarCaso('${c.id}')" class="p-1 text-slate-500 hover:text-slate-800"><i data-lucide="edit" class="w-4 h-4"></i></button>
+            </div>
+          </div>
+        `;
+        cardsCont.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // ALTERNAR MODO VISTA EN DESKTOP
+    function cambiarModoVista(modo) {
+      const tabla = document.getElementById('contenedorTabla');
+      const cards = document.getElementById('contenedorCards');
+      const btnT = document.getElementById('btnVistaTabla');
+      const btnC = document.getElementById('btnVistaCards');
+
+      if (!tabla || !cards) return;
+
+      if (modo === 'tabla') {
+        tabla.style.display = 'block';
+        cards.style.display = 'none';
+        if (btnT && btnC) {
+          btnT.className = 'px-2.5 py-1 rounded-md font-bold bg-white text-slate-800 shadow-sm transition';
+          btnC.className = 'px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition';
+        }
+      } else {
+        tabla.style.display = 'none';
+        cards.style.display = 'grid';
+        if (btnT && btnC) {
+          btnC.className = 'px-2.5 py-1 rounded-md font-bold bg-white text-slate-800 shadow-sm transition';
+          btnT.className = 'px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition';
+        }
+      }
+      lucide.createIcons();
+    }
+
+    // WIZARD DEL FORMULARIO DE CASO (PASO A PASO PARA ABOGADO)
+    function cambiarTabWizard(tab) {
+      tabWizardActual = tab;
+      for (let i = 1; i <= 4; i++) {
+        const c = document.getElementById(`tabContent${i}`);
+        const b = document.getElementById(`tabBtn${i}`);
+        if (i === tab) {
+          c.classList.remove('hidden');
+          b.className = "py-3 border-b-2 border-brand-600 text-brand-700 flex items-center gap-1.5 whitespace-nowrap";
+        } else {
+          c.classList.add('hidden');
+          b.className = "py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap";
+        }
+      }
+
+      document.getElementById('btnWizardPrev').classList.toggle('hidden', tab === 1);
+      document.getElementById('btnWizardNext').classList.toggle('hidden', tab === 4);
+      document.getElementById('btnWizardSave').classList.toggle('hidden', tab !== 4);
+    }
+
+    function navegarWizard(delta) {
+      const nuevo = tabWizardActual + delta;
+      if (nuevo >= 1 && nuevo <= 4) cambiarTabWizard(nuevo);
+    }
+
+    function calcularBrecha() {
+      const probable = parseFloat(document.getElementById('inpEscenarioProbable').value) || 0;
+      const cobertura = parseFloat(document.getElementById('inpCobertura').value) || 0;
+      const brecha = Math.max(0, probable - cobertura);
+      document.getElementById('inpBrechaCalculada').value = brecha.toFixed(2);
+    }
+
+    // MODAL DE REGISTRO / EDICIÓN
+    function abrirModalCaso() {
+      document.getElementById('formCaso').reset();
+      document.getElementById('editIndex').value = "-1";
+      document.getElementById('modalTitulo').textContent = "Registro de Nuevo Caso de Controversia";
+      document.getElementById('inpIdCaso').readOnly = false;
+      document.getElementById('inpFechaDerivacion').value = new Date().toISOString().split('T')[0];
+      cambiarTabWizard(1);
+      document.getElementById('modalCaso').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function cerrarModalCaso() {
+      document.getElementById('modalCaso').classList.add('hidden');
+    }
+
+    function editarCaso(id) {
+      const idx = casos.findIndex(c => c.id === id);
+      if (idx === -1) return;
+      const c = casos[idx];
+
+      document.getElementById('editIndex').value = idx;
+      document.getElementById('modalTitulo').textContent = `Editar Caso: ${c.id}`;
+      document.getElementById('inpIdCaso').value = c.id;
+      document.getElementById('inpIdCaso').readOnly = true;
+      document.getElementById('inpProyecto').value = c.proyecto;
+      document.getElementById('inpFase').value = c.fase || 'Diseño/Estudios';
+      document.getElementById('inpTipoAtencion').value = c.tipoAtencion;
+      document.getElementById('inpRegimen').value = c.regimen || 'NEC4 ECC Opción C (Target)';
+      document.getElementById('inpGenerador').value = c.generador || '';
+      document.getElementById('inpAsunto').value = c.asunto;
+      document.getElementById('inpDocInicio').value = c.docInicio || '';
+      document.getElementById('inpFechaInicio').value = c.fechaInicio || '';
+      document.getElementById('inpInstanciaActual').value = c.instanciaActual;
+      document.getElementById('inpResponsable').value = c.responsable || '';
+      document.getElementById('inpEstado').value = c.estado || 'En curso';
+      document.getElementById('inpTipoPlazo').value = c.tipoPlazo || 'Contractual Ordinario';
+      document.getElementById('inpFechaDerivacion').value = c.fechaDerivacion || '';
+      document.getElementById('inpFechaLimite').value = c.fechaLimite || '';
+      document.getElementById('inpAccionPendiente').value = c.accionPendiente || '';
+      document.getElementById('inpRutaCritica').value = c.rutaCritica || 'No';
+      document.getElementById('inpWbs').value = c.wbs || '';
+      document.getElementById('inpHito').value = c.hito || '';
+      document.getElementById('inpHolgura').value = c.holgura || 0;
+      document.getElementById('inpAfectacionDias').value = c.afectacionDias || 0;
+      document.getElementById('inpMitigacion').value = c.mitigacion || '';
+      document.getElementById('inpMoneda').value = c.moneda || 'PEN';
+      document.getElementById('inpMontoReclamado').value = c.montoReclamado || '';
+      document.getElementById('inpIncluyeIgv').value = c.incluyeIgv || 'Sí';
+      document.getElementById('inpEscenarioBajo').value = c.escenarioBajo || '';
+      document.getElementById('inpEscenarioProbable').value = c.escenarioProbable || '';
+      document.getElementById('inpEscenarioAlto').value = c.escenarioAlto || '';
+      document.getElementById('inpCobertura').value = c.cobertura || '';
+      document.getElementById('inpBrechaCalculada').value = c.brecha || 0;
+      document.getElementById('inpFuente').value = c.fuente || 'RO';
+      document.getElementById('inpEnlaceAcc').value = c.enlaceAcc || '';
+
+      cambiarTabWizard(1);
+      document.getElementById('modalCaso').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function guardarCaso(e) {
+      e.preventDefault();
+      const idx = parseInt(document.getElementById('editIndex').value);
+      const id = document.getElementById('inpIdCaso').value.trim();
+
+      const casoData = {
+        id: id,
+        proyecto: document.getElementById('inpProyecto').value,
+        fase: document.getElementById('inpFase').value,
+        tipoAtencion: document.getElementById('inpTipoAtencion').value,
+        regimen: document.getElementById('inpRegimen').value,
+        generador: document.getElementById('inpGenerador').value,
+        asunto: document.getElementById('inpAsunto').value,
+        docInicio: document.getElementById('inpDocInicio').value,
+        fechaInicio: document.getElementById('inpFechaInicio').value,
+        instanciaActual: document.getElementById('inpInstanciaActual').value,
+        responsable: document.getElementById('inpResponsable').value,
+        estado: document.getElementById('inpEstado').value,
+        tipoPlazo: document.getElementById('inpTipoPlazo').value,
+        fechaDerivacion: document.getElementById('inpFechaDerivacion').value,
+        fechaLimite: document.getElementById('inpFechaLimite').value,
+        accionPendiente: document.getElementById('inpAccionPendiente').value,
+        rutaCritica: document.getElementById('inpRutaCritica').value,
+        wbs: document.getElementById('inpWbs').value,
+        hito: document.getElementById('inpHito').value,
+        holgura: parseInt(document.getElementById('inpHolgura').value) || 0,
+        afectacionDias: parseInt(document.getElementById('inpAfectacionDias').value) || 0,
+        mitigacion: document.getElementById('inpMitigacion').value,
+        moneda: document.getElementById('inpMoneda').value,
+        montoReclamado: parseFloat(document.getElementById('inpMontoReclamado').value) || 0,
+        incluyeIgv: document.getElementById('inpIncluyeIgv').value,
+        escenarioBajo: parseFloat(document.getElementById('inpEscenarioBajo').value) || 0,
+        escenarioProbable: parseFloat(document.getElementById('inpEscenarioProbable').value) || 0,
+        escenarioAlto: parseFloat(document.getElementById('inpEscenarioAlto').value) || 0,
+        cobertura: parseFloat(document.getElementById('inpCobertura').value) || 0,
+        brecha: parseFloat(document.getElementById('inpBrechaCalculada').value) || 0,
+        fuente: document.getElementById('inpFuente').value,
+        enlaceAcc: document.getElementById('inpEnlaceAcc').value,
+        historial: idx >= 0 ? casos[idx].historial || [] : [{
+          fecha: new Date().toISOString().split('T')[0],
+          origen: "Registro Inicial",
+          destino: document.getElementById('inpInstanciaActual').value,
+          doc: document.getElementById('inpDocInicio').value || 'Alta de Caso',
+          obs: "Registro formal en cartera de controversias"
+        }]
+      };
+
+      if (idx >= 0) {
+        casos[idx] = casoData;
+      } else {
+        // Verificar duplicados
+        if (casos.some(c => c.id === id)) {
+          alert(`El ID ${id} ya existe en el sistema. Ingrese un código único.`);
+          return;
+        }
+        casos.unshift(casoData);
+      }
+
+      guardarEnStorage();
+      actualizarDashboard();
+      renderizarCasos();
+      cerrarModalCaso();
+    }
+
+    // DERIVACIÓN RÁPIDA (1 CLIC PARA EL ABOGADO)
+    function abrirModalDerivar(id) {
+      const c = casos.find(item => item.id === id);
+      if (!c) return;
+
+      document.getElementById('formDerivar').reset();
+      document.getElementById('derivarCasoId').value = c.id;
+      document.getElementById('lblDerivarCasoInfo').textContent = `${c.id} - ${c.asunto.substring(0, 40)}... (Actualmente en: ${c.instanciaActual})`;
+      document.getElementById('inpDerivarFecha').value = new Date().toISOString().split('T')[0];
+      
+      // Fecha límite estimada (ej. +7 días)
+      const lim = new Date();
+      lim.setDate(lim.getDate() + 7);
+      document.getElementById('inpDerivarNuevoLimite').value = lim.toISOString().split('T')[0];
+
+      document.getElementById('modalDerivar').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function cerrarModalDerivar() {
+      document.getElementById('modalDerivar').classList.add('hidden');
+    }
+
+    function ejecutarDerivacion(e) {
+      e.preventDefault();
+      const id = document.getElementById('derivarCasoId').value;
+      const c = casos.find(item => item.id === id);
+      if (!c) return;
+
+      const origen = c.instanciaActual;
+      const destino = document.getElementById('selDerivarDestino').value;
+      const doc = document.getElementById('inpDerivarDoc').value;
+      const fecha = document.getElementById('inpDerivarFecha').value;
+      const limite = document.getElementById('inpDerivarNuevoLimite').value;
+      const accion = document.getElementById('inpDerivarAccion').value;
+
+      // Actualizar caso
+      c.instanciaActual = destino;
+      c.fechaDerivacion = fecha;
+      c.fechaLimite = limite;
+      c.accionPendiente = accion;
+      c.estado = `En ${destino}`;
+
+      if (!c.historial) c.historial = [];
+      c.historial.push({
+        fecha: fecha,
+        origen: origen,
+        destino: destino,
+        doc: doc,
+        obs: accion
+      });
+
+      guardarEnStorage();
+      actualizarDashboard();
+      renderizarCasos();
+      cerrarModalDerivar();
+    }
+
+    // FICHA EJECUTIVA DE 1 PÁGINA (PARA EL DIRECTOR)
+    function verFichaCaso(id) {
+      const c = casos.find(item => item.id === id);
+      if (!c) return;
+
+      const sem = calcularSemaforo(c);
+      const dias = calcularDiasDisponibles(c.fechaLimite);
+
+      const html = `
+        <div class="border-b border-slate-200 pb-3 flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xl font-black text-slate-900 font-mono tracking-tight">${c.id}</span>
+              <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-800">${c.proyecto}</span>
+              <span class="px-2.5 py-0.5 rounded text-xs font-bold border ${sem.badge}">${sem.label}</span>
+              ${c.tipoPlazo && c.tipoPlazo.includes("Preclusivo") ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white animate-pulse">⏱️ PLAZO FATAL</span>' : ''}
+            </div>
+            <p class="text-sm font-semibold text-slate-800 mt-1.5 break-words">${c.asunto}</p>
+          </div>
+          <div class="sm:text-right shrink-0">
+            <span class="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">Tipo Atención</span>
+            <span class="font-bold text-slate-800 text-xs bg-slate-100 px-2 py-1 rounded inline-block mt-0.5">${c.tipoAtencion}</span>
+          </div>
+        </div>
+
+        <!-- METADATOS CLAVE: 2 COLUMNAS AMPLIAS CON MIN-W-0 (CERO SOLAPAMIENTO) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-slate-50/90 p-4 rounded-xl border border-slate-200 text-xs">
+          
+          <div class="min-w-0 space-y-1 overflow-hidden">
+            <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Instancia Actual:</span>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-brand-500 shrink-0"></span>
+              <span class="font-bold text-slate-900 text-sm truncate">${c.instanciaActual}</span>
+            </div>
+          </div>
+
+          <div class="min-w-0 space-y-1 overflow-hidden">
+            <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Tipo de Plazo:</span>
+            <span class="font-semibold text-slate-800 text-xs block truncate" title="${c.tipoPlazo}">${c.tipoPlazo}</span>
+          </div>
+
+          <div class="min-w-0 space-y-1 overflow-hidden">
+            <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Responsable Asignado:</span>
+            <span class="font-bold text-slate-800 text-xs block truncate" title="${c.responsable || 'Sin asignar'}">
+              ${c.responsable || 'Sin asignar'}
+            </span>
+          </div>
+
+          <div class="min-w-0 space-y-1 overflow-hidden">
+            <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Fecha Límite y Saldo de Días:</span>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-mono font-bold text-xs ${dias < 0 ? 'text-rose-600' : 'text-slate-900'}">${c.fechaLimite || '-'}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${dias < 0 ? 'bg-rose-100 text-rose-800 border border-rose-300' : dias <= 3 ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">
+                ${dias < 0 ? `Vencido hace ${Math.abs(dias)}d` : `${dias}d restantes`}
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 bg-purple-50/50 rounded-xl border border-purple-200 space-y-1">
+            <span class="font-bold text-purple-900 block flex items-center gap-1">
+              <i data-lucide="git-commit" class="w-3.5 h-3.5 text-purple-600"></i> Impacto en Cronograma
+            </span>
+            <p><strong class="text-slate-600">Ruta Crítica:</strong> ${c.rutaCritica}</p>
+            <p><strong class="text-slate-600">Código WBS:</strong> ${c.wbs || 'No asignado'}</p>
+            <p><strong class="text-slate-600">Holgura / Afectación:</strong> ${c.holgura}d holgura / ${c.afectacionDias}d impacto</p>
+            <p class="text-[11px] text-purple-700"><strong>Mitigación:</strong> ${c.mitigacion || 'En evaluación'}</p>
+          </div>
+
+          <div class="p-3 bg-blue-50/50 rounded-xl border border-blue-200 space-y-1 font-mono">
+            <span class="font-bold text-blue-900 block font-sans flex items-center gap-1">
+              <i data-lucide="dollar-sign" class="w-3.5 h-3.5 text-blue-600"></i> Evaluación Económica
+            </span>
+            <p class="text-slate-600 font-sans"><strong class="text-slate-700">Pretensión:</strong> S/ ${(c.montoReclamado || 0).toLocaleString('es-PE')}</p>
+            <p class="text-blue-900 font-bold"><strong class="font-sans text-slate-700">Exposición Probable:</strong> S/ ${(c.escenarioProbable || 0).toLocaleString('es-PE')}</p>
+            <p class="text-slate-600 font-sans"><strong class="text-slate-700">Cobertura:</strong> S/ ${(c.cobertura || 0).toLocaleString('es-PE')}</p>
+            <p class="${c.brecha > 0 ? 'text-rose-600 font-bold' : 'text-emerald-700 font-bold'}">
+              <strong class="font-sans text-slate-700">Brecha OPP:</strong> ${c.brecha > 0 ? `S/ ${c.brecha.toLocaleString('es-PE')} (Déficit)` : 'Cubierto al 100%'}
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <span class="font-bold text-slate-700 text-xs block">Historial de Trazabilidad entre Instancias:</span>
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <table class="w-full text-left text-[11px]">
+              <thead class="bg-slate-100 text-slate-600 font-semibold">
+                <tr>
+                  <th class="py-1.5 px-3">Fecha</th>
+                  <th class="py-1.5 px-3">Origen</th>
+                  <th class="py-1.5 px-3">Destino</th>
+                  <th class="py-1.5 px-3">Documento</th>
+                  <th class="py-1.5 px-3">Actuación</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                ${(c.historial || []).map(h => `
+                  <tr>
+                    <td class="py-1.5 px-3 font-mono">${h.fecha}</td>
+                    <td class="py-1.5 px-3">${h.origen}</td>
+                    <td class="py-1.5 px-3 font-semibold text-slate-800">${h.destino}</td>
+                    <td class="py-1.5 px-3 text-slate-600">${h.doc}</td>
+                    <td class="py-1.5 px-3 text-slate-500">${h.obs}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        ${c.enlaceAcc ? `
+          <div class="pt-2 text-center">
+            <a href="${c.enlaceAcc}" target="_blank" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Abrir Expediente Oficial en Autodesk ACC
+            </a>
+          </div>
+        ` : ''}
+      `;
+
+      document.getElementById('fichaContenido').innerHTML = html;
+      document.getElementById('modalFicha').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function cerrarModalFicha() {
+      document.getElementById('modalFicha').classList.add('hidden');
+    }
+
+    // EXPORTAR A EXCEL (.XLSX) CON LAS 50 COLUMNAS OFICIALES DE LA MATRIZ MAESTRA
+    function exportarExcel() {
+      const dataAExportar = casos.map(c => {
+        const calcs = calcularCamposOficialesMatriz(c);
+        return {
+          "ID caso": c.id,
+          "Proyecto": c.proyecto,
+          "Fase": c.fase || "Ejecución",
+          "Tipo de atención": c.tipoAtencion,
+          "Asunto / descripción": c.asunto,
+          "Generador": c.generador || "Contratista",
+          "Solicitante / contraparte": c.solicitanteContraparte || c.generador || "Contratista",
+          "Documento de inicio": c.docInicio || "",
+          "Fecha de inicio": c.fechaInicio || "",
+          "Base contractual / normativa": c.baseContractual || c.regimen || "",
+          "Responsable de conducción": c.responsableConduccion || "Dirección de Estudios",
+          "Instancia actual": c.instanciaActual,
+          "Responsable de acción": c.responsable || "Sin asignar",
+          "Acción pendiente": c.accionPendiente || "",
+          "Tipo de plazo": c.tipoPlazo || "Contractual Ordinario",
+          "Fecha de derivación": c.fechaDerivacion || "",
+          "Fecha límite": c.fechaLimite || "",
+          "Días en instancia": calcs.diasInstancia,
+          "Días disponibles": calcs.diasDisponibles,
+          "Estado": c.estado || "En curso",
+          "Próximo hito / decisión": c.proximoHitoDecision || c.accionPendiente || "",
+          "Fecha próxima revisión": c.fechaProximaRevision || c.fechaLimite || "",
+          "Hito / entregable afectado": c.hito || "",
+          "Código WBS / actividad": c.wbs || "",
+          "¿Ruta crítica?": c.rutaCritica || "No",
+          "Holgura disponible (días)": c.holgura ?? 0,
+          "Afectación estimada (días)": c.afectacionDias ?? 0,
+          "Tipo de impacto": c.tipoImpacto || (c.rutaCritica === "Sí" ? "Plazo" : "Económico"),
+          "Monto reclamado": c.montoReclamado || 0,
+          "Moneda": c.moneda || "PEN",
+          "Exposición probable PEN": c.escenarioProbable || 0,
+          "Brecha presupuestal PEN": c.brecha || 0,
+          "Probabilidad": c.probabilidad || (calcs.indice >= 3 ? "Alta" : "Media"),
+          "Puntaje plazo": calcs.puntajePlazo,
+          "Puntaje ruta crítica": calcs.puntajeRC,
+          "Puntaje costo": calcs.puntajeCosto,
+          "Puntaje escalamiento": calcs.puntajeEscalamiento,
+          "Índice prioridad": calcs.indice,
+          "Prioridad": calcs.prioridad,
+          "Semáforo": calcs.semaforoColor,
+          "Medida de mitigación": c.mitigacion || "",
+          "Responsable mitigación": c.responsableMitigacion || "PMO / Dirección",
+          "Fecha límite mitigación": c.fechaLimiteMitigacion || c.fechaLimite || "",
+          "Última actualización": new Date().toISOString().split('T')[0],
+          "Enlace / expediente": c.enlaceAcc || "",
+          "Observaciones": c.observaciones || "",
+          "Alerta de vencimiento": calcs.alertaVencimiento,
+          "Alerta de ruta crítica": calcs.alertaRC,
+          "Alerta consolidada": calcs.alertaConsolidada,
+          "Acción inmediata sugerida": calcs.accionInmediata
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(dataAExportar);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Matriz Maestra G2G");
+      
+      const fechaHoy = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(wb, `Matriz_Maestra_Controversias_G2G_50Col_${fechaHoy}.xlsx`);
+    }
+
+    // GESTIÓN DEL PANEL DE CONFIGURACIÓN DEL SISTEMA Y CATÁLOGOS
+    function abrirModalConfiguracion() {
+      cambiarTabConfig(1);
+      cambiarSeccionCatalogo();
+      document.getElementById('cfgMensajeFatal').value = configSistema.mensajeFatal || "⏱️ PLAZO FATAL / CADUCIDAD PRECLUSIVA";
+      document.getElementById('cfgDiasCritica').value = configSistema.diasAlertaCritica || 3;
+      document.getElementById('cfgDiasProxima').value = configSistema.diasAlertaProxima || 7;
+      
+      const p = configSistema.pesos || { plazo: 0.30, rutaCritica: 0.30, costo: 0.25, escalamiento: 0.15 };
+      document.getElementById('cfgPesoPlazo').value = p.plazo;
+      document.getElementById('cfgPesoRC').value = p.rutaCritica;
+      document.getElementById('cfgPesoCosto').value = p.costo;
+      document.getElementById('cfgPesoEscalamiento').value = p.escalamiento;
+      validarSumaPesos();
+
+      const u = configSistema.umbrales || { p1: 4.0, p2: 3.0, p3: 2.0 };
+      document.getElementById('cfgUmbralP1').value = u.p1;
+      document.getElementById('cfgUmbralP2').value = u.p2;
+      document.getElementById('cfgUmbralP3').value = u.p3;
+
+      renderizarPlazosConfig();
+      renderizarAccProyectosConfig();
+      document.getElementById('modalConfiguracion').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function cerrarModalConfiguracion() {
+      document.getElementById('modalConfiguracion').classList.add('hidden');
+    }
+
+    function cambiarTabConfig(tab) {
+      tabConfigActual = tab;
+      for (let i = 1; i <= 4; i++) {
+        const c = document.getElementById(`tabCfgContent${i}`);
+        const b = document.getElementById(`tabCfgBtn${i}`);
+        if (!c || !b) continue;
+        if (i === tab) {
+          c.classList.remove('hidden');
+          b.className = "py-3 border-b-2 border-brand-600 text-brand-700 flex items-center gap-1.5 whitespace-nowrap";
+        } else {
+          c.classList.add('hidden');
+          b.className = "py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap";
+        }
+      }
+      lucide.createIcons();
+    }
+
+    function cambiarSeccionCatalogo() {
+      seccionCatalogoActual = document.getElementById('selCatSeccion').value;
+      renderizarListaItemsCatalogo();
+    }
+
+    function renderizarListaItemsCatalogo() {
+      const cont = document.getElementById('listaItemsCatalogo');
+      if (!cont) return;
+      cont.innerHTML = '';
+      
+      const sec = seccionCatalogoActual;
+      const items = configSistema[sec] || [];
+
+      if (items.length === 0) {
+        cont.innerHTML = '<p class="text-slate-400 py-3 text-center italic">No hay opciones registradas en esta categoría.</p>';
+        return;
+      }
+
+      items.forEach((it, idx) => {
+        const nombre = typeof it === 'string' ? it : (it.nombre || it.codigo || JSON.stringify(it));
+        const sub = typeof it === 'object' && it.codigo ? `Código: ${it.codigo}` : '';
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200 transition";
+        div.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+            <span class="font-bold text-slate-800 text-xs">${nombre}</span>
+            ${sub ? `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-200 text-slate-700">${sub}</span>` : ''}
+          </div>
+          <button onclick="eliminarItemCatalogo(${idx})" title="Eliminar opción" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        `;
+        cont.appendChild(div);
+      });
+      lucide.createIcons();
+    }
+
+    function agregarItemCatalogo() {
+      const inp = document.getElementById('inpNuevoItemCat');
+      const val = inp.value.trim();
+      if (!val) return;
+
+      const sec = seccionCatalogoActual;
+      if (!configSistema[sec]) configSistema[sec] = [];
+
+      if (sec === 'proyectos') {
+        const cod = val.toUpperCase().split(' ')[0];
+        configSistema.proyectos.push({ codigo: cod, nombre: val, accUrl: `https://acc.autodesk.com/docs/projects/${cod.toLowerCase()}-g2g` });
+      } else {
+        if (!configSistema[sec].includes(val)) {
+          configSistema[sec].push(val);
+        }
+      }
+
+      inp.value = '';
+      renderizarListaItemsCatalogo();
+    }
+
+    function eliminarItemCatalogo(idx) {
+      const sec = seccionCatalogoActual;
+      if (configSistema[sec] && configSistema[sec].length > 1) {
+        if (confirm(`¿Está seguro de eliminar esta opción del catálogo?`)) {
+          configSistema[sec].splice(idx, 1);
+          renderizarListaItemsCatalogo();
+        }
+      } else {
+        alert("El catálogo debe contener al menos una opción activa.");
+      }
+    }
+
+    function renderizarPlazosConfig() {
+      const tbody = document.getElementById('tablaPlazosConfig');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      (configSistema.plazos || []).forEach((p, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = p.esFatal ? 'bg-rose-50/40' : '';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3">
+            <span class="font-bold text-slate-800 block">${p.nombre}</span>
+            <span class="text-[10px] text-slate-500">${p.descripcion || ''}</span>
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <button onclick="togglePlazoFatal(${idx})" class="px-2.5 py-1 rounded-full text-[11px] font-bold border transition ${p.esFatal ? 'bg-rose-600 text-white border-rose-700 shadow-sm' : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200'}">
+              ${p.esFatal ? '⏱️ SÍ (Fatal)' : 'No (Ordinario)'}
+            </button>
+          </td>
+          <td class="py-2.5 px-3 text-[11px] text-slate-600">
+            ${p.esFatal ? '<span class="text-rose-700 font-bold">Activa bandera P1 Crítica, alerta en rojo y aviso fatal al vencer en ≤ 7 días</span>' : 'Sigue la regla estándar de holguras y días disponibles'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function togglePlazoFatal(idx) {
+      if (configSistema.plazos && configSistema.plazos[idx]) {
+        configSistema.plazos[idx].esFatal = !configSistema.plazos[idx].esFatal;
+        renderizarPlazosConfig();
+      }
+    }
+
+    function validarSumaPesos() {
+      const pPlazo = parseFloat(document.getElementById('cfgPesoPlazo').value) || 0;
+      const pRC = parseFloat(document.getElementById('cfgPesoRC').value) || 0;
+      const pCosto = parseFloat(document.getElementById('cfgPesoCosto').value) || 0;
+      const pEsc = parseFloat(document.getElementById('cfgPesoEscalamiento').value) || 0;
+      
+      const suma = Number((pPlazo + pRC + pCosto + pEsc).toFixed(2));
+      const box = document.getElementById('boxSumaPesos');
+      const lbl = document.getElementById('lblSumaPesos');
+
+      if (Math.abs(suma - 1.0) < 0.001) {
+        box.className = "p-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 flex items-center justify-between text-xs font-bold";
+        lbl.textContent = "1.00 (100% - Conforme con la Matriz)";
+      } else {
+        box.className = "p-2.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 flex items-center justify-between text-xs font-bold";
+        lbl.textContent = `${suma} (${(suma * 100).toFixed(0)}% - Debe sumar exactamente 1.00 / 100%)`;
+      }
+    }
+
+    function renderizarAccProyectosConfig() {
+      const cont = document.getElementById('listaAccProyectos');
+      if (!cont) return;
+      cont.innerHTML = '';
+
+      (configSistema.proyectos || []).forEach((proy, idx) => {
+        const div = document.createElement('div');
+        div.className = "p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5";
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-800 text-xs">${proy.nombre} (${proy.codigo})</span>
+            <span class="text-[10px] text-slate-400 font-mono">Proyecto G2G</span>
+          </div>
+          <input type="url" value="${proy.accUrl || ''}" onchange="actualizarUrlAccProyecto(${idx}, this.value)" placeholder="https://acc.autodesk.com/docs/..." class="w-full p-2 border border-slate-300 rounded-lg text-brand-600 font-mono text-[11px]">
+        `;
+        cont.appendChild(div);
+      });
+    }
+
+    function actualizarUrlAccProyecto(idx, url) {
+      if (configSistema.proyectos && configSistema.proyectos[idx]) {
+        configSistema.proyectos[idx].accUrl = url.trim();
+      }
+    }
+
+    function guardarConfiguracionSistema() {
+      // Validar pesos
+      const pPlazo = parseFloat(document.getElementById('cfgPesoPlazo').value) || 0;
+      const pRC = parseFloat(document.getElementById('cfgPesoRC').value) || 0;
+      const pCosto = parseFloat(document.getElementById('cfgPesoCosto').value) || 0;
+      const pEsc = parseFloat(document.getElementById('cfgPesoEscalamiento').value) || 0;
+      const suma = Number((pPlazo + pRC + pCosto + pEsc).toFixed(2));
+
+      if (Math.abs(suma - 1.0) >= 0.01) {
+        alert("La suma de las ponderaciones debe ser exactamente 1.00 (100%). Por favor ajuste los valores.");
+        cambiarTabConfig(3);
+        return;
+      }
+
+      configSistema.mensajeFatal = document.getElementById('cfgMensajeFatal').value.trim() || "⏱️ PLAZO FATAL / CADUCIDAD PRECLUSIVA";
+      configSistema.diasAlertaCritica = parseInt(document.getElementById('cfgDiasCritica').value) || 3;
+      configSistema.diasAlertaProxima = parseInt(document.getElementById('cfgDiasProxima').value) || 7;
+      
+      configSistema.pesos = {
+        plazo: pPlazo,
+        rutaCritica: pRC,
+        costo: pCosto,
+        escalamiento: pEsc
+      };
+
+      configSistema.umbrales = {
+        p1: parseFloat(document.getElementById('cfgUmbralP1').value) || 4.0,
+        p2: parseFloat(document.getElementById('cfgUmbralP2').value) || 3.0,
+        p3: parseFloat(document.getElementById('cfgUmbralP3').value) || 2.0
+      };
+
+      localStorage.setItem("controversias_g2g_config", JSON.stringify(configSistema));
+      poblarSelectsDesdeConfiguracion();
+      actualizarDashboard();
+      renderizarCasos();
+      cerrarModalConfiguracion();
+      alert("Configuración de Catálogos y Parámetros guardada exitosamente.");
+    }
+
+    function restablecerConfigOficial() {
+      if (confirm("¿Desea restablecer todos los catálogos, pesos oficiales (30%/30%/25%/15%) y parámetros a los valores por defecto del manual oficial?")) {
+        configSistema = JSON.parse(JSON.stringify(CONFIG_DEFAULT));
+        localStorage.setItem("controversias_g2g_config", JSON.stringify(configSistema));
+        abrirModalConfiguracion();
+        poblarSelectsDesdeConfiguracion();
+        actualizarDashboard();
+        renderizarCasos();
+      }
+    }
+
+    // CONFIGURACIÓN NUBE / SHEETS
+    function abrirConfigNube() {
+      document.getElementById('inpUrlScript').value = localStorage.getItem("g2g_webhook_url") || "";
+      document.getElementById('modalNube').classList.remove('hidden');
+    }
+
+    function cerrarModalNube() {
+      document.getElementById('modalNube').classList.add('hidden');
+    }
+
+    function guardarConfigNube() {
+      const url = document.getElementById('inpUrlScript').value.trim();
+      localStorage.setItem("g2g_webhook_url", url);
+      alert("Configuración de enlace a Google Sheets guardada exitosamente.");
+      cerrarModalNube();
+    }
+  </script>
+
+  <!-- BOTÓN FLOTANTE MÓVIL (FAB) PARA REGISTRAR NUEVO CASO DESDE SMARTPHONE -->
+  <button onclick="abrirModalCaso()" class="sm:hidden fixed bottom-5 right-5 z-40 bg-gradient-to-r from-brand-600 to-indigo-600 text-white px-4 py-3 rounded-full shadow-2xl flex items-center gap-2 font-bold text-xs active:scale-95 transition border border-white/30 shadow-brand-600/50">
+    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+    <span>+ Nuevo Caso</span>
+  </button>
+
+</body>
+</html>
