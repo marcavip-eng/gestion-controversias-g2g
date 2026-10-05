@@ -860,16 +860,32 @@
           </div>
 
           <!-- Formulario Agregar Item -->
-          <div class="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
-            <input type="text" id="inpNuevoItemCat" placeholder="Nombre de la nueva opción..." class="flex-1 p-2 border border-slate-300 rounded-lg text-xs">
-            <button onclick="agregarItemCatalogo()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-bold flex items-center gap-1 shadow-sm">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Agregar Opción
-            </button>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
+              <span id="lblTituloFormNuevo">Agregar nueva opción al catálogo</span>
+              <span id="lblIndicadorModoCat" class="text-brand-600 font-semibold">Modo creación</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+              <div id="colCodigoCat" class="sm:col-span-4 hidden">
+                <input type="text" id="inpNuevoCodCat" placeholder="Abreviatura / Código (ej. NCC, OAJ)" class="w-full p-2 border border-slate-300 rounded-lg text-xs font-mono uppercase">
+              </div>
+              <div id="colNombreCat" class="sm:col-span-12">
+                <input type="text" id="inpNuevoItemCat" placeholder="Nombre completo de la opción..." class="w-full p-2 border border-slate-300 rounded-lg text-xs">
+              </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-1">
+              <button id="btnCancelarEdicionCat" onclick="cancelarEdicionItemCatalogo()" class="hidden px-3 py-1.5 border border-slate-300 text-slate-600 hover:bg-slate-100 rounded-lg text-xs font-bold transition">
+                Cancelar
+              </button>
+              <button id="btnGuardarItemCat" onclick="guardarItemCatalogo()" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-bold flex items-center gap-1 shadow-sm text-xs transition">
+                <i data-lucide="plus" class="w-3.5 h-3.5" id="icoBtnGuardarCat"></i> <span id="txtBtnGuardarCat">Agregar Opción</span>
+              </button>
+            </div>
           </div>
 
-          <!-- Lista de Elementos Actuales -->
+          <!-- Lista de Elementos Actuales con Edición y Abreviaturas -->
           <div class="space-y-1.5" id="listaItemsCatalogo">
-            <!-- Renderizado dinámico -->
+            <!-- Renderizado dinámico con botón de edición -->
           </div>
         </div>
 
@@ -1319,19 +1335,24 @@
         inpI.innerHTML = '';
         selDest.innerHTML = '';
         (configSistema.instancias || []).forEach(inst => {
+          const valInst = typeof inst === 'object' ? (inst.abreviatura || inst.nombre) : inst;
+          const textInst = typeof inst === 'object' && inst.abreviatura && inst.nombre && inst.abreviatura !== inst.nombre 
+            ? `${inst.abreviatura} - ${inst.nombre}` 
+            : valInst;
+
           const opt1 = document.createElement('option');
-          opt1.value = inst;
-          opt1.textContent = inst;
+          opt1.value = valInst;
+          opt1.textContent = textInst;
           selFiltroI.appendChild(opt1);
 
           const opt2 = document.createElement('option');
-          opt2.value = inst;
-          opt2.textContent = inst;
+          opt2.value = valInst;
+          opt2.textContent = textInst;
           inpI.appendChild(opt2);
 
           const opt3 = document.createElement('option');
-          opt3.value = inst;
-          opt3.textContent = inst;
+          opt3.value = valInst;
+          opt3.textContent = textInst;
           selDest.appendChild(opt3);
         });
         if (valFiltro) selFiltroI.value = valFiltro;
@@ -1743,7 +1764,8 @@
       // 2. Gráfico por Instancia Actual (Cuellos de Botella)
       const conteoInst = {};
       (configSistema.instancias || []).forEach(inst => {
-        conteoInst[inst] = 0;
+        const k = typeof inst === 'object' ? (inst.abreviatura || inst.nombre) : inst;
+        conteoInst[k] = 0;
       });
 
       casosAbiertos.forEach(c => {
@@ -2748,9 +2770,37 @@
       lucide.createIcons();
     }
 
+    let itemCatalogoEditandoIdx = null;
+
     function cambiarSeccionCatalogo() {
       seccionCatalogoActual = document.getElementById('selCatSeccion').value;
+      cancelarEdicionItemCatalogo();
+      actualizarVisibilidadCamposCatalogo();
       renderizarListaItemsCatalogo();
+    }
+
+    function actualizarVisibilidadCamposCatalogo() {
+      const sec = seccionCatalogoActual;
+      const colCod = document.getElementById('colCodigoCat');
+      const colNom = document.getElementById('colNombreCat');
+      const inpCod = document.getElementById('inpNuevoCodCat');
+      const inpNom = document.getElementById('inpNuevoItemCat');
+
+      if (sec === 'proyectos') {
+        colCod.classList.remove('hidden');
+        colNom.className = "sm:col-span-8";
+        inpCod.placeholder = "Abreviatura / Código (ej. NCC, EV4, VESR)";
+        inpNom.placeholder = "Nombre completo del Megaproyecto...";
+      } else if (sec === 'instancias') {
+        colCod.classList.remove('hidden');
+        colNom.className = "sm:col-span-8";
+        inpCod.placeholder = "Abreviatura (ej. OAJ, JPRD, PMO, MTC)";
+        inpNom.placeholder = "Nombre o denominación de la instancia...";
+      } else {
+        colCod.classList.add('hidden');
+        colNom.className = "sm:col-span-12";
+        inpNom.placeholder = "Nombre de la opción...";
+      }
     }
 
     function renderizarListaItemsCatalogo() {
@@ -2767,44 +2817,165 @@
       }
 
       items.forEach((it, idx) => {
-        const nombre = typeof it === 'string' ? it : (it.nombre || it.codigo || JSON.stringify(it));
-        const sub = typeof it === 'object' && it.codigo ? `Código: ${it.codigo}` : '';
+        let nombre = '';
+        let abreviatura = '';
+        let extra = '';
+
+        if (typeof it === 'string') {
+          nombre = it;
+        } else if (typeof it === 'object' && it !== null) {
+          nombre = it.nombre || it.codigo || '';
+          abreviatura = it.codigo || it.abreviatura || '';
+          if (it.accUrl) extra = 'CDE Vinculado';
+        }
+
         const div = document.createElement('div');
-        div.className = "flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200 transition";
+        div.className = "flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100/90 rounded-xl border border-slate-200 transition";
         div.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-brand-500"></span>
-            <span class="font-bold text-slate-800 text-xs">${nombre}</span>
-            ${sub ? `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-200 text-slate-700">${sub}</span>` : ''}
+          <div class="flex items-center gap-2 min-w-0 flex-1">
+            <span class="w-2 h-2 rounded-full bg-brand-500 shrink-0"></span>
+            ${abreviatura ? `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-brand-100 text-brand-800 shrink-0 border border-brand-200">${abreviatura}</span>` : ''}
+            <span class="font-bold text-slate-800 text-xs truncate" title="${nombre}">${nombre}</span>
+            ${extra ? `<span class="text-[9px] px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 font-semibold border border-blue-200 shrink-0">${extra}</span>` : ''}
           </div>
-          <button onclick="eliminarItemCatalogo(${idx})" title="Eliminar opción" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
+          <div class="flex items-center gap-1 shrink-0 ml-2">
+            <button onclick="iniciarEdicionItemCatalogo(${idx})" title="Editar nombre y abreviatura" class="p-1 rounded text-slate-500 hover:text-brand-600 hover:bg-brand-50 transition">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+            </button>
+            <button onclick="eliminarItemCatalogo(${idx})" title="Eliminar opción" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
         `;
         cont.appendChild(div);
       });
       lucide.createIcons();
     }
 
-    function agregarItemCatalogo() {
-      const inp = document.getElementById('inpNuevoItemCat');
-      const val = inp.value.trim();
-      if (!val) return;
+    function iniciarEdicionItemCatalogo(idx) {
+      itemCatalogoEditandoIdx = idx;
+      const sec = seccionCatalogoActual;
+      const it = configSistema[sec][idx];
 
+      const inpCod = document.getElementById('inpNuevoCodCat');
+      const inpNom = document.getElementById('inpNuevoItemCat');
+      const lblTitulo = document.getElementById('lblTituloFormNuevo');
+      const lblModo = document.getElementById('lblIndicadorModoCat');
+      const btnCancel = document.getElementById('btnCancelarEdicionCat');
+      const txtBtn = document.getElementById('txtBtnGuardarCat');
+      const icoBtn = document.getElementById('icoBtnGuardarCat');
+
+      lblTitulo.textContent = `Modificar opción: #${idx + 1}`;
+      lblModo.textContent = "Modo edición";
+      lblModo.className = "text-amber-600 font-bold";
+      btnCancel.classList.remove('hidden');
+      txtBtn.textContent = "Actualizar Opción";
+      icoBtn.setAttribute('data-lucide', 'check');
+
+      if (typeof it === 'string') {
+        inpNom.value = it;
+        if (inpCod) inpCod.value = '';
+      } else if (typeof it === 'object' && it !== null) {
+        inpNom.value = it.nombre || '';
+        if (inpCod) inpCod.value = it.codigo || it.abreviatura || '';
+      }
+
+      inpNom.focus();
+      lucide.createIcons();
+    }
+
+    function cancelarEdicionItemCatalogo() {
+      itemCatalogoEditandoIdx = null;
+      const inpCod = document.getElementById('inpNuevoCodCat');
+      const inpNom = document.getElementById('inpNuevoItemCat');
+      const lblTitulo = document.getElementById('lblTituloFormNuevo');
+      const lblModo = document.getElementById('lblIndicadorModoCat');
+      const btnCancel = document.getElementById('btnCancelarEdicionCat');
+      const txtBtn = document.getElementById('txtBtnGuardarCat');
+      const icoBtn = document.getElementById('icoBtnGuardarCat');
+
+      if (inpCod) inpCod.value = '';
+      if (inpNom) inpNom.value = '';
+      if (lblTitulo) lblTitulo.textContent = "Agregar nueva opción al catálogo";
+      if (lblModo) {
+        lblModo.textContent = "Modo creación";
+        lblModo.className = "text-brand-600 font-semibold";
+      }
+      if (btnCancel) btnCancel.classList.add('hidden');
+      if (txtBtn) txtBtn.textContent = "Agregar Opción";
+      if (icoBtn) icoBtn.setAttribute('data-lucide', 'plus');
+      lucide.createIcons();
+    }
+
+    function guardarItemCatalogo() {
       const sec = seccionCatalogoActual;
       if (!configSistema[sec]) configSistema[sec] = [];
 
+      const inpCod = document.getElementById('inpNuevoCodCat');
+      const inpNom = document.getElementById('inpNuevoItemCat');
+      const valNom = inpNom ? inpNom.value.trim() : '';
+      const valCod = inpCod ? inpCod.value.trim().toUpperCase() : '';
+
+      if (!valNom) {
+        alert("Por favor ingrese el nombre de la opción.");
+        return;
+      }
+
       if (sec === 'proyectos') {
-        const cod = val.toUpperCase().split(' ')[0];
-        configSistema.proyectos.push({ codigo: cod, nombre: val, accUrl: `https://acc.autodesk.com/docs/projects/${cod.toLowerCase()}-g2g` });
+        const codigoFinal = valCod || valNom.split(' ')[0].toUpperCase();
+        const obj = {
+          codigo: codigoFinal,
+          nombre: valNom,
+          accUrl: (itemCatalogoEditandoIdx !== null && configSistema.proyectos[itemCatalogoEditandoIdx]?.accUrl) 
+                  ? configSistema.proyectos[itemCatalogoEditandoIdx].accUrl 
+                  : `https://acc.autodesk.com/docs/projects/${codigoFinal.toLowerCase()}-g2g`
+        };
+
+        if (itemCatalogoEditandoIdx !== null) {
+          // Si cambió el código o nombre, actualizar referencias en los casos existentes
+          const codAnterior = configSistema.proyectos[itemCatalogoEditandoIdx]?.codigo;
+          if (codAnterior && codAnterior !== codigoFinal) {
+            casos.forEach(c => {
+              if (c.proyecto === codAnterior) c.proyecto = codigoFinal;
+            });
+            guardarEnStorage();
+          }
+          configSistema.proyectos[itemCatalogoEditandoIdx] = obj;
+        } else {
+          configSistema.proyectos.push(obj);
+        }
+      } else if (sec === 'instancias') {
+        const itemObj = valCod ? { abreviatura: valCod, nombre: valNom } : valNom;
+        if (itemCatalogoEditandoIdx !== null) {
+          const valorAnterior = typeof configSistema.instancias[itemCatalogoEditandoIdx] === 'object' 
+            ? (configSistema.instancias[itemCatalogoEditandoIdx].abreviatura || configSistema.instancias[itemCatalogoEditandoIdx].nombre)
+            : configSistema.instancias[itemCatalogoEditandoIdx];
+
+          const valorNuevo = valCod || valNom;
+          if (valorAnterior && valorAnterior !== valorNuevo) {
+            casos.forEach(c => {
+              if (c.instanciaActual === valorAnterior) c.instanciaActual = valorNuevo;
+              if (c.estado === `En ${valorAnterior}`) c.estado = `En ${valorNuevo}`;
+            });
+            guardarEnStorage();
+          }
+          configSistema.instancias[itemCatalogoEditandoIdx] = (valCod ? { abreviatura: valCod, nombre: valNom } : valNom);
+        } else {
+          configSistema.instancias.push(valCod ? { abreviatura: valCod, nombre: valNom } : valNom);
+        }
       } else {
-        if (!configSistema[sec].includes(val)) {
-          configSistema[sec].push(val);
+        if (itemCatalogoEditandoIdx !== null) {
+          configSistema[sec][itemCatalogoEditandoIdx] = valNom;
+        } else {
+          if (!configSistema[sec].includes(valNom)) {
+            configSistema[sec].push(valNom);
+          }
         }
       }
 
-      inp.value = '';
+      cancelarEdicionItemCatalogo();
       renderizarListaItemsCatalogo();
+      renderizarAccProyectosConfig();
     }
 
     function eliminarItemCatalogo(idx) {
@@ -2812,7 +2983,9 @@
       if (configSistema[sec] && configSistema[sec].length > 1) {
         if (confirm(`¿Está seguro de eliminar esta opción del catálogo?`)) {
           configSistema[sec].splice(idx, 1);
+          cancelarEdicionItemCatalogo();
           renderizarListaItemsCatalogo();
+          renderizarAccProyectosConfig();
         }
       } else {
         alert("El catálogo debe contener al menos una opción activa.");
