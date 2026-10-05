@@ -1,0 +1,300 @@
+{
+  "metadata": {
+    "version": "2.0.0",
+    "entidad": "PROVIAS NACIONAL - DIRECCION DE INFRAESTRUCTURA G2G",
+    "fecha_actualizacion": "2026-10-05T19:52:15.500Z",
+    "total_casos": 4
+  },
+  "configuracion": {
+    "proyectos": [
+      {
+        "codigo": "NCC",
+        "nombre": "Nueva Carretera Central (G2G)",
+        "accUrl": "https://acc.autodesk.com/docs/projects/ncc-g2g"
+      },
+      {
+        "codigo": "EV4",
+        "nombre": "Eje Vial 4 (G2G)",
+        "accUrl": "https://acc.autodesk.com/docs/projects/ev4-g2g"
+      },
+      {
+        "codigo": "VESR",
+        "nombre": "Vía Expresa Santa Rosa (G2G)",
+        "accUrl": "https://acc.autodesk.com/docs/projects/vesr-g2g"
+      },
+      {
+        "codigo": "PSR",
+        "nombre": "Puentes Sierra Central",
+        "accUrl": "https://acc.autodesk.com/docs/projects/psr-g2g"
+      }
+    ],
+    "instancias": [
+      "PMO",
+      "Dirección de Estudios",
+      "OAJ",
+      "OPP",
+      "Procuraduría del MTC",
+      "MTC / Alta Dirección"
+    ],
+    "tiposAtencion": [
+      "Trato directo",
+      "Evento de Compensación (CE)",
+      "DAB",
+      "Arbitraje",
+      "Controversia contractual",
+      "Consulta legal"
+    ],
+    "regimenes": [
+      "NEC4 ECC Opción C (Target)",
+      "NEC3/4 ECC Opción A",
+      "FIDIC Libro Rojo",
+      "FIDIC Libro Amarillo",
+      "Ley N° 32069 / TUO 30225"
+    ],
+    "fases": [
+      "Diseño/Estudios",
+      "Ejecución",
+      "Contratación",
+      "Cierre"
+    ],
+    "estados": [
+      "En curso",
+      "En OAJ",
+      "En OPP",
+      "En Procuraduría",
+      "En PMO",
+      "Cerrado"
+    ],
+    "plazos": [
+      {
+        "nombre": "Preclusivo / Caducidad (Fatal)",
+        "esFatal": true,
+        "descripcion": "Caducidad de derecho (NEC Cl. 61.3 / FIDIC Cl. 20.1/21.4)"
+      },
+      {
+        "nombre": "Contractual Ordinario",
+        "esFatal": false,
+        "descripcion": "Procedimiento contractual general"
+      },
+      {
+        "nombre": "Acuerdo de Acta",
+        "esFatal": false,
+        "descripcion": "Compromiso de mesa de trato directo"
+      },
+      {
+        "nombre": "Interno / Administrativo",
+        "esFatal": false,
+        "descripcion": "Trámite de gestión interna"
+      }
+    ],
+    "mensajeFatal": "⏱️ PLAZO FATAL / CADUCIDAD PRECLUSIVA",
+    "diasAlertaCritica": 3,
+    "diasAlertaProxima": 7,
+    "pesos": {
+      "plazo": 0.3,
+      "rutaCritica": 0.3,
+      "costo": 0.25,
+      "escalamiento": 0.15
+    },
+    "umbrales": {
+      "p1": 4,
+      "p2": 3,
+      "p3": 2
+    }
+  },
+  "casos": [
+    {
+      "id": "NCC-TD-01",
+      "proyecto": "NCC",
+      "fase": "Diseño/Estudios",
+      "tipoAtencion": "Trato directo",
+      "regimen": "NEC4 ECC Opción C (Target)",
+      "generador": "Contratista",
+      "asunto": "Trato Directo 1: Interpretación de obligación contractual sobre geología y trazado de túneles",
+      "docInicio": "Acta de Reunión N.° 01",
+      "fechaInicio": "2026-09-18",
+      "instanciaActual": "OAJ",
+      "responsable": "Dr. Carlos Vega (Especialista Legal)",
+      "estado": "En OAJ",
+      "tipoPlazo": "Acuerdo de Acta",
+      "fechaDerivacion": "2026-09-23",
+      "fechaLimite": "2026-09-29",
+      "accionPendiente": "Emitir opinión legal vinculante para definir posición institucional",
+      "rutaCritica": "Sí",
+      "wbs": "WBS-NCC-03.01",
+      "hito": "Aprobación Entregable Técnico Geotécnico",
+      "holgura": 0,
+      "afectacionDias": 7,
+      "mitigacion": "Escalar opinión legal urgente y mantener validación técnica paralela con PMO",
+      "moneda": "PEN",
+      "montoReclamado": 2500000,
+      "incluyeIgv": "Sí",
+      "escenarioBajo": 500000,
+      "escenarioProbable": 1200000,
+      "escenarioAlto": 2500000,
+      "cobertura": 900000,
+      "brecha": 300000,
+      "fuente": "RO",
+      "enlaceAcc": "https://acc.autodesk.com/docs/projects/ncc-g2g",
+      "historial": [
+        {
+          "fecha": "2026-09-18",
+          "origen": "Contratista",
+          "destino": "PMO",
+          "doc": "Carta N° 045-2026",
+          "obs": "Ingreso de solicitud de trato directo"
+        },
+        {
+          "fecha": "2026-09-23",
+          "origen": "Dirección de Estudios",
+          "destino": "OAJ",
+          "doc": "Memorando N° 112-2026",
+          "obs": "Solicitud de opinión legal"
+        }
+      ]
+    },
+    {
+      "id": "NCC-TD-02",
+      "proyecto": "NCC",
+      "fase": "Diseño/Estudios",
+      "tipoAtencion": "Trato directo",
+      "regimen": "NEC4 ECC Opción C (Target)",
+      "generador": "Supervisor",
+      "asunto": "Trato Directo 2: Reconocimiento de costos por mayor permanencia e impacto presupuestal",
+      "docInicio": "Acta de Reunión N.° 02",
+      "fechaInicio": "2026-09-23",
+      "instanciaActual": "OPP",
+      "responsable": "Lic. Maritza Gómez (Presupuesto)",
+      "estado": "En OPP",
+      "tipoPlazo": "Acuerdo de Acta",
+      "fechaDerivacion": "2026-09-25",
+      "fechaLimite": "2026-10-08",
+      "accionPendiente": "Evaluar incidencia presupuestal y disponibilidad de recursos",
+      "rutaCritica": "Sí",
+      "wbs": "WBS-NCC-02.04",
+      "hito": "Continuidad del servicio de supervisión",
+      "holgura": 2,
+      "afectacionDias": 5,
+      "mitigacion": "Definir escenario preventivo de reprogramación de partidas",
+      "moneda": "PEN",
+      "montoReclamado": 4800000,
+      "incluyeIgv": "Sí",
+      "escenarioBajo": 900000,
+      "escenarioProbable": 2000000,
+      "escenarioAlto": 3800000,
+      "cobertura": 1300000,
+      "brecha": 700000,
+      "fuente": "ROOC",
+      "enlaceAcc": "https://acc.autodesk.com/docs/projects/ncc-g2g",
+      "historial": [
+        {
+          "fecha": "2026-09-23",
+          "origen": "Supervisor",
+          "destino": "Dirección de Estudios",
+          "doc": "Acta N° 02",
+          "obs": "Acuerdos registrados"
+        },
+        {
+          "fecha": "2026-09-25",
+          "origen": "Dirección de Estudios",
+          "destino": "OPP",
+          "doc": "Memorando N° 120-2026",
+          "obs": "Pase para certificación presupuestal"
+        }
+      ]
+    },
+    {
+      "id": "EV4-DAB-01",
+      "proyecto": "EV4",
+      "fase": "Ejecución",
+      "tipoAtencion": "DAB",
+      "regimen": "FIDIC Libro Rojo",
+      "generador": "Contratista",
+      "asunto": "Sometimiento a DAAB por liberación tardía de interferencias de redes de alta tensión",
+      "docInicio": "Reference Memorial N° 01",
+      "fechaInicio": "2026-08-10",
+      "instanciaActual": "Procuraduría del MTC",
+      "responsable": "Dr. Jorge Mendoza (Procurador Adjunto)",
+      "estado": "En Procuraduría",
+      "tipoPlazo": "Preclusivo / Caducidad (Fatal)",
+      "fechaDerivacion": "2026-09-15",
+      "fechaLimite": "2026-10-14",
+      "accionPendiente": "Formular contestación y preparar audiencia técnica ante el Board",
+      "rutaCritica": "Sí",
+      "wbs": "WBS-EV4-05.01",
+      "hito": "Habilitación de Tramo 2 y Puente Principal",
+      "holgura": 0,
+      "afectacionDias": 25,
+      "mitigacion": "Coordinación estrecha con PMO para peritaje de demoras concurrentes",
+      "moneda": "USD",
+      "montoReclamado": 3200000,
+      "incluyeIgv": "Sí",
+      "escenarioBajo": 600000,
+      "escenarioProbable": 1500000,
+      "escenarioAlto": 3000000,
+      "cobertura": 800000,
+      "brecha": 700000,
+      "fuente": "ROOC",
+      "enlaceAcc": "https://acc.autodesk.com/docs/projects/ev4-g2g",
+      "historial": [
+        {
+          "fecha": "2026-08-10",
+          "origen": "Contratista",
+          "destino": "DAB / Entidad",
+          "doc": "Reference N° 01",
+          "obs": "Inicio formal de controversia ante DAB"
+        },
+        {
+          "fecha": "2026-09-15",
+          "origen": "Dirección de Obras",
+          "destino": "Procuraduría",
+          "doc": "Oficio N° 580-2026",
+          "obs": "Traslado de antecedentes para defensa"
+        }
+      ]
+    },
+    {
+      "id": "VESR-CE-03",
+      "proyecto": "VESR",
+      "fase": "Ejecución",
+      "tipoAtencion": "Evento de Compensación (CE)",
+      "regimen": "NEC4 ECC Opción C (Target)",
+      "generador": "PMO",
+      "asunto": "Instrucción de cambio por adecuación ambiental y rediseño de accesos viarios",
+      "docInicio": "Instrucción PMO N° 018",
+      "fechaInicio": "2026-09-01",
+      "instanciaActual": "PMO",
+      "responsable": "Ing. Pierre Dumont (PMO Vías)",
+      "estado": "En PMO",
+      "tipoPlazo": "Contractual Ordinario",
+      "fechaDerivacion": "2026-09-20",
+      "fechaLimite": "2026-10-25",
+      "accionPendiente": "Auditar cotización de Costo Definido y validar impacto en Accepted Programme",
+      "rutaCritica": "No",
+      "wbs": "WBS-VESR-08.02",
+      "hito": "Pavimentación y Señalización de Ramal A",
+      "holgura": 14,
+      "afectacionDias": 0,
+      "mitigacion": "Optimizar subcontratación local",
+      "moneda": "PEN",
+      "montoReclamado": 1200000,
+      "incluyeIgv": "Sí",
+      "escenarioBajo": 400000,
+      "escenarioProbable": 750000,
+      "escenarioAlto": 1100000,
+      "cobertura": 800000,
+      "brecha": 0,
+      "fuente": "RO",
+      "enlaceAcc": "https://acc.autodesk.com/docs/projects/vesr-g2g",
+      "historial": [
+        {
+          "fecha": "2026-09-01",
+          "origen": "PMO",
+          "destino": "Contratista",
+          "doc": "Instrucción N° 018",
+          "obs": "Notificación de CE"
+        }
+      ]
+    }
+  ]
+}
