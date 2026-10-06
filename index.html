@@ -101,7 +101,7 @@
           </button>
 
           <!-- Botón Panel de Configuración del Sistema / Catálogos -->
-          <button onclick="abrirModalConfiguracion()" title="Configuración de Catálogos, Parámetros, Direcciones y Plazos Fatales" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 hover:border-amber-400/40 transition">
+          <button id="btnAbrirModalConfiguracion" onclick="abrirModalConfiguracion()" title="Configuración de Catálogos, Parámetros, Direcciones y Plazos Fatales" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 hover:border-amber-400/40 transition">
             <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-400"></i>
             <span class="hidden sm:inline">Configuración</span>
           </button>
@@ -352,6 +352,12 @@
         </div>
         
         <div class="flex items-center space-x-2 shrink-0">
+          <!-- BOTÓN CONFIGURACIÓN EN BARRA PRINCIPAL (ACCESO DIRECTO) -->
+          <button onclick="abrirModalConfiguracion()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 shadow-sm transition" title="Configurar Catálogos, Órganos de Conducción, Plazos y Ponderaciones">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-amber-600"></i>
+            <span>Configuración</span>
+          </button>
+
           <!-- BOTÓN PROMINENTE Y DESTACADO: REGISTRAR NUEVO CASO -->
           <button onclick="abrirModalCaso()" class="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-md shadow-brand-500/30 hover:shadow-lg transition transform active:scale-95 border border-white/20">
             <i data-lucide="plus-circle" class="w-4 h-4 text-white"></i>
@@ -1403,6 +1409,14 @@
         cambiarModoVista('tabla');
       }
       lucide.createIcons();
+
+      const btnCfg = document.getElementById('btnAbrirModalConfiguracion');
+      if (btnCfg) {
+        btnCfg.onclick = (e) => {
+          e.preventDefault();
+          abrirModalConfiguracion();
+        };
+      }
     });
 
     function formatearFechaHoy() {
@@ -1414,14 +1428,33 @@
       const guardada = localStorage.getItem("controversias_g2g_config");
       if (guardada) {
         try {
-          configSistema = JSON.parse(guardada);
+          const parsed = JSON.parse(guardada);
+          configSistema = Object.assign({}, JSON.parse(JSON.stringify(CONFIG_DEFAULT)), parsed);
+          if (!configSistema.direcciones || configSistema.direcciones.length === 0) {
+            configSistema.direcciones = JSON.parse(JSON.stringify(CONFIG_DEFAULT.direcciones));
+          }
+          if (!configSistema.plazos || typeof configSistema.plazos[0] === 'string') {
+            configSistema.plazos = JSON.parse(JSON.stringify(CONFIG_DEFAULT.plazos));
+          }
+          if (!configSistema.proyectos || typeof configSistema.proyectos[0] === 'string') {
+            configSistema.proyectos = JSON.parse(JSON.stringify(CONFIG_DEFAULT.proyectos));
+          }
+          if (!configSistema.instancias || typeof configSistema.instancias[0] === 'string') {
+            configSistema.instancias = JSON.parse(JSON.stringify(CONFIG_DEFAULT.instancias));
+          }
+          if (!configSistema.pesos) {
+            configSistema.pesos = JSON.parse(JSON.stringify(CONFIG_DEFAULT.pesos));
+          }
+          if (!configSistema.umbrales) {
+            configSistema.umbrales = JSON.parse(JSON.stringify(CONFIG_DEFAULT.umbrales));
+          }
         } catch (e) {
           configSistema = JSON.parse(JSON.stringify(CONFIG_DEFAULT));
         }
       } else {
         configSistema = JSON.parse(JSON.stringify(CONFIG_DEFAULT));
-        localStorage.setItem("controversias_g2g_config", JSON.stringify(configSistema));
       }
+      localStorage.setItem("controversias_g2g_config", JSON.stringify(configSistema));
     }
 
     function poblarSelectsDesdeConfiguracion() {
@@ -1434,14 +1467,16 @@
         selFiltroP.innerHTML = '<option value="">Proyecto: Todos</option>';
         inpP.innerHTML = '';
         (configSistema.proyectos || []).forEach(p => {
+          const codP = typeof p === 'object' ? (p.codigo || '') : p;
+          const nomP = typeof p === 'object' ? (p.nombre || codP) : codP;
           const opt1 = document.createElement('option');
-          opt1.value = p.codigo;
-          opt1.textContent = `${p.codigo} (${p.nombre})`;
+          opt1.value = codP;
+          opt1.textContent = `${codP} (${nomP})`;
           selFiltroP.appendChild(opt1);
 
           const opt2 = document.createElement('option');
-          opt2.value = p.codigo;
-          opt2.textContent = `${p.codigo} - ${p.nombre}`;
+          opt2.value = codP;
+          opt2.textContent = `${codP} - ${nomP}`;
           inpP.appendChild(opt2);
         });
         if (valFiltro) selFiltroP.value = valFiltro;
@@ -1548,8 +1583,10 @@
         inpPlazo.innerHTML = '';
         (configSistema.plazos || []).forEach(p => {
           const opt = document.createElement('option');
-          opt.value = p.nombre;
-          opt.textContent = (p.esFatal ? '⏱️ ' : '') + p.nombre;
+          const nom = typeof p === 'object' ? (p.nombre || '') : p;
+          const esFatal = typeof p === 'object' ? !!p.esFatal : (p && p.includes('Fatal'));
+          opt.value = nom;
+          opt.textContent = (esFatal ? '⏱️ ' : '') + nom;
           inpPlazo.appendChild(opt);
         });
         if (valPlazo) inpPlazo.value = valPlazo;
@@ -3257,6 +3294,9 @@
       }
     }
 
+    window.abrirModalConfiguracion = abrirModalConfiguracion;
+    window.cerrarModalConfiguracion = cerrarModalConfiguracion;
+
     function cambiarTabConfig(tab) {
       tabConfigActual = tab;
       for (let i = 1; i <= 4; i++) {
@@ -3525,20 +3565,23 @@
       tbody.innerHTML = '';
 
       (configSistema.plazos || []).forEach((p, idx) => {
+        const nom = typeof p === 'object' ? (p.nombre || '') : p;
+        const desc = typeof p === 'object' ? (p.descripcion || '') : '';
+        const esFatal = typeof p === 'object' ? !!p.esFatal : (p && p.includes('Fatal'));
         const tr = document.createElement('tr');
-        tr.className = p.esFatal ? 'bg-rose-50/40' : '';
+        tr.className = esFatal ? 'bg-rose-50/40' : '';
         tr.innerHTML = `
           <td class="py-2.5 px-3">
-            <span class="font-bold text-slate-800 block">${p.nombre}</span>
-            <span class="text-[10px] text-slate-500">${p.descripcion || ''}</span>
+            <span class="font-bold text-slate-800 block">${nom}</span>
+            <span class="text-[10px] text-slate-500">${desc}</span>
           </td>
           <td class="py-2.5 px-3 text-center">
-            <button onclick="togglePlazoFatal(${idx})" class="px-2.5 py-1 rounded-full text-[11px] font-bold border transition ${p.esFatal ? 'bg-rose-600 text-white border-rose-700 shadow-sm' : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200'}">
-              ${p.esFatal ? '⏱️ SÍ (Fatal)' : 'No (Ordinario)'}
+            <button onclick="togglePlazoFatal(${idx})" class="px-2.5 py-1 rounded-full text-[11px] font-bold border transition ${esFatal ? 'bg-rose-600 text-white border-rose-700 shadow-sm' : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200'}">
+              ${esFatal ? '⏱️ SÍ (Fatal)' : 'No (Ordinario)'}
             </button>
           </td>
           <td class="py-2.5 px-3 text-[11px] text-slate-600">
-            ${p.esFatal ? '<span class="text-rose-700 font-bold">Activa bandera P1 Crítica, alerta en rojo y aviso fatal al vencer en ≤ 7 días</span>' : 'Sigue la regla estándar de holguras y días disponibles'}
+            ${esFatal ? '<span class="text-rose-700 font-bold">Activa bandera P1 Crítica, alerta en rojo y aviso fatal al vencer en ≤ 7 días</span>' : 'Sigue la regla estándar de holguras y días disponibles'}
           </td>
         `;
         tbody.appendChild(tr);
@@ -3577,14 +3620,17 @@
       cont.innerHTML = '';
 
       (configSistema.proyectos || []).forEach((proy, idx) => {
+        const codProy = typeof proy === 'object' ? (proy.codigo || '') : proy;
+        const nomProy = typeof proy === 'object' ? (proy.nombre || codProy) : proy;
+        const urlProy = typeof proy === 'object' ? (proy.accUrl || '') : '';
         const div = document.createElement('div');
         div.className = "p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5";
         div.innerHTML = `
           <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-800 text-xs">${proy.nombre} (${proy.codigo})</span>
+            <span class="font-bold text-slate-800 text-xs">${nomProy} (${codProy})</span>
             <span class="text-[10px] text-slate-400 font-mono">Proyecto G2G</span>
           </div>
-          <input type="url" value="${proy.accUrl || ''}" onchange="actualizarUrlAccProyecto(${idx}, this.value)" placeholder="https://acc.autodesk.com/docs/..." class="w-full p-2 border border-slate-300 rounded-lg text-brand-600 font-mono text-[11px]">
+          <input type="url" value="${urlProy}" onchange="actualizarUrlAccProyecto(${idx}, this.value)" placeholder="https://acc.autodesk.com/docs/..." class="w-full p-2 border border-slate-300 rounded-lg text-brand-600 font-mono text-[11px]">
         `;
         cont.appendChild(div);
       });
