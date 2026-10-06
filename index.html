@@ -103,7 +103,7 @@
           <!-- Botón Panel de Configuración del Sistema / Catálogos -->
           <button onclick="abrirModalConfiguracion()" title="Configuración de Catálogos, Parámetros, Direcciones y Plazos Fatales" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 hover:border-amber-400/40 transition">
             <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span class="hidden xl:inline">Configuración</span>
+            <span class="hidden sm:inline">Configuración</span>
           </button>
 
           <!-- Botón Exportar Excel (50 Columnas Oficiales) -->
@@ -3203,32 +3203,58 @@
 
     // GESTIÓN DEL PANEL DE CONFIGURACIÓN DEL SISTEMA Y CATÁLOGOS
     function abrirModalConfiguracion() {
-      cambiarTabConfig(1);
-      cambiarSeccionCatalogo();
-      document.getElementById('cfgMensajeFatal').value = configSistema.mensajeFatal || "⏱️ PLAZO FATAL / CADUCIDAD PRECLUSIVA";
-      document.getElementById('cfgDiasCritica').value = configSistema.diasAlertaCritica || 3;
-      document.getElementById('cfgDiasProxima').value = configSistema.diasAlertaProxima || 7;
-      
-      const p = configSistema.pesos || { plazo: 0.30, rutaCritica: 0.30, costo: 0.25, escalamiento: 0.15 };
-      document.getElementById('cfgPesoPlazo').value = p.plazo;
-      document.getElementById('cfgPesoRC').value = p.rutaCritica;
-      document.getElementById('cfgPesoCosto').value = p.costo;
-      document.getElementById('cfgPesoEscalamiento').value = p.escalamiento;
-      validarSumaPesos();
+      try {
+        cambiarTabConfig(1);
+        cambiarSeccionCatalogo();
+        
+        const mFatal = document.getElementById('cfgMensajeFatal');
+        if (mFatal) mFatal.value = configSistema.mensajeFatal || "⏱️ PLAZO FATAL / CADUCIDAD PRECLUSIVA";
+        
+        const dCrit = document.getElementById('cfgDiasCritica');
+        if (dCrit) dCrit.value = configSistema.diasAlertaCritica || 3;
+        
+        const dProx = document.getElementById('cfgDiasProxima');
+        if (dProx) dProx.value = configSistema.diasAlertaProxima || 7;
+        
+        const p = configSistema.pesos || { plazo: 0.30, rutaCritica: 0.30, costo: 0.25, escalamiento: 0.15 };
+        const pPlazo = document.getElementById('cfgPesoPlazo');
+        const pRC = document.getElementById('cfgPesoRC');
+        const pCosto = document.getElementById('cfgPesoCosto');
+        const pEsc = document.getElementById('cfgPesoEscalamiento');
+        if (pPlazo) pPlazo.value = p.plazo;
+        if (pRC) pRC.value = p.rutaCritica;
+        if (pCosto) pCosto.value = p.costo;
+        if (pEsc) pEsc.value = p.escalamiento;
+        validarSumaPesos();
 
-      const u = configSistema.umbrales || { p1: 4.0, p2: 3.0, p3: 2.0 };
-      document.getElementById('cfgUmbralP1').value = u.p1;
-      document.getElementById('cfgUmbralP2').value = u.p2;
-      document.getElementById('cfgUmbralP3').value = u.p3;
+        const u = configSistema.umbrales || { p1: 4.0, p2: 3.0, p3: 2.0 };
+        const u1 = document.getElementById('cfgUmbralP1');
+        const u2 = document.getElementById('cfgUmbralP2');
+        const u3 = document.getElementById('cfgUmbralP3');
+        if (u1) u1.value = u.p1;
+        if (u2) u2.value = u.p2;
+        if (u3) u3.value = u.p3;
 
-      renderizarPlazosConfig();
-      renderizarAccProyectosConfig();
-      document.getElementById('modalConfiguracion').classList.remove('hidden');
+        renderizarPlazosConfig();
+        renderizarAccProyectosConfig();
+      } catch (err) {
+        console.warn("Advertencia al inicializar campos de configuración:", err);
+      }
+
+      const modal = document.getElementById('modalConfiguracion');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+      }
       lucide.createIcons();
     }
 
     function cerrarModalConfiguracion() {
-      document.getElementById('modalConfiguracion').classList.add('hidden');
+      const modal = document.getElementById('modalConfiguracion');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
     }
 
     function cambiarTabConfig(tab) {
