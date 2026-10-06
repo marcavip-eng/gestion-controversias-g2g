@@ -71,23 +71,45 @@
         <!-- Clúster de Acciones Rápidas -->
         <div class="flex items-center space-x-2">
           
+          <!-- Selector / Indicador de Dirección Institucional -->
+          <div class="hidden xl:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-slate-800 text-slate-300 border border-slate-700">
+            <i data-lucide="building-2" class="w-3.5 h-3.5 text-brand-400"></i>
+            <span class="font-medium text-slate-400">Órgano:</span>
+            <select id="selDireccionActiva" onchange="cambiarDireccionActiva(this.value)" class="bg-transparent font-bold text-white border-none focus:ring-0 text-xs cursor-pointer">
+              <!-- Renderizado dinámico desde configuración -->
+            </select>
+          </div>
+
+          <!-- Botón Guardar en Disco / Carpeta Nativa (File System Access API) -->
+          <button onclick="guardarEnCarpetaNativa()" title="Guardar cambios en archivo JSON en tu carpeta local, H:\ o OneDrive (Explorador Nativo)" class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-sm transition">
+            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Guardar JSON</span>
+          </button>
+
+          <!-- Botón Cargar Archivo JSON desde Carpeta -->
+          <button onclick="cargarDesdeCarpetaNativa()" title="Abrir archivo JSON de controversias desde el Explorador de Archivos" class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+            <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
+            <span class="hidden md:inline">Abrir JSON</span>
+          </button>
+          <input type="file" id="inpFileJsonHidden" accept=".json" class="hidden" onchange="procesarArchivoJsonSubido(event)">
+
           <!-- Estado de Sincronización en Nube -->
-          <button id="btnSyncCloud" onclick="abrirConfigNube()" title="Configuración de Nube / Google Sheets" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          <button id="btnSyncCloud" onclick="abrirConfigNube()" title="Configuración de Sincronización Nube / Webhook" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="hidden md:inline" id="cloudStatusText">Nube / Sheets Activo</span>
+            <span class="hidden lg:inline" id="cloudStatusText">Nube / Sincronizado</span>
             <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
           </button>
 
           <!-- Botón Panel de Configuración del Sistema / Catálogos -->
-          <button onclick="abrirModalConfiguracion()" title="Configuración de Catálogos, Parámetros, Ponderaciones y Plazos Fatales" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 hover:border-amber-400/40 transition">
+          <button onclick="abrirModalConfiguracion()" title="Configuración de Catálogos, Parámetros, Direcciones y Plazos Fatales" class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 hover:border-amber-400/40 transition">
             <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span class="hidden lg:inline">Catálogos & Configuración</span>
+            <span class="hidden xl:inline">Configuración</span>
           </button>
 
           <!-- Botón Exportar Excel (50 Columnas Oficiales) -->
           <button onclick="exportarExcel()" title="Descargar Matriz Excel Oficial (50 Columnas Completas)" class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-700/50 transition">
             <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
-            <span class="hidden sm:inline">Exportar Excel (50 Col)</span>
+            <span class="hidden sm:inline">Excel 50 Col</span>
           </button>
 
           <!-- Botón + Nuevo Caso (Abogado) -->
@@ -106,15 +128,21 @@
 
     <!-- TABLERO EJECUTIVO (KPIs DE IMPACTO PARA DIRECCIÓN) -->
     <section>
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
         <div>
           <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-600"></i>
             Tablero Ejecutivo en Tiempo Real
           </h2>
-          <p class="text-xs text-slate-400">Indicadores consolidados para la toma de decisiones inmediata</p>
+          <p class="text-xs text-slate-400">Indicadores consolidados y trazabilidad de control legal para la Dirección</p>
         </div>
-        <span class="text-xs text-slate-400 font-mono" id="lblFechaCorte">Corte: Hoy</span>
+        <div class="flex items-center gap-2">
+          <div id="badgeValidacionGeneral" class="px-2.5 py-1 rounded-lg text-xs font-bold border flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span id="lblTextoValidacionGral">Data Validada Legalmente</span>
+          </div>
+          <span class="text-xs text-slate-500 font-mono bg-white px-2 py-1 rounded-lg border border-slate-200" id="lblFechaCorte">Corte: Hoy</span>
+        </div>
       </div>
 
       <!-- Tarjetas KPI -->
@@ -510,9 +538,19 @@
               </select>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Responsable Nominal Asignado</label>
-              <input type="text" id="inpResponsable" placeholder="Ej. Dr. Carlos Vega (Especialista Legal)" class="w-full p-2 border border-slate-300 rounded-lg">
+              <label class="block font-bold text-slate-700 mb-1">Órgano de Conducción <span class="text-rose-500">*</span></label>
+              <select id="inpResponsableConduccion" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 font-semibold">
+                <!-- Poblado dinámicamente desde configSistema.direcciones -->
+              </select>
             </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Especialista / Abogado Asignado</label>
+              <input type="text" id="inpResponsable" placeholder="Ej. Abog. Carlos Vega (Especialista Legal)" class="w-full p-2 border border-slate-300 rounded-lg">
+              <span class="text-[10px] text-slate-400">Personal operativo a cargo del caso</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-700 mb-1">Estado Operativo</label>
               <select id="inpEstado" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
@@ -524,7 +562,6 @@
                 <option value="Cerrado">Cerrado / Implementado</option>
               </select>
             </div>
-          </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
@@ -741,6 +778,55 @@
     </div>
   </div>
 
+  <!-- MODAL: CERTIFICACIÓN / VALIDACIÓN LEGAL SIN CAMBIOS -->
+  <div id="modalValidarLegal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden text-xs">
+      <div class="bg-slate-900 px-5 py-3 text-white flex items-center justify-between border-b border-slate-800">
+        <h3 class="font-bold flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+          Validación Legal Periódica (Sin Cambios)
+        </h3>
+        <button onclick="cerrarModalValidarLegal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="formValidarLegal" onsubmit="ejecutarValidacionLegal(event)" class="p-5 space-y-3.5">
+        <input type="hidden" id="validarCasoId">
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 space-y-1">
+          <div class="font-bold flex items-center gap-1.5 text-emerald-800">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+            Certificación de Revisión Legal del Expediente
+          </div>
+          <p class="text-[11px] text-emerald-700" id="lblValidarCasoInfo">
+            Caso: -
+          </p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Abogado / Especialista Validador <span class="text-rose-500">*</span></label>
+          <input type="text" id="inpValidadorNombre" required placeholder="Ej. Abog. Marco Avila / Asesor Legal OAJ" class="w-full p-2 border border-slate-300 rounded-lg font-semibold">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Órgano / Dirección de Validación</label>
+          <select id="selValidadorDireccion" class="w-full p-2 border border-slate-300 rounded-lg font-bold text-slate-800 bg-slate-50">
+            <!-- Poblado dinámicamente -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Declaración de Conformidad Procesal</label>
+          <textarea id="inpValidadorNota" rows="2" class="w-full p-2 border border-slate-300 rounded-lg text-slate-700 text-xs bg-slate-50" readonly>Se revisó el estado del caso a la fecha. Se valida que la información procesal, fechas y plazos se mantienen vigentes sin merituar modificaciones fácticas.</textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end space-x-2">
+          <button type="button" onclick="cerrarModalValidarLegal()" class="px-3 py-1.5 border border-slate-300 rounded-lg text-slate-700">Cancelar</button>
+          <button type="submit" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold shadow-sm flex items-center gap-1.5">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i> Certificar Validación
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: FICHA EJECUTIVA DE 1 PÁGINA (COMPARTIR CON DIRECTOR) -->
   <div id="modalFicha" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3 overflow-y-auto">
     <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col text-xs">
@@ -850,10 +936,11 @@
               <p class="text-slate-500 text-[11px]">Seleccione la categoría para agregar, modificar o dar de baja opciones del Wizard y filtros</p>
             </div>
             <select id="selCatSeccion" onchange="cambiarSeccionCatalogo()" class="p-2 border border-slate-300 rounded-lg font-bold text-slate-700 bg-slate-50">
-              <option value="proyectos">Proyectos G2G</option>
+              <option value="direcciones">Direcciones y Órganos de Conducción</option>
+              <option value="proyectos">Megaproyectos / Contratos</option>
               <option value="instancias">Instancias Administrativas</option>
               <option value="tiposAtencion">Tipos de Atención / Reclamo</option>
-              <option value="regimenes">Regímenes Contractuales</option>
+              <option value="regimenes">Regímenes Contractuales (LCE / FIDIC / NEC)</option>
               <option value="fases">Fases del Ciclo</option>
               <option value="estados">Estados Operativos</option>
             </select>
@@ -1047,6 +1134,7 @@
         asunto: "Trato Directo 1: Interpretación de obligación contractual sobre geología y trazado de túneles",
         docInicio: "Acta de Reunión N.° 01",
         fechaInicio: "2026-09-18",
+        responsableConduccion: "Dirección de Estudios (Consultorías de Diseño)",
         instanciaActual: "OAJ",
         responsable: "Dr. Carlos Vega (Especialista Legal)",
         estado: "En OAJ",
@@ -1070,9 +1158,12 @@
         brecha: 300000,
         fuente: "RO",
         enlaceAcc: "https://acc.autodesk.com/docs/projects/ncc-g2g",
+        ultimaValidacionLegal: "2026-10-04",
+        validadorLegal: "Dr. Carlos Vega",
         historial: [
           { fecha: "2026-09-18", origen: "Contratista", destino: "PMO", doc: "Carta N° 045-2026", obs: "Ingreso de solicitud de trato directo" },
-          { fecha: "2026-09-23", origen: "Dirección de Estudios", destino: "OAJ", doc: "Memorando N° 112-2026", obs: "Solicitud de opinión legal" }
+          { fecha: "2026-09-23", origen: "Dirección de Estudios", destino: "OAJ", doc: "Memorando N° 112-2026", obs: "Solicitud de opinión legal" },
+          { fecha: "2026-10-04", origen: "OAJ", destino: "OAJ", doc: "Certificación Legal Periódica", obs: "Validación procesal conforme efectuada por Dr. Carlos Vega sin merituar cambios." }
         ]
       },
       {
@@ -1085,6 +1176,7 @@
         asunto: "Trato Directo 2: Reconocimiento de costos por mayor permanencia e impacto presupuestal",
         docInicio: "Acta de Reunión N.° 02",
         fechaInicio: "2026-09-23",
+        responsableConduccion: "Dirección de Estudios (Consultorías de Diseño)",
         instanciaActual: "OPP",
         responsable: "Lic. Maritza Gómez (Presupuesto)",
         estado: "En OPP",
@@ -1108,21 +1200,25 @@
         brecha: 700000,
         fuente: "ROOC",
         enlaceAcc: "https://acc.autodesk.com/docs/projects/ncc-g2g",
+        ultimaValidacionLegal: "2026-10-02",
+        validadorLegal: "Dr. Carlos Vega",
         historial: [
           { fecha: "2026-09-23", origen: "Supervisor", destino: "Dirección de Estudios", doc: "Acta N° 02", obs: "Acuerdos registrados" },
-          { fecha: "2026-09-25", origen: "Dirección de Estudios", destino: "OPP", doc: "Memorando N° 120-2026", obs: "Pase para certificación presupuestal" }
+          { fecha: "2026-09-25", origen: "Dirección de Estudios", destino: "OPP", doc: "Memorando N° 120-2026", obs: "Pase para certificación presupuestal" },
+          { fecha: "2026-10-02", origen: "Dirección de Estudios", destino: "OPP", doc: "Certificación Legal Periódica", obs: "Validación procesal conforme efectuada por Dr. Carlos Vega sin merituar cambios." }
         ]
       },
       {
         id: "EV4-DAB-01",
         proyecto: "EV4",
         fase: "Ejecución",
-        tipoAtencion: "DAB",
-        regimen: "FIDIC Libro Rojo",
+        tipoAtencion: "DAB / DAAB (Junta de Disputas)",
+        regimen: "FIDIC Libro Rojo (Construcción Diseñada por Empleador)",
         generador: "Contratista",
         asunto: "Sometimiento a DAAB por liberación tardía de interferencias de redes de alta tensión",
         docInicio: "Reference Memorial N° 01",
         fechaInicio: "2026-08-10",
+        responsableConduccion: "Dirección de Obras (Ejecución y Supervisión)",
         instanciaActual: "Procuraduría del MTC",
         responsable: "Dr. Jorge Mendoza (Procurador Adjunto)",
         estado: "En Procuraduría",
@@ -1146,9 +1242,12 @@
         brecha: 700000,
         fuente: "ROOC",
         enlaceAcc: "https://acc.autodesk.com/docs/projects/ev4-g2g",
+        ultimaValidacionLegal: "2026-10-05",
+        validadorLegal: "Dr. Jorge Mendoza",
         historial: [
           { fecha: "2026-08-10", origen: "Contratista", destino: "DAB / Entidad", doc: "Reference N° 01", obs: "Inicio formal de controversia ante DAB" },
-          { fecha: "2026-09-15", origen: "Dirección de Obras", destino: "Procuraduría", doc: "Oficio N° 580-2026", obs: "Traslado de antecedentes para defensa" }
+          { fecha: "2026-09-15", origen: "Dirección de Obras", destino: "Procuraduría", doc: "Oficio N° 580-2026", obs: "Traslado de antecedentes para defensa" },
+          { fecha: "2026-10-05", origen: "Procuraduría del MTC", destino: "Procuraduría del MTC", doc: "Certificación Legal Periódica", obs: "Validación procesal conforme efectuada por Dr. Jorge Mendoza sin merituar cambios." }
         ]
       },
       {
@@ -1161,6 +1260,7 @@
         asunto: "Instrucción de cambio por adecuación ambiental y rediseño de accesos viarios",
         docInicio: "Instrucción PMO N° 018",
         fechaInicio: "2026-09-01",
+        responsableConduccion: "Dirección de Infraestructura G2G (PMO)",
         instanciaActual: "PMO",
         responsable: "Ing. Pierre Dumont (PMO Vías)",
         estado: "En PMO",
@@ -1184,14 +1284,26 @@
         brecha: 0,
         fuente: "RO",
         enlaceAcc: "https://acc.autodesk.com/docs/projects/vesr-g2g",
+        ultimaValidacionLegal: "2026-10-05",
+        validadorLegal: "Dra. Patricia Alva",
         historial: [
-          { fecha: "2026-09-01", origen: "PMO", destino: "Contratista", doc: "Instrucción N° 018", obs: "Notificación de CE" }
+          { fecha: "2026-09-01", origen: "PMO", destino: "Contratista", doc: "Instrucción N° 018", obs: "Notificación de CE" },
+          { fecha: "2026-10-05", origen: "Dirección de Infraestructura G2G (PMO)", destino: "PMO", doc: "Certificación Legal Periódica", obs: "Validación procesal conforme efectuada por Dra. Patricia Alva sin merituar cambios." }
         ]
       }
     ];
 
     // CONFIGURACIÓN OFICIAL POR DEFECTO DEL SISTEMA (Catálogos y Parámetros)
     const CONFIG_DEFAULT = {
+      direccionActiva: "G2G",
+      direcciones: [
+        { codigo: "G2G", nombre: "Dirección de Infraestructura G2G (PMO)" },
+        { codigo: "DE", nombre: "Dirección de Estudios (Consultorías de Diseño)" },
+        { codigo: "DO", nombre: "Dirección de Obras (Ejecución y Supervisión)" },
+        { codigo: "DGV", nombre: "Dirección de Gestión Vial (Conservación)" },
+        { codigo: "DP", nombre: "Dirección de Puentes e Intervenciones Especiales" },
+        { codigo: "OAJ", nombre: "Oficina de Asesoría Jurídica" }
+      ],
       proyectos: [
         { codigo: "NCC", nombre: "Nueva Carretera Central (G2G)", accUrl: "https://acc.autodesk.com/docs/projects/ncc-g2g" },
         { codigo: "EV4", nombre: "Eje Vial 4 (G2G)", accUrl: "https://acc.autodesk.com/docs/projects/ev4-g2g" },
@@ -1199,27 +1311,39 @@
         { codigo: "PSR", nombre: "Puentes Sierra Central", accUrl: "https://acc.autodesk.com/docs/projects/psr-g2g" }
       ],
       instancias: [
-        "PMO",
-        "Dirección de Estudios",
-        "OAJ",
-        "OPP",
-        "Procuraduría del MTC",
-        "MTC / Alta Dirección"
+        { abreviatura: "PMO", nombre: "Asistencia Técnica PMO / Alta Gerencia" },
+        { abreviatura: "OAJ", nombre: "Oficina de Asesoría Jurídica" },
+        { abreviatura: "Dirección de Estudios", nombre: "Dirección de Estudios" },
+        { abreviatura: "Dirección de Obras", nombre: "Dirección de Obras" },
+        { abreviatura: "OPP", nombre: "Oficina de Planeamiento y Presupuesto" },
+        { abreviatura: "Procuraduría del MTC", nombre: "Procuraduría Pública del MTC" },
+        { abreviatura: "MTC / Despacho", nombre: "MTC / Alta Dirección Ministerial" }
       ],
       tiposAtencion: [
         "Trato directo",
         "Evento de Compensación (CE)",
-        "DAB",
-        "Arbitraje",
-        "Controversia contractual",
-        "Consulta legal"
+        "Reclamo Cl. 20 (FIDIC)",
+        "DAB / DAAB (Junta de Disputas)",
+        "Arbitraje Nacional / Internacional",
+        "Prestación Adicional de Obra (< 15%)",
+        "Prestación Adicional con CGR (> 15%)",
+        "Ampliación de Plazo Contractual",
+        "Deductivo Vinculante",
+        "Controversia de Liquidación",
+        "Consulta legal especializada"
       ],
       regimenes: [
-        "NEC4 ECC Opción C (Target)",
-        "NEC3/4 ECC Opción A",
-        "FIDIC Libro Rojo",
-        "FIDIC Libro Amarillo",
-        "Ley N° 32069 / TUO 30225"
+        "LCE - Ley N° 32069 (Nueva Ley de Compras Públicas)",
+        "LCE - TUO Ley N° 30225 y D.S. 344-2018-EF (Contratos en Curso)",
+        "FIDIC Libro Rojo (Construcción Diseñada por Empleador)",
+        "FIDIC Libro Amarillo (Diseño y Construcción EPC Ligero)",
+        "FIDIC Libro Plata (Llave en Mano / EPC)",
+        "FIDIC Libro Esmeralda (Obras Subterráneas y Túneles)",
+        "FIDIC Libro Blanco (Servicios de Consultoría y Supervisión)",
+        "FIDIC Libro Verde (Contrato Abreviado de Obras Menores)",
+        "NEC4 ECC Opción C (Target Cost)",
+        "NEC3/4 ECC Opción A (Precio Fijo / Suma Alzada)",
+        "NEC4 PSC (Servicios Profesionales de Consultoría)"
       ],
       fases: [
         "Diseño/Estudios",
@@ -1244,6 +1368,7 @@
       mensajeFatal: "⏱️ PLAZO FATAL / CADUCIDAD PRECLUSIVA",
       diasAlertaCritica: 3,
       diasAlertaProxima: 7,
+      diasAlertaValidacionLegal: 14,
       pesos: {
         plazo: 0.30,
         rutaCritica: 0.30,
@@ -1428,6 +1553,44 @@
           inpPlazo.appendChild(opt);
         });
         if (valPlazo) inpPlazo.value = valPlazo;
+      }
+
+      // 8. Direcciones / Órganos de Conducción
+      const selDirTop = document.getElementById('selDireccionActiva');
+      const selDirModal = document.getElementById('inpResponsableConduccion');
+      const selDirValidar = document.getElementById('selValidadorDireccion');
+      const dirs = configSistema.direcciones || [];
+
+      if (selDirTop) {
+        const valActual = configSistema.direccionActiva || 'G2G';
+        selDirTop.innerHTML = '';
+        dirs.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.codigo || d.nombre;
+          opt.textContent = `${d.codigo || ''} - ${d.nombre}`;
+          if (opt.value === valActual) opt.selected = true;
+          selDirTop.appendChild(opt);
+        });
+      }
+
+      if (selDirModal) {
+        selDirModal.innerHTML = '';
+        dirs.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.nombre;
+          opt.textContent = `${d.codigo ? d.codigo + ' · ' : ''}${d.nombre}`;
+          selDirModal.appendChild(opt);
+        });
+      }
+
+      if (selDirValidar) {
+        selDirValidar.innerHTML = '';
+        dirs.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.nombre;
+          opt.textContent = `${d.codigo ? d.codigo + ' · ' : ''}${d.nombre}`;
+          selDirValidar.appendChild(opt);
+        });
       }
     }
 
@@ -1684,6 +1847,45 @@
       document.getElementById('cnt-rutacritica').textContent = rutaCritica;
       document.getElementById('cnt-semana').textContent = vencenSemana;
       document.getElementById('cnt-brecha').textContent = casos.filter(c => c.brecha > 0 && c.estado !== "Cerrado").length;
+
+      // CÁLCULO DEL INDICADOR EJECUTIVO DE VALIDACIÓN LEGAL PARA EL DIRECTOR
+      let casosVencidosValidacion = 0;
+      let casosRequierenValidacion = 0;
+      const hoy = new Date();
+
+      casos.forEach(c => {
+        if (c.estado !== "Cerrado") {
+          if (!c.ultimaValidacionLegal) {
+            casosVencidosValidacion++;
+          } else {
+            const fVal = new Date(c.ultimaValidacionLegal + "T00:00:00");
+            const diffDias = Math.floor((hoy - fVal) / (1000 * 60 * 60 * 24));
+            if (diffDias > 14) {
+              casosVencidosValidacion++;
+            } else if (diffDias > 7) {
+              casosRequierenValidacion++;
+            }
+          }
+        }
+      });
+
+      const badgeVal = document.getElementById('badgeValidacionGeneral');
+      if (badgeVal) {
+        if (abiertos === 0) {
+          badgeVal.className = "px-2.5 py-1 rounded-lg text-xs font-bold border flex items-center gap-1.5 bg-slate-100 text-slate-700 border-slate-300";
+          badgeVal.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400"></span><span id="lblTextoValidacionGral">Sin Casos Abiertos</span>`;
+        } else if (casosVencidosValidacion > 0) {
+          badgeVal.className = "px-2.5 py-1 rounded-lg text-xs font-bold border flex items-center gap-1.5 bg-rose-50 text-rose-800 border-rose-300 animate-pulse";
+          badgeVal.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-600"></span><span id="lblTextoValidacionGral">${casosVencidosValidacion} caso(s) con validación vencida (>14d)</span>`;
+        } else if (casosRequierenValidacion > 0) {
+          badgeVal.className = "px-2.5 py-1 rounded-lg text-xs font-bold border flex items-center gap-1.5 bg-amber-50 text-amber-800 border-amber-300";
+          badgeVal.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span id="lblTextoValidacionGral">${casosRequierenValidacion} caso(s) requieren validación semanal (>7d)</span>`;
+        } else {
+          badgeVal.className = "px-2.5 py-1 rounded-lg text-xs font-bold border flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border-emerald-300";
+          badgeVal.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span id="lblTextoValidacionGral">100% Data Validada Legalmente (<7d)</span>`;
+        }
+      }
+
       renderizarGraficosEjecutivos();
     }
 
@@ -2047,6 +2249,9 @@
             </td>
             <td class="py-3 px-3 text-center whitespace-nowrap">
               <div class="flex items-center justify-center space-x-1">
+                <button onclick="abrirModalValidarLegal('${c.id}')" title="Validar Legalmente (Sin Cambios)" class="p-1 rounded hover:bg-emerald-100 text-emerald-700">
+                  <i data-lucide="shield-check" class="w-4 h-4"></i>
+                </button>
                 <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Ejecutiva" class="p-1 rounded hover:bg-slate-200 text-slate-600">
                   <i data-lucide="eye" class="w-4 h-4"></i>
                 </button>
@@ -2065,6 +2270,7 @@
           tr.innerHTML = `
             <td class="py-2.5 px-3 bg-white sticky left-0 z-10 border-r border-slate-200 text-center shadow-sm">
               <div class="flex items-center justify-center space-x-1">
+                <button onclick="abrirModalValidarLegal('${c.id}')" title="Validar Legal" class="p-1 hover:bg-emerald-100 rounded text-emerald-700"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i></button>
                 <button onclick="verFichaCaso('${c.id}')" title="Ficha" class="p-1 hover:bg-slate-200 rounded text-slate-600"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
                 <button onclick="abrirModalDerivar('${c.id}')" title="Derivar" class="p-1 hover:bg-brand-100 rounded text-brand-600"><i data-lucide="send" class="w-3.5 h-3.5"></i></button>
                 <button onclick="editarCaso('${c.id}')" title="Editar" class="p-1 hover:bg-amber-100 rounded text-amber-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
@@ -2252,29 +2458,37 @@
 
           <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-2.5 rounded-lg border border-slate-100">
             <div>
-              <span class="text-slate-400 block text-[10px]">Instancia Actual:</span>
-              <span class="font-bold text-slate-800">${c.instanciaActual}</span>
+              <span class="text-slate-400 block text-[10px]">Instancia / Conducción:</span>
+              <span class="font-bold text-slate-800 truncate block" title="${c.instanciaActual}">${c.instanciaActual}</span>
+              <span class="text-[9px] text-slate-500 truncate block">${c.responsableConduccion || 'Órgano Asignado'}</span>
             </div>
             <div>
               <span class="text-slate-400 block text-[10px]">Vencimiento:</span>
               <span class="font-bold ${dias < 0 ? 'text-rose-600' : 'text-slate-800'}">${c.fechaLimite || '-'}</span>
+              <span class="text-[9px] ${dias < 0 ? 'text-rose-600 font-bold' : 'text-slate-500'}">${dias < 0 ? `Vencido hace ${Math.abs(dias)}d` : `${dias}d rest.`}</span>
             </div>
             <div>
               <span class="text-slate-400 block text-[10px]">Exposición Probable:</span>
               <span class="font-bold text-blue-900 font-mono">S/ ${(c.escenarioProbable || 0).toLocaleString('es-PE')}</span>
             </div>
             <div>
-              <span class="text-slate-400 block text-[10px]">Brecha OPP:</span>
-              <span class="font-bold ${c.brecha > 0 ? 'text-rose-600' : 'text-emerald-700'} font-mono">${c.brecha > 0 ? `S/ ${c.brecha.toLocaleString('es-PE')}` : 'Cubierto'}</span>
+              <span class="text-slate-400 block text-[10px]">Validación Legal:</span>
+              <span class="flex items-center gap-1 text-[10px] font-semibold text-slate-700">
+                <span class="w-2 h-2 rounded-full ${calcularColorValidacion(c.ultimaValidacionLegal)}"></span>
+                ${c.ultimaValidacionLegal ? formatearFecha(c.ultimaValidacionLegal) : 'Pendiente'}
+              </span>
             </div>
           </div>
 
           <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
-            <span class="text-[10px] text-slate-500 font-medium truncate max-w-[140px]">Resp: ${c.responsable || 'Sin asignar'}</span>
-            <div class="flex items-center space-x-2">
-              <button onclick="verFichaCaso('${c.id}')" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium">Ficha</button>
-              <button onclick="abrirModalDerivar('${c.id}')" class="px-2.5 py-1 rounded bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold">Derivar</button>
-              <button onclick="editarCaso('${c.id}')" class="p-1 text-slate-500 hover:text-slate-800"><i data-lucide="edit" class="w-4 h-4"></i></button>
+            <span class="text-[10px] text-slate-500 font-medium truncate max-w-[120px]" title="${c.responsable || 'Sin asignar'}">Abog: ${c.responsable || 'Sin asignar'}</span>
+            <div class="flex items-center space-x-1.5">
+              <button onclick="abrirModalValidarLegal('${c.id}')" title="Validar conformidad legal sin cambios" class="px-2 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[11px] flex items-center gap-0.5">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Validar
+              </button>
+              <button onclick="verFichaCaso('${c.id}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-[11px]">Ficha</button>
+              <button onclick="abrirModalDerivar('${c.id}')" class="px-2 py-1 rounded bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-[11px]">Pase</button>
+              <button onclick="editarCaso('${c.id}')" class="p-1 text-slate-500 hover:text-slate-800"><i data-lucide="edit" class="w-3.5 h-3.5"></i></button>
             </div>
           </div>
         `;
@@ -2350,6 +2564,15 @@
       document.getElementById('modalTitulo').textContent = "Registro de Nuevo Caso de Controversia";
       document.getElementById('inpIdCaso').readOnly = false;
       document.getElementById('inpFechaDerivacion').value = new Date().toISOString().split('T')[0];
+
+      // Asignar órgano de conducción activo por defecto
+      const selModal = document.getElementById('inpResponsableConduccion');
+      if (selModal) {
+        const dirActiva = configSistema.direccionActiva || 'G2G';
+        const encontrada = (configSistema.direcciones || []).find(d => d.codigo === dirActiva);
+        if (encontrada) selModal.value = encontrada.nombre;
+      }
+
       cambiarTabWizard(1);
       document.getElementById('modalCaso').classList.remove('hidden');
       lucide.createIcons();
@@ -2377,6 +2600,7 @@
       document.getElementById('inpDocInicio').value = c.docInicio || '';
       document.getElementById('inpFechaInicio').value = c.fechaInicio || '';
       document.getElementById('inpInstanciaActual').value = c.instanciaActual;
+      document.getElementById('inpResponsableConduccion').value = c.responsableConduccion || (configSistema.direcciones[0]?.nombre || 'Dirección de Estudios');
       document.getElementById('inpResponsable').value = c.responsable || '';
       document.getElementById('inpEstado').value = c.estado || 'En curso';
       document.getElementById('inpTipoPlazo').value = c.tipoPlazo || 'Contractual Ordinario';
@@ -2421,6 +2645,7 @@
         docInicio: document.getElementById('inpDocInicio').value,
         fechaInicio: document.getElementById('inpFechaInicio').value,
         instanciaActual: document.getElementById('inpInstanciaActual').value,
+        responsableConduccion: document.getElementById('inpResponsableConduccion').value,
         responsable: document.getElementById('inpResponsable').value,
         estado: document.getElementById('inpEstado').value,
         tipoPlazo: document.getElementById('inpTipoPlazo').value,
@@ -2443,6 +2668,8 @@
         brecha: parseFloat(document.getElementById('inpBrechaCalculada').value) || 0,
         fuente: document.getElementById('inpFuente').value,
         enlaceAcc: document.getElementById('inpEnlaceAcc').value,
+        ultimaValidacionLegal: idx >= 0 ? casos[idx].ultimaValidacionLegal : new Date().toISOString().split('T')[0],
+        validadorLegal: idx >= 0 ? casos[idx].validadorLegal : 'Registro Inicial',
         historial: idx >= 0 ? casos[idx].historial || [] : [{
           fecha: new Date().toISOString().split('T')[0],
           origen: "Registro Inicial",
@@ -2527,6 +2754,96 @@
       cerrarModalDerivar();
     }
 
+    // ACCIÓN: CERTIFICACIÓN / VALIDACIÓN LEGAL PERIÓDICA (SIN CAMBIOS DE FONDO)
+    function abrirModalValidarLegal(id) {
+      const c = casos.find(item => item.id === id);
+      if (!c) return;
+
+      document.getElementById('validarCasoId').value = c.id;
+      document.getElementById('lblValidarCasoInfo').innerHTML = `
+        <strong>${c.id} (${c.proyecto})</strong>: "${c.asunto.substring(0, 50)}..."<br>
+        <span class="text-slate-500 font-mono text-[10px]">Instancia actual: ${c.instanciaActual} · Saldo: ${c.fechaLimite || 'Sin límite'}</span>
+      `;
+
+      // Autocompletar validador si ya existe en localStorage o caso
+      const validadorPrevio = localStorage.getItem("g2g_ultimo_validador") || c.responsable || '';
+      document.getElementById('inpValidadorNombre').value = validadorPrevio;
+
+      // Seleccionar dirección
+      const selDir = document.getElementById('selValidadorDireccion');
+      if (selDir && c.responsableConduccion) {
+        selDir.value = c.responsableConduccion;
+      }
+
+      document.getElementById('modalValidarLegal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function cerrarModalValidarLegal() {
+      document.getElementById('modalValidarLegal').classList.add('hidden');
+    }
+
+    function ejecutarValidacionLegal(e) {
+      e.preventDefault();
+      const id = document.getElementById('validarCasoId').value;
+      const c = casos.find(item => item.id === id);
+      if (!c) return;
+
+      const validador = document.getElementById('inpValidadorNombre').value.trim();
+      const direccion = document.getElementById('selValidadorDireccion').value;
+      const fechaHoy = new Date().toISOString().split('T')[0];
+
+      // Actualizar estado de validación
+      c.ultimaValidacionLegal = fechaHoy;
+      c.validadorLegal = validador;
+      if (direccion) c.responsableConduccion = direccion;
+
+      // Guardar validador preferente en localStorage
+      localStorage.setItem("g2g_ultimo_validador", validador);
+
+      // Agregar al historial de trazabilidad formal
+      if (!c.historial) c.historial = [];
+      c.historial.push({
+        fecha: fechaHoy,
+        origen: direccion || c.instanciaActual,
+        destino: c.instanciaActual,
+        doc: "Certificación Legal Periódica",
+        obs: `Validación procesal conforme efectuada por ${validador} (${direccion || 'Asesoría Legal'}) sin merituar cambios.`
+      });
+
+      guardarEnStorage();
+      actualizarDashboard();
+      renderizarCasos();
+      cerrarModalValidarLegal();
+
+      // Si está abierta la ficha, refrescarla
+      const modalF = document.getElementById('modalFicha');
+      if (modalF && !modalF.classList.contains('hidden')) {
+        verFichaCaso(c.id);
+      }
+    }
+
+    // UTILIDADES DE FECHA Y COLOR PARA VALIDACIÓN LEGAL
+    function calcularColorValidacion(fechaStr) {
+      if (!fechaStr) return 'bg-rose-500';
+      const hoy = new Date();
+      const fVal = new Date(fechaStr + "T00:00:00");
+      const diffDias = Math.floor((hoy - fVal) / (1000 * 60 * 60 * 24));
+      if (diffDias <= 7) return 'bg-emerald-500';
+      if (diffDias <= 14) return 'bg-amber-500';
+      return 'bg-rose-500';
+    }
+
+    function formatearFecha(fechaStr) {
+      if (!fechaStr) return '-';
+      try {
+        const parts = fechaStr.split('-');
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      } catch (e) {
+        return fechaStr;
+      }
+    }
+
     // FICHA EJECUTIVA DE 1 PÁGINA (PARA EL DIRECTOR)
     function verFichaCaso(id) {
       const c = casos.find(item => item.id === id);
@@ -2564,19 +2881,24 @@
           </div>
 
           <div class="min-w-0 space-y-1 overflow-hidden">
+            <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Órgano de Conducción:</span>
+            <span class="font-bold text-slate-800 text-xs block truncate" title="${c.responsableConduccion || 'Dirección de Estudios'}">${c.responsableConduccion || 'Dirección de Estudios'}</span>
+          </div>
+
+          <div class="min-w-0 space-y-1 overflow-hidden">
             <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Tipo de Plazo:</span>
             <span class="font-semibold text-slate-800 text-xs block truncate" title="${c.tipoPlazo}">${c.tipoPlazo}</span>
           </div>
 
           <div class="min-w-0 space-y-1 overflow-hidden">
-            <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Responsable Asignado:</span>
+            <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Especialista Asignado:</span>
             <span class="font-bold text-slate-800 text-xs block truncate" title="${c.responsable || 'Sin asignar'}">
               ${c.responsable || 'Sin asignar'}
             </span>
           </div>
 
           <div class="min-w-0 space-y-1 overflow-hidden">
-            <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Fecha Límite y Saldo de Días:</span>
+            <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Fecha Límite y Saldo:</span>
             <div class="flex flex-wrap items-center gap-2">
               <span class="font-mono font-bold text-xs ${dias < 0 ? 'text-rose-600' : 'text-slate-900'}">${c.fechaLimite || '-'}</span>
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${dias < 0 ? 'bg-rose-100 text-rose-800 border border-rose-300' : dias <= 3 ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">
@@ -2585,6 +2907,28 @@
             </div>
           </div>
 
+          <div class="min-w-0 space-y-1 overflow-hidden">
+            <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Última Validación Legal:</span>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full ${calcularColorValidacion(c.ultimaValidacionLegal)}"></span>
+              <span class="font-semibold text-slate-800 text-xs">${c.ultimaValidacionLegal ? formatearFecha(c.ultimaValidacionLegal) : 'Pendiente'}</span>
+              <span class="text-[10px] text-slate-500 truncate">(${c.validadorLegal || 'Inicial'})</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Botón de Acción Directa: Validación Legal sin Cambios -->
+        <div class="flex items-center justify-between p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl">
+          <div class="space-y-0.5">
+            <span class="font-bold text-emerald-900 text-xs flex items-center gap-1.5">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> Certificación Legal Semanal
+            </span>
+            <p class="text-[10px] text-emerald-700">Validar conformidad procesal sin cambios de fondo (visado del abogado).</p>
+          </div>
+          <button onclick="abrirModalValidarLegal('${c.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs shadow-sm flex items-center gap-1">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Validar Data
+          </button>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -2723,6 +3067,140 @@
       XLSX.writeFile(wb, `Matriz_Maestra_Controversias_G2G_50Col_${fechaHoy}.xlsx`);
     }
 
+    // GESTIÓN NATIVA DE ARCHIVOS EN CARPETA (FILE SYSTEM ACCESS API + EXPLORADOR DE ARCHIVOS)
+    async function guardarEnCarpetaNativa() {
+      const dbPayload = {
+        meta: {
+          sistema: "Gestión Integral de Controversias y Reclamos G2G / LCE",
+          version: "2.2",
+          fechaExportacion: new Date().toISOString(),
+          direccionActiva: configSistema.direccionActiva || "G2G",
+          totalCasos: casos.length
+        },
+        configuracion: configSistema,
+        casos: casos
+      };
+      const jsonString = JSON.stringify(dbPayload, null, 2);
+      const fechaStr = new Date().toISOString().split('T')[0];
+
+      // 1. Intentar File System Access API nativa (permite seleccionar carpeta/ruta en Windows como el Explorador)
+      if (window.showSaveFilePicker) {
+        try {
+          const fileHandle = await window.showSaveFilePicker({
+            suggestedName: `matriz_controversias_db_${fechaStr}.json`,
+            types: [{
+              description: 'Base de Datos de Controversias JSON',
+              accept: { 'application/json': ['.json'] }
+            }]
+          });
+          const writable = await fileHandle.createWritable();
+          await writable.write(jsonString);
+          await writable.close();
+          guardarEnStorage();
+          alert("¡Archivo guardado exitosamente en la carpeta seleccionada!");
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return; // El usuario canceló la ventana
+          console.warn("showSaveFilePicker falló o no fue permitido, procediendo con descarga estándar:", err);
+        }
+      }
+
+      // 2. Fallback universal (móviles, smartphones, tablets o navegadores sin File System Access API)
+      descargarArchivoJson(dbPayload, `matriz_controversias_db_${fechaStr}.json`);
+      guardarEnStorage();
+      alert("¡Base de datos descargada como archivo JSON exitosamente!");
+    }
+
+    function descargarArchivoJson(objeto, nombreArchivo) {
+      const blob = new Blob([JSON.stringify(objeto, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nombreArchivo;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    async function cargarDesdeCarpetaNativa() {
+      if (window.showOpenFilePicker) {
+        try {
+          const [fileHandle] = await window.showOpenFilePicker({
+            types: [{
+              description: 'Archivo JSON de Controversias',
+              accept: { 'application/json': ['.json'] }
+            }],
+            multiple: false
+          });
+          const file = await fileHandle.getFile();
+          const text = await file.text();
+          const data = JSON.parse(text);
+          cargarCasosDesdeObjeto(data);
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          console.warn("showOpenFilePicker falló, usando input estándar:", err);
+        }
+      }
+      // Fallback a selector input hidden
+      const inp = document.getElementById('inpFileJsonHidden');
+      if (inp) inp.click();
+    }
+
+    function procesarArchivoJsonSubido(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          cargarCasosDesdeObjeto(data);
+        } catch (err) {
+          alert("Error: El archivo seleccionado no contiene un formato JSON válido.");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function cargarCasosDesdeObjeto(data) {
+      let nuevosCasos = [];
+      if (Array.isArray(data)) {
+        nuevosCasos = data;
+      } else if (data && typeof data === 'object') {
+        if (Array.isArray(data.casos)) {
+          nuevosCasos = data.casos;
+        }
+        if (data.configuracion && typeof data.configuracion === 'object') {
+          configSistema = Object.assign({}, CONFIG_DEFAULT, configSistema, data.configuracion);
+          localStorage.setItem("controversias_g2g_config", JSON.stringify(configSistema));
+          poblarSelectsDesdeConfiguracion();
+        }
+      }
+
+      if (!nuevosCasos || nuevosCasos.length === 0) {
+        alert("No se encontraron controversias en el archivo seleccionado.");
+        return;
+      }
+
+      casos = nuevosCasos;
+      guardarEnStorage();
+      actualizarDashboard();
+      renderizarCasos();
+      alert(`¡Se cargaron exitosamente ${casos.length} casos de controversias desde el archivo!`);
+    }
+
+    function cambiarDireccionActiva(dir) {
+      configSistema.direccionActiva = dir;
+      localStorage.setItem("controversias_g2g_config", JSON.stringify(configSistema));
+      const selModal = document.getElementById('inpResponsableConduccion');
+      if (selModal) {
+        const encontrada = (configSistema.direcciones || []).find(d => d.codigo === dir);
+        if (encontrada) selModal.value = encontrada.nombre;
+      }
+    }
+
     // GESTIÓN DEL PANEL DE CONFIGURACIÓN DEL SISTEMA Y CATÁLOGOS
     function abrirModalConfiguracion() {
       cambiarTabConfig(1);
@@ -2786,7 +3264,12 @@
       const inpCod = document.getElementById('inpNuevoCodCat');
       const inpNom = document.getElementById('inpNuevoItemCat');
 
-      if (sec === 'proyectos') {
+      if (sec === 'direcciones') {
+        colCod.classList.remove('hidden');
+        colNom.className = "sm:col-span-8";
+        inpCod.placeholder = "Abreviatura / Código (ej. DE, DO, G2G, DGV)";
+        inpNom.placeholder = "Denominación del Órgano / Dirección de Conducción...";
+      } else if (sec === 'proyectos') {
         colCod.classList.remove('hidden');
         colNom.className = "sm:col-span-8";
         inpCod.placeholder = "Abreviatura / Código (ej. NCC, EV4, VESR)";
@@ -2921,7 +3404,25 @@
         return;
       }
 
-      if (sec === 'proyectos') {
+      if (sec === 'direcciones') {
+        const codigoFinal = valCod || valNom.split(' ')[0].toUpperCase();
+        const obj = {
+          codigo: codigoFinal,
+          nombre: valNom
+        };
+        if (itemCatalogoEditandoIdx !== null) {
+          const valAnterior = configSistema.direcciones[itemCatalogoEditandoIdx]?.nombre;
+          if (valAnterior && valAnterior !== valNom) {
+            casos.forEach(c => {
+              if (c.responsableConduccion === valAnterior) c.responsableConduccion = valNom;
+            });
+            guardarEnStorage();
+          }
+          configSistema.direcciones[itemCatalogoEditandoIdx] = obj;
+        } else {
+          configSistema.direcciones.push(obj);
+        }
+      } else if (sec === 'proyectos') {
         const codigoFinal = valCod || valNom.split(' ')[0].toUpperCase();
         const obj = {
           codigo: codigoFinal,

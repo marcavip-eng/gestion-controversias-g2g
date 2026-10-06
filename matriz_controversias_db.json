@@ -1,11 +1,38 @@
 {
   "metadata": {
-    "version": "2.1.0",
+    "version": "2.2.0",
     "entidad": "PROVIAS NACIONAL - DIRECCION DE INFRAESTRUCTURA G2G",
-    "fecha_actualizacion": "2026-10-05T22:21:00.334Z",
+    "fecha_actualizacion": "2026-10-06T11:45:00.000Z",
     "total_casos": 4
   },
   "configuracion": {
+    "direccionActiva": "G2G",
+    "direcciones": [
+      {
+        "codigo": "G2G",
+        "nombre": "Dirección de Infraestructura G2G"
+      },
+      {
+        "codigo": "DE",
+        "nombre": "Dirección de Estudios"
+      },
+      {
+        "codigo": "DO",
+        "nombre": "Dirección de Obras"
+      },
+      {
+        "codigo": "DGV",
+        "nombre": "Dirección de Gestión Vial"
+      },
+      {
+        "codigo": "DP",
+        "nombre": "Dirección de Puentes"
+      },
+      {
+        "codigo": "OAJ",
+        "nombre": "Oficina de Asesoría Jurídica"
+      }
+    ],
     "proyectos": [
       {
         "codigo": "NCC",
@@ -31,6 +58,7 @@
     "instancias": [
       "PMO",
       "Dirección de Estudios",
+      "Dirección de Obras",
       "OAJ",
       "OPP",
       "Procuraduría del MTC",
@@ -39,23 +67,35 @@
     "tiposAtencion": [
       "Trato directo",
       "Evento de Compensación (CE)",
-      "DAB",
+      "DAB / DAAB",
       "Arbitraje",
       "Controversia contractual",
-      "Consulta legal"
+      "Consulta legal",
+      "FIDIC Cl. 20 (Reclamo)",
+      "Prestación adicional (<15%)",
+      "Prestación adicional (>15% CGR)",
+      "Ampliación de plazo",
+      "Deductivo vinculante",
+      "Liquidación contractual"
     ],
     "regimenes": [
+      "LCE - Ley N° 32069 (Nueva Ley General)",
+      "LCE - TUO Ley N° 30225 (Contratos vigentes anteriores)",
       "NEC4 ECC Opción C (Target)",
-      "NEC3/4 ECC Opción A",
-      "FIDIC Libro Rojo",
-      "FIDIC Libro Amarillo",
-      "Ley N° 32069 / TUO 30225"
+      "NEC3/4 ECC Opción A (Precio Alzado)",
+      "NEC4 PSC (Servicios Profesionales / Consultoría)",
+      "FIDIC Libro Rojo (Construcción)",
+      "FIDIC Libro Amarillo (Diseño-Construcción)",
+      "FIDIC Libro Plata (EPC / Llave en mano)",
+      "FIDIC Libro Esmeralda (Obras Subterráneas / Túneles)",
+      "FIDIC Libro Blanco (Consultoría y Supervisión)",
+      "FIDIC Libro Verde (Acuerdo Breve)"
     ],
     "fases": [
       "Diseño/Estudios",
       "Ejecución",
       "Contratación",
-      "Cierre"
+      "Cierre y Liquidación"
     ],
     "estados": [
       "En curso",
@@ -113,6 +153,7 @@
       "asunto": "Trato Directo 1: Interpretación de obligación contractual sobre geología y trazado de túneles",
       "docInicio": "Acta de Reunión N.° 01",
       "fechaInicio": "2026-09-18",
+      "responsableConduccion": "Dirección de Estudios",
       "instanciaActual": "OAJ",
       "responsable": "Dr. Carlos Vega (Especialista Legal)",
       "estado": "En OAJ",
@@ -136,6 +177,8 @@
       "brecha": 300000,
       "fuente": "RO",
       "enlaceAcc": "https://acc.autodesk.com/docs/projects/ncc-g2g",
+      "ultimaValidacionLegal": "2026-10-04",
+      "validadorLegal": "Dr. Carlos Vega",
       "historial": [
         {
           "fecha": "2026-09-18",
@@ -150,6 +193,13 @@
           "destino": "OAJ",
           "doc": "Memorando N° 112-2026",
           "obs": "Solicitud de opinión legal"
+        },
+        {
+          "fecha": "2026-10-04",
+          "origen": "OAJ",
+          "destino": "OAJ",
+          "doc": "Certificación Legal Periódica",
+          "obs": "Validación procesal conforme efectuada por Dr. Carlos Vega sin merituar cambios."
         }
       ]
     },
@@ -163,6 +213,7 @@
       "asunto": "Trato Directo 2: Reconocimiento de costos por mayor permanencia e impacto presupuestal",
       "docInicio": "Acta de Reunión N.° 02",
       "fechaInicio": "2026-09-23",
+      "responsableConduccion": "Dirección de Estudios",
       "instanciaActual": "OPP",
       "responsable": "Lic. Maritza Gómez (Presupuesto)",
       "estado": "En OPP",
@@ -186,6 +237,8 @@
       "brecha": 700000,
       "fuente": "ROOC",
       "enlaceAcc": "https://acc.autodesk.com/docs/projects/ncc-g2g",
+      "ultimaValidacionLegal": "2026-10-02",
+      "validadorLegal": "Dr. Carlos Vega",
       "historial": [
         {
           "fecha": "2026-09-23",
@@ -200,6 +253,13 @@
           "destino": "OPP",
           "doc": "Memorando N° 120-2026",
           "obs": "Pase para certificación presupuestal"
+        },
+        {
+          "fecha": "2026-10-02",
+          "origen": "Dirección de Estudios",
+          "destino": "OPP",
+          "doc": "Certificación Legal Periódica",
+          "obs": "Validación procesal conforme efectuada por Dr. Carlos Vega sin merituar cambios."
         }
       ]
     },
@@ -207,12 +267,13 @@
       "id": "EV4-DAB-01",
       "proyecto": "EV4",
       "fase": "Ejecución",
-      "tipoAtencion": "DAB",
-      "regimen": "FIDIC Libro Rojo",
+      "tipoAtencion": "DAB / DAAB",
+      "regimen": "FIDIC Libro Rojo (Construcción)",
       "generador": "Contratista",
       "asunto": "Sometimiento a DAAB por liberación tardía de interferencias de redes de alta tensión",
       "docInicio": "Reference Memorial N° 01",
       "fechaInicio": "2026-08-10",
+      "responsableConduccion": "Dirección de Obras",
       "instanciaActual": "Procuraduría del MTC",
       "responsable": "Dr. Jorge Mendoza (Procurador Adjunto)",
       "estado": "En Procuraduría",
@@ -236,6 +297,8 @@
       "brecha": 700000,
       "fuente": "ROOC",
       "enlaceAcc": "https://acc.autodesk.com/docs/projects/ev4-g2g",
+      "ultimaValidacionLegal": "2026-10-05",
+      "validadorLegal": "Dr. Jorge Mendoza",
       "historial": [
         {
           "fecha": "2026-08-10",
@@ -250,6 +313,13 @@
           "destino": "Procuraduría",
           "doc": "Oficio N° 580-2026",
           "obs": "Traslado de antecedentes para defensa"
+        },
+        {
+          "fecha": "2026-10-05",
+          "origen": "Procuraduría del MTC",
+          "destino": "Procuraduría del MTC",
+          "doc": "Certificación Legal Periódica",
+          "obs": "Validación procesal conforme efectuada por Dr. Jorge Mendoza sin merituar cambios."
         }
       ]
     },
@@ -263,6 +333,7 @@
       "asunto": "Instrucción de cambio por adecuación ambiental y rediseño de accesos viarios",
       "docInicio": "Instrucción PMO N° 018",
       "fechaInicio": "2026-09-01",
+      "responsableConduccion": "Dirección de Infraestructura G2G",
       "instanciaActual": "PMO",
       "responsable": "Ing. Pierre Dumont (PMO Vías)",
       "estado": "En PMO",
@@ -286,6 +357,8 @@
       "brecha": 0,
       "fuente": "RO",
       "enlaceAcc": "https://acc.autodesk.com/docs/projects/vesr-g2g",
+      "ultimaValidacionLegal": "2026-10-05",
+      "validadorLegal": "Dra. Patricia Alva",
       "historial": [
         {
           "fecha": "2026-09-01",
@@ -293,6 +366,13 @@
           "destino": "Contratista",
           "doc": "Instrucción N° 018",
           "obs": "Notificación de CE"
+        },
+        {
+          "fecha": "2026-10-05",
+          "origen": "Dirección de Infraestructura G2G",
+          "destino": "PMO",
+          "doc": "Certificación Legal Periódica",
+          "obs": "Validación procesal conforme efectuada por Dra. Patricia Alva sin merituar cambios."
         }
       ]
     }
