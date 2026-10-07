@@ -221,7 +221,7 @@
       </div>
     </section>
 
-    <!-- TABLERO EJECUTIVO OFICIAL (RPLICA DEL EXCEL: RESUMEN POR PROYECTO & CASOS POR INSTANCIA) -->
+    <!-- TABLERO EJECUTIVO CONSOLIDADO (CONMUTACIÓN DE TABLAS EXCEL Y GRÁFICOS VISUALES) -->
     <section class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
         <div class="flex items-center gap-2">
@@ -229,91 +229,142 @@
           <div>
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
               <i data-lucide="layout-grid" class="w-4 h-4 text-brand-600"></i>
-              Tablero Ejecutivo Consolidado (Excel Oficial)
+              Tablero Ejecutivo Consolidado (Tiempo Real)
             </h3>
-            <p class="text-[11px] text-slate-500 font-medium">Distribucin analtica multicriterio alimentada en tiempo real</p>
+            <p class="text-[11px] text-slate-500 font-medium">Análisis multicriterio de cartera por proyectos e instancias</p>
           </div>
         </div>
-        <div class="flex items-center gap-2 text-xs">
-          <button onclick="toggleTablasEjecutivas()" id="btnToggleTablas" class="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold flex items-center gap-1 transition">
-            <span id="lblToggleTablas">Ocultar Tablas</span>
-            <i data-lucide="chevron-up" class="w-3.5 h-3.5" id="icoToggleTablas"></i>
+
+        <!-- Conmutador de Vista: Tablas vs Gráficos vs Ambos -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <div class="flex items-center space-x-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+            <button type="button" onclick="conmutarVistaEjecutiva('tablas')" id="btnVistaTablas" class="px-2.5 py-1 rounded font-bold bg-white text-slate-900 shadow-sm transition flex items-center gap-1">
+              <i data-lucide="table" class="w-3.5 h-3.5 text-blue-600"></i> 📋 Tablas Excel
+            </button>
+            <button type="button" onclick="conmutarVistaEjecutiva('graficos')" id="btnVistaGraficos" class="px-2.5 py-1 rounded font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-1">
+              <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-indigo-600"></i> 📊 Gráficos
+            </button>
+            <button type="button" onclick="conmutarVistaEjecutiva('ambos')" id="btnVistaAmbos" class="px-2.5 py-1 rounded font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-1">
+              <i data-lucide="columns-2" class="w-3.5 h-3.5 text-brand-600"></i> 🔀 Ver Ambos
+            </button>
+          </div>
+
+          <button onclick="toggleSeccionEjecutiva()" id="btnToggleSeccion" title="Plegar / Desplegar sección ejecutiva" class="px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-500 transition flex items-center gap-1 text-xs font-semibold">
+            <span id="lblToggleSeccion">Ocultar</span>
+            <i data-lucide="chevron-up" class="w-3.5 h-3.5" id="icoToggleSeccion"></i>
           </button>
         </div>
       </div>
 
-      <div id="contenedorTablasEjecutivas" class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
+      <div id="cuerpoSeccionEjecutiva" class="space-y-4 pt-1">
         
-        <!-- TABLA 1: Resumen por proyecto -->
-        <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between bg-white">
-          <div>
-            <div class="bg-slate-900 px-4 py-2.5 text-white flex items-center justify-between">
-              <span class="font-bold text-xs tracking-wide flex items-center gap-1.5">
-                <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-400"></i> Resumen por proyecto
-              </span>
-              <span class="text-[10px] text-blue-300 uppercase font-semibold">Portafolio</span>
+        <!-- BLOQUE 1: TABLAS EJECUTIVAS OFICIALES (EXCEL) -->
+        <div id="contenedorTablasEjecutivas" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          
+          <!-- TABLA 1: Resumen por proyecto -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between bg-white">
+            <div>
+              <div class="bg-slate-900 px-4 py-2.5 text-white flex items-center justify-between">
+                <span class="font-bold text-xs tracking-wide flex items-center gap-1.5">
+                  <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-400"></i> Resumen por proyecto
+                </span>
+                <span class="text-[10px] text-blue-300 uppercase font-semibold">Portafolio</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left border-collapse">
+                  <thead>
+                    <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 text-[11px] font-bold">
+                      <th class="p-2.5">Proyecto</th>
+                      <th class="p-2.5 text-center">Casos abiertos</th>
+                      <th class="p-2.5 text-center">P1 críticos</th>
+                      <th class="p-2.5 text-center">Ruta crítica</th>
+                      <th class="p-2.5 text-right">Exposición probable PEN</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyResumenProyecto" class="divide-y divide-slate-100 text-slate-700 font-medium">
+                    <!-- Render dinámico -->
+                  </tbody>
+                  <tfoot id="tfootResumenProyecto" class="bg-slate-50 font-bold border-t-2 border-slate-300 text-slate-900 text-xs">
+                    <!-- Total dinámico -->
+                  </tfoot>
+                </table>
+              </div>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-xs text-left border-collapse">
-                <thead>
-                  <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 text-[11px] font-bold">
-                    <th class="p-2.5">Proyecto</th>
-                    <th class="p-2.5 text-center">Casos abiertos</th>
-                    <th class="p-2.5 text-center">P1 crticos</th>
-                    <th class="p-2.5 text-center">Ruta crtica</th>
-                    <th class="p-2.5 text-right">Exposicin probable PEN</th>
-                  </tr>
-                </thead>
-                <tbody id="tbodyResumenProyecto" class="divide-y divide-slate-100 text-slate-700 font-medium">
-                  <!-- Render dinmico -->
-                </tbody>
-                <tfoot id="tfootResumenProyecto" class="bg-slate-50 font-bold border-t-2 border-slate-300 text-slate-900 text-xs">
-                  <!-- Total dinmico -->
-                </tfoot>
-              </table>
+            <div class="p-2 bg-slate-50 border-t border-slate-200 text-[10px] text-slate-500 italic text-right">
+              * Clic en cualquier fila para filtrar casos del proyecto.
             </div>
           </div>
-          <div class="p-2 bg-slate-50 border-t border-slate-200 text-[10px] text-slate-500 italic text-right">
-            * Clic en cualquier fila para filtrar casos del proyecto.
+
+          <!-- TABLA 2: Casos por instancia actual -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between bg-white">
+            <div>
+              <div class="bg-slate-900 px-4 py-2.5 text-white flex items-center justify-between">
+                <span class="font-bold text-xs tracking-wide flex items-center gap-1.5">
+                  <i data-lucide="git-branch" class="w-3.5 h-3.5 text-amber-400"></i> Casos por instancia actual
+                </span>
+                <span class="text-[10px] text-amber-300 uppercase font-semibold">Carga Procesal</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left border-collapse">
+                  <thead>
+                    <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 text-[11px] font-bold">
+                      <th class="p-2.5">Instancia</th>
+                      <th class="p-2.5 text-center">Abiertos</th>
+                      <th class="p-2.5 text-center">Vencidos</th>
+                      <th class="p-2.5 text-right">Exposición PEN</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyResumenInstancia" class="divide-y divide-slate-100 text-slate-700 font-medium">
+                    <!-- Render dinámico -->
+                  </tbody>
+                  <tfoot id="tfootResumenInstancia" class="bg-slate-50 font-bold border-t-2 border-slate-300 text-slate-900 text-xs">
+                    <!-- Total dinámico -->
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+            <div class="p-2 bg-slate-50 border-t border-slate-200 text-[10px] text-slate-500 italic text-right">
+              * Clic en cualquier fila para filtrar casos de la instancia.
+            </div>
           </div>
+
         </div>
 
-        <!-- TABLA 2: Casos por instancia actual -->
-        <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between bg-white">
-          <div>
-            <div class="bg-slate-900 px-4 py-2.5 text-white flex items-center justify-between">
-              <span class="font-bold text-xs tracking-wide flex items-center gap-1.5">
-                <i data-lucide="git-branch" class="w-3.5 h-3.5 text-amber-400"></i> Casos por instancia actual
+        <!-- BLOQUE 2: GRÁFICOS VISUALES ESTADÍSTICOS (BARRAS DE IMPACTO) -->
+        <div id="contenedorGraficosEjecutivos" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Gráfico 1: Casos Abiertos por Megaproyecto -->
+          <div class="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
+            <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
+              <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-600"></i>
+                Casos Abiertos por Megaproyecto
               </span>
-              <span class="text-[10px] text-amber-300 uppercase font-semibold">Carga Procesal</span>
+              <span class="text-[11px] text-slate-500 font-mono font-semibold" id="lblTotalCasosProy">0 casos</span>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-xs text-left border-collapse">
-                <thead>
-                  <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 text-[11px] font-bold">
-                    <th class="p-2.5">Instancia</th>
-                    <th class="p-2.5 text-center">Abiertos</th>
-                    <th class="p-2.5 text-center">Vencidos</th>
-                    <th class="p-2.5 text-right">Exposicin PEN</th>
-                  </tr>
-                </thead>
-                <tbody id="tbodyResumenInstancia" class="divide-y divide-slate-100 text-slate-700 font-medium">
-                  <!-- Render dinmico -->
-                </tbody>
-                <tfoot id="tfootResumenInstancia" class="bg-slate-50 font-bold border-t-2 border-slate-300 text-slate-900 text-xs">
-                  <!-- Total dinmico -->
-                </tfoot>
-              </table>
+            <div id="graficoCasosPorProyecto" class="space-y-2.5 pt-1">
+              <!-- Renderizado dinámico de barras -->
             </div>
           </div>
-          <div class="p-2 bg-slate-50 border-t border-slate-200 text-[10px] text-slate-500 italic text-right">
-            * Clic en cualquier fila para filtrar casos de la instancia.
+
+          <!-- Gráfico 2: Carga Procesal por Instancia (Cuellos de Botella) -->
+          <div class="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
+            <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
+              <span class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                <i data-lucide="git-branch" class="w-3.5 h-3.5 text-brand-600"></i>
+                Carga Procesal por Instancia (Cuellos de Botella)
+              </span>
+              <span class="text-[11px] text-slate-500 font-mono font-semibold" id="lblTotalCasosInst">0 casos</span>
+            </div>
+            <div id="graficoCargaPorInstancia" class="space-y-2.5 pt-1">
+              <!-- Renderizado dinámico de barras -->
+            </div>
           </div>
+
         </div>
 
       </div>
     </section>
-
 
 <!-- BARRA DE FILTROS TÁCTILES RÁPIDOS Y BÚSQUEDA -->
     <section class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm space-y-3">
@@ -1771,6 +1822,7 @@
       cargarCasosDesdeAlmacenamiento();
       poblarSelectsDesdeConfiguracion();
       limpiarFiltros();
+      conmutarVistaEjecutiva(modoVistaEjecutivaActual);
       document.getElementById('lblFechaCorte').textContent = `Corte: ${formatearFechaHoy()}`;
       if (window.innerWidth < 768) {
         cambiarModoVista('cards');
@@ -2360,25 +2412,63 @@
         }
       }
 
+      renderizarTablasResumenEjecutivo();
       renderizarGraficosEjecutivos();
     }
 
-    // GESTIÓN DE TABLAS DEL TABLERO EJECUTIVO (RESUMEN POR PROYECTO & CASOS POR INSTANCIA)
-    let tablasColapsadas = false;
-    function toggleTablasEjecutivas() {
-      tablasColapsadas = !tablasColapsadas;
-      const cont = document.getElementById('contenedorTablasEjecutivas');
-      const lbl = document.getElementById('lblToggleTablas');
-      const ico = document.getElementById('icoToggleTablas');
-      if (tablasColapsadas) {
-        cont.classList.add('hidden');
-        lbl.textContent = 'Mostrar Tablas';
+    // GESTIÓN DEL TABLERO EJECUTIVO HÍBRIDO (CONMUTACIÓN TABLAS EXCEL & GRÁFICOS)
+    let seccionEjecutivaColapsada = false;
+    let modoVistaEjecutivaActual = localStorage.getItem('g2g_vista_ejecutiva') || 'ambos';
+
+    function toggleSeccionEjecutiva() {
+      seccionEjecutivaColapsada = !seccionEjecutivaColapsada;
+      const cuerpo = document.getElementById('cuerpoSeccionEjecutiva');
+      const lbl = document.getElementById('lblToggleSeccion');
+      const ico = document.getElementById('icoToggleSeccion');
+      if (seccionEjecutivaColapsada) {
+        cuerpo.classList.add('hidden');
+        lbl.textContent = 'Mostrar';
         ico.setAttribute('data-lucide', 'chevron-down');
       } else {
-        cont.classList.remove('hidden');
-        lbl.textContent = 'Ocultar Tablas';
+        cuerpo.classList.remove('hidden');
+        lbl.textContent = 'Ocultar';
         ico.setAttribute('data-lucide', 'chevron-up');
       }
+      lucide.createIcons();
+    }
+
+    function conmutarVistaEjecutiva(modo) {
+      modoVistaEjecutivaActual = modo;
+      localStorage.setItem('g2g_vista_ejecutiva', modo);
+
+      const contTablas = document.getElementById('contenedorTablasEjecutivas');
+      const contGraficos = document.getElementById('contenedorGraficosEjecutivos');
+      const btnTablas = document.getElementById('btnVistaTablas');
+      const btnGraficos = document.getElementById('btnVistaGraficos');
+      const btnAmbos = document.getElementById('btnVistaAmbos');
+
+      // Clases botones inactivos
+      const clsInactivo = "px-2.5 py-1 rounded font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-1";
+      const clsActivo = "px-2.5 py-1 rounded font-bold bg-white text-slate-900 shadow-sm transition flex items-center gap-1";
+
+      if (btnTablas) btnTablas.className = clsInactivo;
+      if (btnGraficos) btnGraficos.className = clsInactivo;
+      if (btnAmbos) btnAmbos.className = clsInactivo;
+
+      if (modo === 'tablas') {
+        if (contTablas) contTablas.classList.remove('hidden');
+        if (contGraficos) contGraficos.classList.add('hidden');
+        if (btnTablas) btnTablas.className = clsActivo;
+      } else if (modo === 'graficos') {
+        if (contTablas) contTablas.classList.add('hidden');
+        if (contGraficos) contGraficos.classList.remove('hidden');
+        if (btnGraficos) btnGraficos.className = clsActivo;
+      } else { // ambos
+        if (contTablas) contTablas.classList.remove('hidden');
+        if (contGraficos) contGraficos.classList.remove('hidden');
+        if (btnAmbos) btnAmbos.className = clsActivo;
+      }
+
       lucide.createIcons();
     }
 
@@ -2398,6 +2488,7 @@
       }
     }
 
+    // RENDERIZADO 1: TABLAS EJECUTIVAS OFICIALES (EXCEL)
     function renderizarTablasResumenEjecutivo() {
       const tbProy = document.getElementById('tbodyResumenProyecto');
       const tfProy = document.getElementById('tfootResumenProyecto');
@@ -2408,7 +2499,7 @@
 
       const casosAbiertos = casos.filter(c => c.estado !== 'Cerrado');
 
-      // 1. RESUMEN POR PROYECTO (Exacto como en el Excel Oficial del Ingeniero)
+      // 1. Resumen por Proyecto
       const ordenProyectos = ['NCC', 'EV4', 'VESR', 'PSR'];
       (configSistema.proyectos || []).forEach(p => {
         if (!ordenProyectos.includes(p.codigo)) ordenProyectos.push(p.codigo);
@@ -2462,7 +2553,7 @@
         </tr>
       `;
 
-      // 2. CASOS POR INSTANCIA ACTUAL (Exacto como en el Excel Oficial del Ingeniero)
+      // 2. Casos por Instancia Actual
       const ordenInstancias = [
         'PMO',
         'Dirección de Estudios',
@@ -2518,6 +2609,118 @@
           <td class="p-2.5 text-right font-mono font-bold text-blue-900">S/ ${totExpI.toLocaleString('es-PE', { maximumFractionDigits: 0 })}</td>
         </tr>
       `;
+
+      lucide.createIcons();
+    }
+
+    // RENDERIZADO 2: GRÁFICOS VISUALES ESTADÍSTICOS (BARRAS DE IMPACTO)
+    function renderizarGraficosEjecutivos() {
+      const gProy = document.getElementById('graficoCasosPorProyecto');
+      const gInst = document.getElementById('graficoCargaPorInstancia');
+      if (!gProy || !gInst) return;
+
+      const casosAbiertos = casos.filter(c => c.estado !== 'Cerrado');
+      const totalAbiertos = casosAbiertos.length || 1;
+
+      // 1. Gráfico por Megaproyecto
+      const conteoProy = {};
+      const expProy = {};
+      (configSistema.proyectos || []).forEach(p => {
+        conteoProy[p.codigo] = 0;
+        expProy[p.codigo] = 0;
+      });
+
+      casosAbiertos.forEach(c => {
+        const proy = c.proyecto || 'Otro';
+        conteoProy[proy] = (conteoProy[proy] || 0) + 1;
+        expProy[proy] = (expProy[proy] || 0) + (c.escenarioProbable || 0);
+      });
+
+      const lblProy = document.getElementById('lblTotalCasosProy');
+      if (lblProy) lblProy.textContent = `${casosAbiertos.length} casos en cartera`;
+      gProy.innerHTML = '';
+
+      Object.keys(conteoProy).forEach(cod => {
+        const cant = conteoProy[cod];
+        const pct = Math.round((cant / totalAbiertos) * 100);
+        const exp = expProy[cod] || 0;
+        const colorBarra = cod === 'NCC' ? 'bg-blue-600' : cod === 'EV4' ? 'bg-indigo-600' : cod === 'VESR' ? 'bg-purple-600' : 'bg-emerald-600';
+
+        const item = document.createElement('div');
+        item.className = "cursor-pointer group p-1.5 hover:bg-slate-100 rounded-lg transition";
+        item.onclick = () => {
+          document.getElementById('selFiltroProyecto').value = cod;
+          renderizarCasos();
+        };
+        item.innerHTML = `
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="font-bold text-slate-800 flex items-center gap-1.5 group-hover:text-brand-600 transition">
+              <span class="w-2.5 h-2.5 rounded-full ${colorBarra}"></span>
+              ${cod}
+            </span>
+            <div class="flex items-center gap-2 font-mono text-[11px]">
+              <span class="font-bold text-slate-800">${cant} caso(s) (${pct}%)</span>
+              <span class="text-slate-400">· S/ ${exp.toLocaleString('es-PE', { maximumFractionDigits: 0 })}</span>
+            </div>
+          </div>
+          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div class="${colorBarra} h-full rounded-full transition-all duration-500" style="width: ${cant > 0 ? Math.max(pct, 6) : 0}%"></div>
+          </div>
+        `;
+        gProy.appendChild(item);
+      });
+
+      // 2. Gráfico por Instancia Actual (Cuellos de Botella)
+      const conteoInst = {};
+      (configSistema.instancias || []).forEach(inst => {
+        const k = typeof inst === 'object' ? (inst.abreviatura || inst.nombre) : inst;
+        conteoInst[k] = 0;
+      });
+
+      casosAbiertos.forEach(c => {
+        const inst = c.instanciaActual || 'Sin asignar';
+        conteoInst[inst] = (conteoInst[inst] || 0) + 1;
+      });
+
+      const lblInst = document.getElementById('lblTotalCasosInst');
+      if (lblInst) lblInst.textContent = `${casosAbiertos.length} casos derivados`;
+      gInst.innerHTML = '';
+
+      const ordenados = Object.keys(conteoInst)
+        .filter(inst => conteoInst[inst] > 0)
+        .sort((a, b) => conteoInst[b] - conteoInst[a]);
+
+      if (ordenados.length === 0) {
+        gInst.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 italic">No hay instancias con casos derivados pendientes.</div>`;
+      } else {
+        ordenados.forEach(inst => {
+          const cant = conteoInst[inst];
+          const pct = Math.round((cant / totalAbiertos) * 100);
+          const esCuello = cant >= 2;
+          const colorBarra = esCuello ? 'bg-amber-500' : 'bg-brand-500';
+
+          const item = document.createElement('div');
+          item.className = "cursor-pointer group p-1.5 hover:bg-slate-100 rounded-lg transition";
+          item.onclick = () => {
+            document.getElementById('selFiltroInstancia').value = inst;
+            renderizarCasos();
+          };
+          item.innerHTML = `
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-bold text-slate-800 flex items-center gap-1.5 group-hover:text-brand-600 transition truncate max-w-[200px]" title="${inst}">
+                <span class="w-2.5 h-2.5 rounded-full ${colorBarra}"></span>
+                ${inst}
+                ${esCuello ? '<span class="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold">Carga Alta</span>' : ''}
+              </span>
+              <span class="font-mono text-[11px] font-bold text-slate-800">${cant} caso(s) (${pct}%)</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+              <div class="${colorBarra} h-full rounded-full transition-all duration-500" style="width: ${cant > 0 ? Math.max(pct, 6) : 0}%"></div>
+            </div>
+          `;
+          gInst.appendChild(item);
+        });
+      }
 
       lucide.createIcons();
     }
