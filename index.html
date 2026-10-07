@@ -1490,13 +1490,25 @@
         };
       }
 
+      // Inicializar Webhook oficial institucional por defecto si es primera vez
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('webhook')) {
+        const paramUrl = urlParams.get('webhook').trim();
+        if (paramUrl.startsWith('https://script.google.com/')) {
+          localStorage.setItem("g2g_webhook_url", paramUrl);
+          localStorage.removeItem("g2g_modo_offline");
+        }
+      } else if (!localStorage.getItem("g2g_webhook_url") && localStorage.getItem("g2g_modo_offline") !== "true") {
+        localStorage.setItem("g2g_webhook_url", WEBHOOK_OFICIAL_DEFAULT);
+      }
+
       // Inicializar indicador visual de sincronización en nube
       actualizarEstadoVisualNube();
 
-      // Si existe Webhook configurado y auto-sync activo, sincronizar en segundo plano
-      const urlNube = localStorage.getItem("g2g_webhook_url");
+      // Si auto-sync activo (por defecto sí), descargar la última foto oficial de la nube
+      const urlNube = obtenerUrlWebhook();
       const autoSync = localStorage.getItem("g2g_auto_sync") !== "false";
-      if (urlNube && autoSync) {
+      if (urlNube && autoSync && localStorage.getItem("g2g_modo_offline") !== "true") {
         descargarDesdeNube(false);
       }
     });
@@ -3778,8 +3790,21 @@
     // CONFIGURACIÓN Y SINCRONIZACIÓN NUBE INSTITUCIONAL (GOOGLE SHEETS / APPS SCRIPT)
     // =========================================================================
 
+    const WEBHOOK_OFICIAL_DEFAULT = "https://script.google.com/macros/s/AKfycbxigupPXVSVRbe8R7ajdLoahPEjgRONxzuLOyALHe7VsoCMWvRzSC440i9Rrfme8Z-I/exec";
+
+    function obtenerUrlWebhook() {
+      if (localStorage.getItem("g2g_modo_offline") === "true") {
+        return "";
+      }
+      const guardada = localStorage.getItem("g2g_webhook_url");
+      if (guardada && guardada.trim() !== "") {
+        return guardada.trim();
+      }
+      return WEBHOOK_OFICIAL_DEFAULT;
+    }
+
     function abrirConfigNube() {
-      const url = localStorage.getItem("g2g_webhook_url") || "";
+      const url = obtenerUrlWebhook();
       const pin = localStorage.getItem("g2g_pin") || "";
       const autoSync = localStorage.getItem("g2g_auto_sync") !== "false";
 
@@ -3824,7 +3849,7 @@
     }
 
     function actualizarEstadoVisualNube(estado = null, mensaje = null, detalle = null) {
-      const url = localStorage.getItem("g2g_webhook_url") || "";
+      const url = obtenerUrlWebhook();
       const dotModal = document.getElementById('dotEstadoNube');
       const txtModal = document.getElementById('txtEstadoNube');
       const subModal = document.getElementById('subEstadoNube');
@@ -3870,7 +3895,7 @@
         // Conectado y en buen estado
         const ultimaSinc = localStorage.getItem("g2g_ultima_sinc") || "Activa";
         if (dotModal) dotModal.className = "w-3 h-3 rounded-full bg-emerald-500 shrink-0";
-        if (txtModal) txtModal.textContent = mensaje || "Conectado a Google Sheets";
+        if (txtModal) txtModal.textContent = mensaje || "Conectado a Google Sheets Oficial";
         if (subModal) subModal.textContent = detalle || `Última sincronización: ${ultimaSinc}`;
         if (boxModal) boxModal.className = "p-3 rounded-xl border flex items-center justify-between bg-emerald-50 border-emerald-200 text-emerald-800";
         if (btnHeader) {
@@ -3890,7 +3915,8 @@
         alert("Atención: La URL ingresada no parece ser un Webhook válido de Google Apps Script (debe comenzar con https://script.google.com/macros/s/...)");
       }
 
-      localStorage.setItem("g2g_webhook_url", url);
+      localStorage.removeItem("g2g_modo_offline");
+      localStorage.setItem("g2g_webhook_url", url || WEBHOOK_OFICIAL_DEFAULT);
       if (pin) localStorage.setItem("g2g_pin", pin);
       else localStorage.removeItem("g2g_pin");
       localStorage.setItem("g2g_auto_sync", chkAuto && chkAuto.checked ? "true" : "false");
@@ -3902,6 +3928,7 @@
 
     function desconectarNube() {
       if (confirm("¿Está seguro de desconectar este dispositivo de la Nube de Google Sheets?\nLos datos locales no se borrarán.")) {
+        localStorage.setItem("g2g_modo_offline", "true");
         localStorage.removeItem("g2g_webhook_url");
         localStorage.removeItem("g2g_pin");
         localStorage.removeItem("g2g_auto_sync");
@@ -3917,7 +3944,7 @@
     }
 
     async function probarConexionNube() {
-      const url = (document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "") || localStorage.getItem("g2g_webhook_url");
+      const url = (document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "") || obtenerUrlWebhook();
       if (!url) {
         alert("Por favor ingrese primero la URL del Webhook de Google Apps Script.");
         return;
@@ -3948,7 +3975,7 @@
     }
 
     async function descargarDesdeNube(mostrarAlertas = true) {
-      const url = localStorage.getItem("g2g_webhook_url") || (document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "");
+      const url = obtenerUrlWebhook() || (document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "");
       if (!url) {
         if (mostrarAlertas) alert("No hay ningún Webhook de Google Sheets configurado. Ingrese la URL en la configuración de la Nube.");
         return;
@@ -3994,7 +4021,7 @@
     }
 
     async function enviarHaciaNube() {
-      const url = localStorage.getItem("g2g_webhook_url") || (document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "");
+      const url = obtenerUrlWebhook() || (document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "");
       if (!url) {
         alert("Primero configure y guarde la URL del Webhook de Google Sheets.");
         abrirConfigNube();
