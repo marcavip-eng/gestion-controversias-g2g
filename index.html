@@ -1428,6 +1428,7 @@
       fases: [
         "Diseño/Estudios",
         "Ejecución",
+        "Diseño y construcción Fast track",
         "Contratación",
         "Cierre"
       ],
@@ -3712,6 +3713,8 @@
       cancelarEdicionItemCatalogo();
       renderizarListaItemsCatalogo();
       renderizarAccProyectosConfig();
+      localStorage.setItem("controversias_g2g_config", JSON.stringify(configSistema));
+      poblarSelectsDesdeConfiguracion();
     }
 
     function eliminarItemCatalogo(idx) {
@@ -3722,6 +3725,8 @@
           cancelarEdicionItemCatalogo();
           renderizarListaItemsCatalogo();
           renderizarAccProyectosConfig();
+          localStorage.setItem("controversias_g2g_config", JSON.stringify(configSistema));
+          poblarSelectsDesdeConfiguracion();
         }
       } else {
         alert("El catálogo debe contener al menos una opción activa.");

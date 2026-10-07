@@ -45,10 +45,17 @@ function doGet(e) {
       }
     }
     
+    var totalCount = 0;
+    if (Array.isArray(responseData)) {
+      totalCount = responseData.length;
+    } else if (responseData && Array.isArray(responseData.casos)) {
+      totalCount = responseData.casos.length;
+    }
+
     var output = {
       success: true,
       data: responseData,
-      count: responseData.length,
+      count: totalCount,
       timestamp: new Date().toISOString()
     };
     
