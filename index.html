@@ -1730,15 +1730,30 @@
       if (guardados) {
         try {
           casos = JSON.parse(guardados);
+          if (!Array.isArray(casos) || casos.length === 0) {
+            casos = JSON.parse(JSON.stringify(CASOS_DEFAULT));
+            guardarEnStorage();
+          }
         } catch (e) {
-          casos = [...CASOS_DEFAULT];
+          casos = JSON.parse(JSON.stringify(CASOS_DEFAULT));
+          guardarEnStorage();
         }
       } else {
-        casos = [...CASOS_DEFAULT];
+        casos = JSON.parse(JSON.stringify(CASOS_DEFAULT));
         guardarEnStorage();
       }
       actualizarDashboard();
       renderizarCasos();
+    }
+
+    function restaurarCasosEjemplo() {
+      if (confirm("¿Desea restaurar los casos de ejemplo oficiales en el sistema?")) {
+        casos = JSON.parse(JSON.stringify(CASOS_DEFAULT));
+        guardarEnStorage();
+        actualizarDashboard();
+        renderizarCasos();
+        alert("✅ Se han restaurado los casos de ejemplo oficiales.");
+      }
     }
 
     function guardarEnStorage() {
@@ -2302,8 +2317,12 @@
                   <i data-lucide="folder-search" class="w-6 h-6"></i>
                 </div>
                 <p class="text-slate-600 font-medium text-xs">No se encontraron casos con los criterios seleccionados.</p>
-                <div class="flex items-center justify-center gap-2 pt-1">
+                <div class="flex items-center justify-center flex-wrap gap-2 pt-1">
                   <button onclick="limpiarFiltros()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs hover:bg-slate-50">Limpiar Filtros</button>
+                  <button onclick="restaurarCasosEjemplo()" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center gap-1 transition">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                    <span>Cargar Casos de Ejemplo</span>
+                  </button>
                   <button onclick="abrirModalCaso()" class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white font-bold text-xs hover:bg-brand-500 shadow-sm flex items-center gap-1.5">
                     <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
                     <span>+ Registrar Nuevo Caso</span>
@@ -2319,8 +2338,12 @@
               <i data-lucide="folder-search" class="w-6 h-6"></i>
             </div>
             <p class="text-slate-600 font-medium text-xs">No se encontraron casos con los filtros aplicados.</p>
-            <div class="flex items-center justify-center gap-2 pt-1">
+            <div class="flex items-center justify-center flex-wrap gap-2 pt-1">
               <button onclick="limpiarFiltros()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs">Limpiar Filtros</button>
+              <button onclick="restaurarCasosEjemplo()" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center gap-1 transition">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                <span>Cargar Casos de Ejemplo</span>
+              </button>
               <button onclick="abrirModalCaso()" class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white font-bold text-xs shadow-sm flex items-center gap-1.5">
                 <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
                 <span>+ Registrar Nuevo Caso</span>
@@ -4004,6 +4027,12 @@
             }
           } else {
             actualizarEstadoVisualNube('exito', 'Nube Conectada', 'La base en Google Sheets está vacía por ahora');
+            if (!casos || casos.length === 0) {
+              casos = JSON.parse(JSON.stringify(CASOS_DEFAULT));
+              guardarEnStorage();
+              actualizarDashboard();
+              renderizarCasos();
+            }
             if (mostrarAlertas) {
               alert("ℹ️ La hoja de Google Sheets está conectada, pero aún no tiene controversias guardadas. Un abogado con PIN puede enviar los primeros registros con el botón 'Enviar a Nube'.");
             }
