@@ -90,16 +90,18 @@ function doPost(e) {
     }
     
     var casos = payload.casos || [];
+    var config = payload.configuracion || null;
     var usuario = payload.usuario || "Abogado Operativo";
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     
-    // 1. Guardar copia serializada JSON rápida en hoja oculta
+    // 1. Guardar copia serializada JSON rápida en hoja oculta (casos + catálogos)
     var sheetJson = ss.getSheetByName("JSON_STORE");
     if (!sheetJson) {
       sheetJson = ss.insertSheet("JSON_STORE");
       sheetJson.hideSheet();
     }
-    sheetJson.getRange("A1").setValue(JSON.stringify(casos));
+    var storePayload = config ? { casos: casos, configuracion: config } : casos;
+    sheetJson.getRange("A1").setValue(JSON.stringify(storePayload));
     sheetJson.getRange("B1").setValue(new Date());
     sheetJson.getRange("C1").setValue(usuario);
     

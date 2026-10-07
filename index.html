@@ -4079,8 +4079,22 @@
 
         if (res && res.success) {
           const datosNube = res.data;
-          if (Array.isArray(datosNube) && datosNube.length > 0 && !datosNube.some(c => c.id === 'TEST-01')) {
-            casos = datosNube;
+          let nuevosCasos = [];
+          if (Array.isArray(datosNube)) {
+            nuevosCasos = datosNube;
+          } else if (datosNube && typeof datosNube === 'object') {
+            if (Array.isArray(datosNube.casos)) {
+              nuevosCasos = datosNube.casos;
+            }
+            if (datosNube.configuracion && typeof datosNube.configuracion === 'object') {
+              configSistema = Object.assign({}, JSON.parse(JSON.stringify(CONFIG_DEFAULT)), datosNube.configuracion);
+              localStorage.setItem("controversias_g2g_config", JSON.stringify(configSistema));
+              poblarSelectsDesdeConfiguracion();
+            }
+          }
+
+          if (nuevosCasos.length > 0 && !nuevosCasos.some(c => c.id === 'TEST-01')) {
+            casos = nuevosCasos;
             guardarEnStorage();
             actualizarDashboard();
             renderizarCasos();
@@ -4090,7 +4104,7 @@
             actualizarEstadoVisualNube('exito', 'Datos Sincronizados', `Última descarga: ${horaActual} (${casos.length} casos)`);
 
             if (mostrarAlertas) {
-              alert(`📥 ¡Descarga completada con éxito!\nSe cargaron ${casos.length} controversias actualizadas desde Google Sheets.\n\nLa Jefa y todo el equipo están viendo la misma información.`);
+              alert(`📥 ¡Descarga completada con éxito!\nSe cargaron ${casos.length} controversias y catálogos actualizados desde Google Sheets.\n\nLa Jefa y todo el equipo están viendo la misma información.`);
             }
           } else {
             actualizarEstadoVisualNube('exito', 'Nube Conectada', 'Sincronizado con Google Sheets');
@@ -4147,6 +4161,7 @@
         const payload = {
           pin: pin.trim(),
           casos: casos,
+          configuracion: configSistema,
           usuario: configSistema?.direccionActiva || "Abogado Operativo G2G"
         };
 
