@@ -301,12 +301,15 @@
         <!-- Búsqueda textual -->
         <div class="sm:col-span-5 relative">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-          <input type="text" id="txtBuscar" oninput="renderizarCasos()" placeholder="Buscar por código, asunto, responsable, contraparte..." class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 text-slate-800">
+          <input type="text" id="txtBuscar" autocomplete="off" oninput="toggleBotonLimpiarBusqueda(); renderizarCasos()" placeholder="Buscar por código, asunto, responsable, contraparte..." class="w-full pl-9 pr-8 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 text-slate-800">
+          <button type="button" id="btnLimpiarTxtBuscar" onclick="limpiarSoloTxtBuscar()" class="hidden absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 transition" title="Limpiar búsqueda">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
 
         <!-- Filtro Proyecto -->
         <div class="sm:col-span-2">
-          <select id="selFiltroProyecto" onchange="renderizarCasos()" class="w-full py-2 px-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 text-slate-800">
+          <select id="selFiltroProyecto" autocomplete="off" onchange="renderizarCasos()" class="w-full py-2 px-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 text-slate-800">
             <option value="">Proyecto: Todos</option>
             <option value="NCC">NCC (Nueva Carretera Central)</option>
             <option value="EV4">EV4 (Eje Vial 4)</option>
@@ -317,7 +320,7 @@
 
         <!-- Filtro Instancia Actual -->
         <div class="sm:col-span-3">
-          <select id="selFiltroInstancia" onchange="renderizarCasos()" class="w-full py-2 px-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 text-slate-800">
+          <select id="selFiltroInstancia" autocomplete="off" onchange="renderizarCasos()" class="w-full py-2 px-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 text-slate-800">
             <option value="">Instancia: Todas</option>
             <option value="PMO">PMO (Asistencia Técnica)</option>
             <option value="Dirección de Estudios">Dirección de Estudios / Conducción</option>
@@ -1474,6 +1477,7 @@
       cargarConfiguracionSistema();
       cargarCasosDesdeAlmacenamiento();
       poblarSelectsDesdeConfiguracion();
+      limpiarFiltros();
       document.getElementById('lblFechaCorte').textContent = `Corte: ${formatearFechaHoy()}`;
       if (window.innerWidth < 768) {
         cambiarModoVista('cards');
@@ -2185,10 +2189,34 @@
       renderizarCasos();
     }
 
+    function toggleBotonLimpiarBusqueda() {
+      const inp = document.getElementById('txtBuscar');
+      const btn = document.getElementById('btnLimpiarTxtBuscar');
+      if (!inp || !btn) return;
+      if (inp.value && inp.value.trim().length > 0) {
+        btn.classList.remove('hidden');
+      } else {
+        btn.classList.add('hidden');
+      }
+    }
+
+    function limpiarSoloTxtBuscar() {
+      const inp = document.getElementById('txtBuscar');
+      if (inp) {
+        inp.value = '';
+        toggleBotonLimpiarBusqueda();
+        renderizarCasos();
+      }
+    }
+
     function limpiarFiltros() {
-      document.getElementById('txtBuscar').value = '';
-      document.getElementById('selFiltroProyecto').value = '';
-      document.getElementById('selFiltroInstancia').value = '';
+      const inpB = document.getElementById('txtBuscar');
+      if (inpB) inpB.value = '';
+      toggleBotonLimpiarBusqueda();
+      const selP = document.getElementById('selFiltroProyecto');
+      if (selP) selP.value = '';
+      const selI = document.getElementById('selFiltroInstancia');
+      if (selI) selI.value = '';
       aplicarFiltroRapido('todos');
     }
 
