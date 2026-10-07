@@ -655,7 +655,7 @@
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">Fecha Límite <span class="text-rose-500">*</span></label>
-              <input type="date" id="inpFechaLimite" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 font-bold">
+              <input type="date" id="inpFechaLimite" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 font-bold">
             </div>
           </div>
 
@@ -737,8 +737,8 @@
                 <input type="number" step="0.01" id="inpEscenarioBajo" placeholder="0.00" class="w-full p-2 border border-slate-300 rounded-lg font-mono">
               </div>
               <div>
-                <label class="block text-[11px] font-bold text-blue-700 mb-0.5">Escenario Probable (Punto Focal) *</label>
-                <input type="number" step="0.01" id="inpEscenarioProbable" required placeholder="0.00" oninput="calcularBrecha()" class="w-full p-2 border border-blue-400 bg-blue-50/50 rounded-lg font-mono font-bold">
+                <label class="block text-[11px] font-bold text-blue-700 mb-0.5">Escenario Probable (Punto Focal) <span class="text-slate-400 font-normal text-[10px]">(Opcional: completar conforme defina OPP)</span></label>
+                <input type="number" step="0.01" id="inpEscenarioProbable" placeholder="0.00" oninput="calcularBrecha()" class="w-full p-2 border border-blue-400 bg-blue-50/50 rounded-lg font-mono font-bold">
               </div>
               <div>
                 <label class="block text-[11px] text-slate-500 mb-0.5">Escenario Alto (Máximo Riesgo)</label>
@@ -785,7 +785,7 @@
             <button type="button" id="btnWizardNext" onclick="navegarWizard(1)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-bold">
               Siguiente
             </button>
-            <button type="submit" id="btnWizardSave" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-bold shadow-md shadow-brand-600/30 hidden">
+            <button type="submit" id="btnWizardSave" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg font-bold shadow-md shadow-brand-600/30">
               Guardar Caso
             </button>
           </div>
@@ -2975,6 +2975,27 @@
           `;
         }
 
+                // Detección inteligente de información pendiente (Permite registro flexible y progresivo)
+        const alertasFaltantes = [];
+        if (!c.posicionProvias || c.posicionProvias.trim() === '') {
+          alertasFaltantes.push('<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">⚖️ Posición legal</span>');
+        }
+        if (!c.wbs || c.wbs.trim() === '') {
+          alertasFaltantes.push('<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">🏗️ WBS de obra</span>');
+        }
+        if (!c.escenarioProbable || parseFloat(c.escenarioProbable) === 0) {
+          alertasFaltantes.push('<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">💰 Cuantía OPP</span>');
+        }
+
+        const barraAlertasHTML = alertasFaltantes.length > 0
+          ? `<div class="flex items-center gap-1 flex-wrap pt-1 text-[9px]">
+              <span class="text-slate-400 font-bold uppercase text-[8px]">Por completar:</span>
+              ${alertasFaltantes.join(' ')}
+             </div>`
+          : `<div class="flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              <i data-lucide="check-circle" class="w-3 h-3 text-emerald-600"></i> Expediente Completo (Legal, Técnico y OPP)
+             </div>`;
+
         card.innerHTML = `
           <div class="flex items-start justify-between">
             <div>
@@ -3006,7 +3027,10 @@
             </div>
             <div>
               <span class="text-slate-400 block text-[10px]">Exposición Probable:</span>
-              <span class="font-bold text-blue-900 font-mono">S/ ${(c.escenarioProbable || 0).toLocaleString('es-PE')}</span>
+              ${(c.escenarioProbable && c.escenarioProbable > 0)
+                ? `<span class="font-bold text-blue-900 font-mono">S/ ${(c.escenarioProbable).toLocaleString('es-PE')}</span>`
+                : `<span class="font-bold text-slate-400 font-mono text-[10px] italic">Pendiente OPP</span>`
+              }
             </div>
             <div>
               <span class="text-slate-400 block text-[10px]">Validación Legal:</span>
@@ -3016,6 +3040,9 @@
               </span>
             </div>
           </div>
+
+          <!-- Alertas de Completitud Progresiva -->
+          ${barraAlertasHTML}
 
           <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
             <span class="text-[10px] text-slate-500 font-medium truncate max-w-[100px]" title="${c.responsable || 'Sin asignar'}">
@@ -3084,6 +3111,11 @@
       const icoBanner = document.getElementById('icoBannerPerfil');
       const badgeBanner = document.getElementById('badgeBannerPerfil');
 
+      const tabBtn1 = document.getElementById('tabBtn1');
+      const tabBtn2 = document.getElementById('tabBtn2');
+      const tabBtn3 = document.getElementById('tabBtn3');
+      const tabBtn4 = document.getElementById('tabBtn4');
+
       // Reset clases botones
       if (btnAbog) btnAbog.className = 'px-3 py-1 rounded font-medium transition flex items-center gap-1 text-slate-300 hover:text-white';
       if (btnIng) btnIng.className = 'px-3 py-1 rounded font-medium transition flex items-center gap-1 text-slate-300 hover:text-white';
@@ -3092,34 +3124,51 @@
       if (perfil === 'abogado') {
         if (btnAbog) btnAbog.className = 'px-3 py-1 rounded font-bold transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow-sm';
         if (banner) banner.className = 'p-3 rounded-xl border text-xs flex items-center justify-between bg-amber-50 border-amber-200 text-amber-900 transition';
-        if (txtBanner) txtBanner.innerHTML = '<strong>Módulo Abogado Activo:</strong> Editando los 13 campos del expediente legal y procesal. WBS y cronograma técnico no requeridos.';
+        if (txtBanner) txtBanner.innerHTML = '<strong>Módulo Abogado Activo:</strong> Editando los 13 campos del expediente legal. WBS y cuantías presupuestales ocultos para mayor agilidad.';
         if (icoBanner) icoBanner.setAttribute('data-lucide', 'scale');
         if (badgeBanner) {
-          badgeBanner.textContent = 'LEGAL';
+          badgeBanner.textContent = '13 DATOS LEGALES';
           badgeBanner.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900 uppercase tracking-wide';
         }
+        // Ocultar pestañas técnicas y económicas al abogado
+        if (tabBtn1) tabBtn1.classList.remove('hidden');
+        if (tabBtn2) tabBtn2.classList.remove('hidden');
+        if (tabBtn3) tabBtn3.classList.add('hidden');
+        if (tabBtn4) tabBtn4.classList.add('hidden');
+
         if (tabWizardActual > 2) cambiarTabWizard(1);
         else cambiarTabWizard(tabWizardActual);
       } else if (perfil === 'ingeniero') {
         if (btnIng) btnIng.className = 'px-3 py-1 rounded font-bold transition flex items-center gap-1 bg-blue-500 text-white shadow-sm';
         if (banner) banner.className = 'p-3 rounded-xl border text-xs flex items-center justify-between bg-blue-50 border-blue-200 text-blue-900 transition';
-        if (txtBanner) txtBanner.innerHTML = '<strong>Módulo Ingeniero Activo:</strong> Editando WBS, Cronograma de Obra, Mitigación y Presupuesto OPP. Expediente legal en lectura.';
+        if (txtBanner) txtBanner.innerHTML = '<strong>Módulo Ingeniero / Costos Activo:</strong> Editando WBS, Cronograma de Obra, Mitigación y Presupuesto OPP. Expediente legal disponible de referencia.';
         if (icoBanner) icoBanner.setAttribute('data-lucide', 'hard-hat');
         if (badgeBanner) {
-          badgeBanner.textContent = 'TÉCNICO / OBRA';
+          badgeBanner.textContent = 'OBRA & OPP';
           badgeBanner.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-blue-200 text-blue-900 uppercase tracking-wide';
         }
+        // Mostrar todas las pestañas para el ingeniero
+        if (tabBtn1) tabBtn1.classList.remove('hidden');
+        if (tabBtn2) tabBtn2.classList.remove('hidden');
+        if (tabBtn3) tabBtn3.classList.remove('hidden');
+        if (tabBtn4) tabBtn4.classList.remove('hidden');
+
         if (tabWizardActual < 3) cambiarTabWizard(3);
         else cambiarTabWizard(tabWizardActual);
       } else {
         if (btnComp) btnComp.className = 'px-3 py-1 rounded font-bold transition flex items-center gap-1 bg-slate-700 text-white shadow-sm';
         if (banner) banner.className = 'p-3 rounded-xl border text-xs flex items-center justify-between bg-slate-100 border-slate-200 text-slate-700 transition';
-        if (txtBanner) txtBanner.innerHTML = '<strong>Modo Completo Activo:</strong> Acceso libre a los 4 bloques (Identificación, Trámite, WBS Técnico y Cuantía Económica).';
+        if (txtBanner) txtBanner.innerHTML = '<strong>Modo Completo / Jefatura:</strong> Acceso irrestricto a los 4 bloques (Identificación, Trámite, WBS Técnico y Cuantía Económica).';
         if (icoBanner) icoBanner.setAttribute('data-lucide', 'layers');
         if (badgeBanner) {
-          badgeBanner.textContent = 'MAESTRO';
+          badgeBanner.textContent = 'INTEGRAL';
           badgeBanner.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-800 uppercase tracking-wide';
         }
+        if (tabBtn1) tabBtn1.classList.remove('hidden');
+        if (tabBtn2) tabBtn2.classList.remove('hidden');
+        if (tabBtn3) tabBtn3.classList.remove('hidden');
+        if (tabBtn4) tabBtn4.classList.remove('hidden');
+
         cambiarTabWizard(tabWizardActual);
       }
       lucide.createIcons();
@@ -3145,27 +3194,28 @@
       const btnNext = document.getElementById('btnWizardNext');
       const btnSave = document.getElementById('btnWizardSave');
 
+      // Botón Guardar SIEMPRE VISIBLE en cualquier paso
+      if (btnSave) {
+        btnSave.classList.remove('hidden');
+        if (perfilEdicionActual === 'abogado') {
+          btnSave.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Guardar Expediente Legal';
+        } else if (perfilEdicionActual === 'ingeniero') {
+          btnSave.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Guardar Avance Técnico';
+        } else {
+          btnSave.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Guardar Caso';
+        }
+      }
+
+      // Control de botones Anterior y Siguiente
       if (perfilEdicionActual === 'abogado') {
         if (btnPrev) btnPrev.classList.toggle('hidden', tab === 1);
         if (btnNext) btnNext.classList.toggle('hidden', tab === 2);
-        if (btnSave) {
-          btnSave.classList.toggle('hidden', tab !== 2);
-          btnSave.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Guardar Evaluación Legal';
-        }
       } else if (perfilEdicionActual === 'ingeniero') {
-        if (btnPrev) btnPrev.classList.toggle('hidden', tab === 3);
+        if (btnPrev) btnPrev.classList.toggle('hidden', tab === 1 || tab === 3);
         if (btnNext) btnNext.classList.toggle('hidden', tab === 4);
-        if (btnSave) {
-          btnSave.classList.toggle('hidden', tab !== 4);
-          btnSave.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Guardar Evaluación Técnica';
-        }
       } else {
         if (btnPrev) btnPrev.classList.toggle('hidden', tab === 1);
         if (btnNext) btnNext.classList.toggle('hidden', tab === 4);
-        if (btnSave) {
-          btnSave.classList.toggle('hidden', tab !== 4);
-          btnSave.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Guardar Caso';
-        }
       }
       lucide.createIcons();
     }
