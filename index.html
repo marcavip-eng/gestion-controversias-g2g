@@ -1579,9 +1579,9 @@
             "moneda": "USD",
             "montoReclamado": 1129220.93,
             "incluyeIgv": "Sí",
-            "escenarioBajo": 500000,
-            "escenarioProbable": 1129220.93,
-            "escenarioAlto": 4200000,
+            "escenarioBajo": 0,
+            "escenarioProbable": 0,
+            "escenarioAlto": 0,
             "cobertura": 0,
             "brecha": 0,
             "fuente": "RO",
@@ -1995,6 +1995,20 @@
           if (!Array.isArray(casos) || casos.length === 0 || casos.some(c => c.id === 'TEST-01')) {
             casos = JSON.parse(JSON.stringify(CASOS_DEFAULT));
             guardarEnStorage();
+          } else {
+            // Sincronización automática de integridad con el Excel del Ingeniero
+            let modificado = false;
+            casos.forEach(c => {
+              if (c.id === 'VESR-NDD-01' && (c.escenarioProbable > 0 || c.escenarioBajo > 0)) {
+                c.escenarioProbable = 0;
+                c.escenarioBajo = 0;
+                c.escenarioAlto = 0;
+                c.tipoCambio = 3.45;
+                c.montoReclamadoPEN = 3895812.21;
+                modificado = true;
+              }
+            });
+            if (modificado) guardarEnStorage();
           }
         } catch (e) {
           casos = JSON.parse(JSON.stringify(CASOS_DEFAULT));
@@ -2233,7 +2247,10 @@
           if (calcs.esPlazoFatal) preclusivos++;
           
           exposicionTotal += (c.escenarioProbable || 0);
-          pretensionTotal += (c.montoReclamado || 0);
+          // Calcular pretensión convertida a PEN según tipo de cambio del caso
+          const tc = c.tipoCambio || (c.moneda === 'EUR' ? 3.86 : (c.moneda === 'USD' ? 3.45 : 1.0));
+          const recPEN = c.montoReclamadoPEN || ((c.montoReclamado || 0) * tc);
+          pretensionTotal += recPEN;
           if (c.brecha > 0) brechaTotal += c.brecha;
         }
       });

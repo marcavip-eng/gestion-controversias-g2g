@@ -222,7 +222,9 @@
           "doc": "Memorando N° 6737-2026",
           "obs": "Reiterativo para informe concluyente antes de audiencia"
         }
-      ]
+      ],
+      "tipoCambio": 1.0,
+      "montoReclamadoPEN": 18262.3
     },
     {
       "id": "NCC-OTR-01",
@@ -291,7 +293,9 @@
           "doc": "Memorándum N° 2467-2026-MTC/20.3",
           "obs": "Opinión sobre delimitación de competencias"
         }
-      ]
+      ],
+      "tipoCambio": 1.0,
+      "montoReclamadoPEN": 0.0
     },
     {
       "id": "NCC-TDI-01",
@@ -360,7 +364,9 @@
           "doc": "Acta de Cierre Trato Directo",
           "obs": "Suscripción de acuerdos y aprobación de Hoja de Ruta para Adenda N° 13"
         }
-      ]
+      ],
+      "tipoCambio": 3.86,
+      "montoReclamadoPEN": 45559684.95
     },
     {
       "id": "VESR-TDI-01",
@@ -429,7 +435,9 @@
           "doc": "Acta de Cierre Trato Directo VESR",
           "obs": "Consenso de cierre técnico y suscripción de Hoja de Ruta"
         }
-      ]
+      ],
+      "tipoCambio": 3.86,
+      "montoReclamadoPEN": 13840316.53
     },
     {
       "id": "VESR-NDD-01",
@@ -463,9 +471,9 @@
       "moneda": "USD",
       "montoReclamado": 1129220.93,
       "incluyeIgv": "Sí",
-      "escenarioBajo": 500000,
-      "escenarioProbable": 1129220.93,
-      "escenarioAlto": 4200000,
+      "escenarioBajo": 0,
+      "escenarioProbable": 0,
+      "escenarioAlto": 0,
       "cobertura": 0,
       "brecha": 0,
       "fuente": "RO",
@@ -498,7 +506,9 @@
           "doc": "Memorando de Coordinación NDD",
           "obs": "Inicio de elaboración de informe técnico conjunto para DAAB"
         }
-      ]
+      ],
+      "tipoCambio": 3.45,
+      "montoReclamadoPEN": 3895812.21
     }
   ]
 }
