@@ -441,23 +441,42 @@
         </button>
       </div>
 
-      <!-- Navegación por Pestañas del Wizard (Amigable para Abogados) -->
+      <!-- Selector de Perfil de Edición: Abogado vs Ingeniero vs Todo -->
+      <div class="bg-slate-800 px-5 py-2.5 border-b border-slate-700 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-1.5 text-slate-300 font-semibold">
+          <i data-lucide="user-cog" class="w-4 h-4 text-brand-400"></i>
+          <span>Perfil de Edición Especializado:</span>
+        </div>
+        <div class="flex items-center space-x-1 bg-slate-900 p-0.5 rounded-lg border border-slate-700 text-xs">
+          <button type="button" onclick="cambiarPerfilEdicion('abogado')" id="btnPerfilEditAbogado" class="px-3 py-1 rounded font-bold transition flex items-center gap-1 text-slate-300 hover:text-white">
+            <i data-lucide="scale" class="w-3.5 h-3.5 text-amber-400"></i> ⚖️ Modo Abogado
+          </button>
+          <button type="button" onclick="cambiarPerfilEdicion('ingeniero')" id="btnPerfilEditIngeniero" class="px-3 py-1 rounded font-medium transition flex items-center gap-1 text-slate-300 hover:text-white">
+            <i data-lucide="hard-hat" class="w-3.5 h-3.5 text-blue-400"></i> 🏗️ Modo Ingeniero
+          </button>
+          <button type="button" onclick="cambiarPerfilEdicion('completo')" id="btnPerfilEditCompleto" class="px-3 py-1 rounded font-medium transition flex items-center gap-1 text-slate-300 hover:text-white">
+            <span>📋 Todo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navegación por Pestañas del Wizard Dinámico -->
       <div class="bg-slate-100 px-5 border-b border-slate-200 flex items-center space-x-4 text-xs font-semibold overflow-x-auto no-scrollbar">
         <button onclick="cambiarTabWizard(1)" id="tabBtn1" class="py-3 border-b-2 border-brand-600 text-brand-700 flex items-center gap-1.5 whitespace-nowrap">
           <span class="w-5 h-5 rounded-full bg-brand-600 text-white flex items-center justify-center text-[10px]">1</span>
-          Identificación y Asunto
+          ⚖️ Identificación y Asunto Legal
         </button>
         <button onclick="cambiarTabWizard(2)" id="tabBtn2" class="py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
           <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[10px]">2</span>
-          Instancia y Plazos Legales
+          ⚖️ Trámite y Plazos Procesales
         </button>
         <button onclick="cambiarTabWizard(3)" id="tabBtn3" class="py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
           <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[10px]">3</span>
-          Cronograma y Ruta Crítica
+          🏗️ WBS, Cronograma y Mitigación
         </button>
         <button onclick="cambiarTabWizard(4)" id="tabBtn4" class="py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap">
           <span class="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[10px]">4</span>
-          Cuantificación Económica y OPP
+          💰 Cuantía y Presupuesto OPP
         </button>
       </div>
 
@@ -465,6 +484,15 @@
       <form id="formCaso" onsubmit="guardarCaso(event)" class="p-5 overflow-y-auto space-y-4 flex-1 text-xs">
         
         <input type="hidden" id="editIndex" value="-1">
+
+        <!-- Banner Contextual Dinámico según el Perfil Activo -->
+        <div id="bannerPerfilEdicion" class="p-3 rounded-xl border text-xs flex items-center justify-between bg-amber-50 border-amber-200 text-amber-900 transition">
+          <div class="flex items-center gap-2">
+            <i data-lucide="scale" class="w-4 h-4 text-amber-600 shrink-0" id="icoBannerPerfil"></i>
+            <span id="txtBannerPerfil"><strong>Módulo Abogado Activo:</strong> Editando los 13 campos del expediente legal. WBS y cronograma técnico no requeridos.</span>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900 uppercase tracking-wide" id="badgeBannerPerfil">LEGAL</span>
+        </div>
 
         <!-- TAB 1: IDENTIFICACIÓN Y ASUNTO -->
         <div id="tabContent1" class="space-y-4">
@@ -2989,15 +3017,23 @@
             </div>
           </div>
 
-          <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
-            <span class="text-[10px] text-slate-500 font-medium truncate max-w-[120px]" title="${c.responsable || 'Sin asignar'}">Abog: ${c.responsable || 'Sin asignar'}</span>
-            <div class="flex items-center space-x-1.5">
-              <button onclick="abrirModalValidarLegal('${c.id}')" title="Validar conformidad legal sin cambios" class="px-2 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[11px] flex items-center gap-0.5">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Validar
+          <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+            <span class="text-[10px] text-slate-500 font-medium truncate max-w-[100px]" title="${c.responsable || 'Sin asignar'}">
+              ${c.responsable || 'Sin asignar'}
+            </span>
+            <div class="flex items-center space-x-1">
+              <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Ejecutiva" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-[11px]">
+                Ficha
               </button>
-              <button onclick="verFichaCaso('${c.id}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-[11px]">Ficha</button>
-              <button onclick="abrirModalDerivar('${c.id}')" class="px-2 py-1 rounded bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-[11px]">Pase</button>
-              <button onclick="editarCaso('${c.id}')" class="p-1 text-slate-500 hover:text-slate-800"><i data-lucide="edit" class="w-3.5 h-3.5"></i></button>
+              <button onclick="editarCasoComo('${c.id}', 'abogado')" title="Editar como Abogado (13 datos legales)" class="px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-[11px] flex items-center gap-1 border border-amber-200 transition">
+                <i data-lucide="scale" class="w-3 h-3 text-amber-600"></i> Abogado
+              </button>
+              <button onclick="editarCasoComo('${c.id}', 'ingeniero')" title="Editar como Ingeniero (WBS, Obra & Costos)" class="px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold text-[11px] flex items-center gap-1 border border-blue-200 transition">
+                <i data-lucide="hard-hat" class="w-3 h-3 text-blue-600"></i> Ingeniero
+              </button>
+              <button onclick="abrirModalDerivar('${c.id}')" title="Pase a otra Instancia" class="px-1.5 py-1 rounded bg-slate-50 hover:bg-slate-100 text-slate-600 font-medium text-[11px] border border-slate-200">
+                Pase
+              </button>
             </div>
           </div>
         `;
@@ -3034,29 +3070,129 @@
       lucide.createIcons();
     }
 
-    // WIZARD DEL FORMULARIO DE CASO (PASO A PASO PARA ABOGADO)
+    // WIZARD DEL FORMULARIO DE CASO (CON PERFILES ESPECIALIZADOS: ABOGADO / INGENIERO / COMPLETO)
+    let perfilEdicionActual = 'completo';
+
+    function cambiarPerfilEdicion(perfil) {
+      perfilEdicionActual = perfil;
+
+      const btnAbog = document.getElementById('btnPerfilEditAbogado');
+      const btnIng = document.getElementById('btnPerfilEditIngeniero');
+      const btnComp = document.getElementById('btnPerfilEditCompleto');
+      const banner = document.getElementById('bannerPerfilEdicion');
+      const txtBanner = document.getElementById('txtBannerPerfil');
+      const icoBanner = document.getElementById('icoBannerPerfil');
+      const badgeBanner = document.getElementById('badgeBannerPerfil');
+
+      // Reset clases botones
+      if (btnAbog) btnAbog.className = 'px-3 py-1 rounded font-medium transition flex items-center gap-1 text-slate-300 hover:text-white';
+      if (btnIng) btnIng.className = 'px-3 py-1 rounded font-medium transition flex items-center gap-1 text-slate-300 hover:text-white';
+      if (btnComp) btnComp.className = 'px-3 py-1 rounded font-medium transition flex items-center gap-1 text-slate-300 hover:text-white';
+
+      if (perfil === 'abogado') {
+        if (btnAbog) btnAbog.className = 'px-3 py-1 rounded font-bold transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow-sm';
+        if (banner) banner.className = 'p-3 rounded-xl border text-xs flex items-center justify-between bg-amber-50 border-amber-200 text-amber-900 transition';
+        if (txtBanner) txtBanner.innerHTML = '<strong>Módulo Abogado Activo:</strong> Editando los 13 campos del expediente legal y procesal. WBS y cronograma técnico no requeridos.';
+        if (icoBanner) icoBanner.setAttribute('data-lucide', 'scale');
+        if (badgeBanner) {
+          badgeBanner.textContent = 'LEGAL';
+          badgeBanner.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900 uppercase tracking-wide';
+        }
+        if (tabWizardActual > 2) cambiarTabWizard(1);
+        else cambiarTabWizard(tabWizardActual);
+      } else if (perfil === 'ingeniero') {
+        if (btnIng) btnIng.className = 'px-3 py-1 rounded font-bold transition flex items-center gap-1 bg-blue-500 text-white shadow-sm';
+        if (banner) banner.className = 'p-3 rounded-xl border text-xs flex items-center justify-between bg-blue-50 border-blue-200 text-blue-900 transition';
+        if (txtBanner) txtBanner.innerHTML = '<strong>Módulo Ingeniero Activo:</strong> Editando WBS, Cronograma de Obra, Mitigación y Presupuesto OPP. Expediente legal en lectura.';
+        if (icoBanner) icoBanner.setAttribute('data-lucide', 'hard-hat');
+        if (badgeBanner) {
+          badgeBanner.textContent = 'TÉCNICO / OBRA';
+          badgeBanner.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-blue-200 text-blue-900 uppercase tracking-wide';
+        }
+        if (tabWizardActual < 3) cambiarTabWizard(3);
+        else cambiarTabWizard(tabWizardActual);
+      } else {
+        if (btnComp) btnComp.className = 'px-3 py-1 rounded font-bold transition flex items-center gap-1 bg-slate-700 text-white shadow-sm';
+        if (banner) banner.className = 'p-3 rounded-xl border text-xs flex items-center justify-between bg-slate-100 border-slate-200 text-slate-700 transition';
+        if (txtBanner) txtBanner.innerHTML = '<strong>Modo Completo Activo:</strong> Acceso libre a los 4 bloques (Identificación, Trámite, WBS Técnico y Cuantía Económica).';
+        if (icoBanner) icoBanner.setAttribute('data-lucide', 'layers');
+        if (badgeBanner) {
+          badgeBanner.textContent = 'MAESTRO';
+          badgeBanner.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-800 uppercase tracking-wide';
+        }
+        cambiarTabWizard(tabWizardActual);
+      }
+      lucide.createIcons();
+    }
+
     function cambiarTabWizard(tab) {
       tabWizardActual = tab;
       for (let i = 1; i <= 4; i++) {
         const c = document.getElementById(`tabContent${i}`);
         const b = document.getElementById(`tabBtn${i}`);
+        if (!c || !b) continue;
+
         if (i === tab) {
           c.classList.remove('hidden');
-          b.className = "py-3 border-b-2 border-brand-600 text-brand-700 flex items-center gap-1.5 whitespace-nowrap";
+          b.className = 'py-3 border-b-2 border-brand-600 text-brand-700 flex items-center gap-1.5 whitespace-nowrap font-bold';
         } else {
           c.classList.add('hidden');
-          b.className = "py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap";
+          b.className = 'py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 whitespace-nowrap font-medium';
         }
       }
 
-      document.getElementById('btnWizardPrev').classList.toggle('hidden', tab === 1);
-      document.getElementById('btnWizardNext').classList.toggle('hidden', tab === 4);
-      document.getElementById('btnWizardSave').classList.toggle('hidden', tab !== 4);
+      const btnPrev = document.getElementById('btnWizardPrev');
+      const btnNext = document.getElementById('btnWizardNext');
+      const btnSave = document.getElementById('btnWizardSave');
+
+      if (perfilEdicionActual === 'abogado') {
+        if (btnPrev) btnPrev.classList.toggle('hidden', tab === 1);
+        if (btnNext) btnNext.classList.toggle('hidden', tab === 2);
+        if (btnSave) {
+          btnSave.classList.toggle('hidden', tab !== 2);
+          btnSave.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Guardar Evaluación Legal';
+        }
+      } else if (perfilEdicionActual === 'ingeniero') {
+        if (btnPrev) btnPrev.classList.toggle('hidden', tab === 3);
+        if (btnNext) btnNext.classList.toggle('hidden', tab === 4);
+        if (btnSave) {
+          btnSave.classList.toggle('hidden', tab !== 4);
+          btnSave.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Guardar Evaluación Técnica';
+        }
+      } else {
+        if (btnPrev) btnPrev.classList.toggle('hidden', tab === 1);
+        if (btnNext) btnNext.classList.toggle('hidden', tab === 4);
+        if (btnSave) {
+          btnSave.classList.toggle('hidden', tab !== 4);
+          btnSave.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Guardar Caso';
+        }
+      }
+      lucide.createIcons();
     }
 
     function navegarWizard(delta) {
-      const nuevo = tabWizardActual + delta;
-      if (nuevo >= 1 && nuevo <= 4) cambiarTabWizard(nuevo);
+      let nuevo = tabWizardActual + delta;
+      if (perfilEdicionActual === 'abogado') {
+        if (nuevo < 1) nuevo = 1;
+        if (nuevo > 2) nuevo = 2;
+      } else if (perfilEdicionActual === 'ingeniero') {
+        if (nuevo < 3) nuevo = 3;
+        if (nuevo > 4) nuevo = 4;
+      } else {
+        if (nuevo < 1) nuevo = 1;
+        if (nuevo > 4) nuevo = 4;
+      }
+      cambiarTabWizard(nuevo);
+    }
+
+    function editarCasoComo(id, perfil) {
+      editarCaso(id);
+      cambiarPerfilEdicion(perfil);
+      if (perfil === 'ingeniero') {
+        cambiarTabWizard(3);
+      } else {
+        cambiarTabWizard(1);
+      }
     }
 
     function calcularBrecha() {
