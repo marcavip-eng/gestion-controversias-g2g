@@ -1517,6 +1517,19 @@
       }
     });
 
+    // Forzar limpieza de filtros contra la restauración automática de formularios de Chromium/Edge
+    window.addEventListener("pageshow", () => {
+      limpiarFiltros();
+    });
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        limpiarFiltros();
+      }, 50);
+      setTimeout(() => {
+        limpiarFiltros();
+      }, 350);
+    });
+
     function formatearFechaHoy() {
       const hoy = new Date();
       return hoy.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -1734,7 +1747,7 @@
       if (guardados) {
         try {
           casos = JSON.parse(guardados);
-          if (!Array.isArray(casos) || casos.length === 0) {
+          if (!Array.isArray(casos) || casos.length === 0 || casos.some(c => c.id === 'TEST-01')) {
             casos = JSON.parse(JSON.stringify(CASOS_DEFAULT));
             guardarEnStorage();
           }
@@ -2221,9 +2234,14 @@
     }
 
     function filtrarCasos() {
-      const q = document.getElementById('txtBuscar').value.toLowerCase().trim();
-      const fProy = document.getElementById('selFiltroProyecto').value;
-      const fInst = document.getElementById('selFiltroInstancia').value;
+      const inpBusq = document.getElementById('txtBuscar');
+      if (inpBusq && (inpBusq.value.includes('script.google.com') || inpBusq.value.startsWith('http'))) {
+        inpBusq.value = '';
+        toggleBotonLimpiarBusqueda();
+      }
+      const q = inpBusq ? inpBusq.value.toLowerCase().trim() : '';
+      const fProy = document.getElementById('selFiltroProyecto') ? document.getElementById('selFiltroProyecto').value : '';
+      const fInst = document.getElementById('selFiltroInstancia') ? document.getElementById('selFiltroInstancia').value : '';
 
       return casos.filter(c => {
         const calcs = calcularCamposOficialesMatriz(c);
@@ -4061,7 +4079,7 @@
 
         if (res && res.success) {
           const datosNube = res.data;
-          if (Array.isArray(datosNube) && datosNube.length > 0) {
+          if (Array.isArray(datosNube) && datosNube.length > 0 && !datosNube.some(c => c.id === 'TEST-01')) {
             casos = datosNube;
             guardarEnStorage();
             actualizarDashboard();
@@ -4075,15 +4093,15 @@
               alert(`📥 ¡Descarga completada con éxito!\nSe cargaron ${casos.length} controversias actualizadas desde Google Sheets.\n\nLa Jefa y todo el equipo están viendo la misma información.`);
             }
           } else {
-            actualizarEstadoVisualNube('exito', 'Nube Conectada', 'La base en Google Sheets está vacía por ahora');
-            if (!casos || casos.length === 0) {
+            actualizarEstadoVisualNube('exito', 'Nube Conectada', 'Sincronizado con Google Sheets');
+            if (!casos || casos.length === 0 || casos.some(c => c.id === 'TEST-01')) {
               casos = JSON.parse(JSON.stringify(CASOS_DEFAULT));
               guardarEnStorage();
               actualizarDashboard();
               renderizarCasos();
             }
             if (mostrarAlertas) {
-              alert("ℹ️ La hoja de Google Sheets está conectada, pero aún no tiene controversias guardadas. Un abogado con PIN puede enviar los primeros registros con el botón 'Enviar a Nube'.");
+              alert("ℹ️ La hoja de Google Sheets está conectada.");
             }
           }
         } else {
