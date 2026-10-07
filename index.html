@@ -1394,7 +1394,6 @@
       instancias: [
         { abreviatura: "PMO", nombre: "Asistencia Técnica PMO / Alta Gerencia" },
         { abreviatura: "OAJ", nombre: "Oficina de Asesoría Jurídica" },
-        { abreviatura: "Dirección de Estudios", nombre: "Dirección de Estudios" },
         { abreviatura: "Dirección de Obras", nombre: "Dirección de Obras" },
         { abreviatura: "OPP", nombre: "Oficina de Planeamiento y Presupuesto" },
         { abreviatura: "Procuraduría del MTC", nombre: "Procuraduría Pública del MTC" },
@@ -2141,7 +2140,14 @@
       document.getElementById('lblTotalCasosInst').textContent = `${casosAbiertos.length} casos derivados`;
       gInst.innerHTML = '';
 
-      const ordenados = Object.keys(conteoInst).sort((a, b) => conteoInst[b] - conteoInst[a]);
+      const ordenados = Object.keys(conteoInst)
+        .filter(inst => conteoInst[inst] > 0)
+        .sort((a, b) => conteoInst[b] - conteoInst[a]);
+
+      if (ordenados.length === 0) {
+        gInst.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 italic">No hay instancias con casos derivados pendientes.</div>`;
+        return;
+      }
 
       ordenados.forEach(inst => {
         const cant = conteoInst[inst];
