@@ -3819,10 +3819,12 @@
       if (localStorage.getItem("g2g_modo_offline") === "true") {
         return "";
       }
-      const guardada = localStorage.getItem("g2g_webhook_url");
-      if (guardada && guardada.trim() !== "") {
-        return guardada.trim();
+      const guardada = (localStorage.getItem("g2g_webhook_url") || "").trim();
+      if (guardada && guardada.startsWith("https://script.google.com/macros/s/") && guardada.endsWith("/exec")) {
+        return guardada;
       }
+      // Si no existe o estaba cortada / sin /exec, restablecer automáticamente la URL oficial válida
+      localStorage.setItem("g2g_webhook_url", WEBHOOK_OFICIAL_DEFAULT);
       return WEBHOOK_OFICIAL_DEFAULT;
     }
 
@@ -3930,16 +3932,20 @@
     }
 
     function guardarConfigNube() {
-      const url = document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "";
+      let url = document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "";
       const pin = document.getElementById('inpPinSeguridad') ? document.getElementById('inpPinSeguridad').value.trim() : "";
       const chkAuto = document.getElementById('chkAutoSyncCloud');
 
-      if (url && !url.startsWith("https://script.google.com/")) {
-        alert("Atención: La URL ingresada no parece ser un Webhook válido de Google Apps Script (debe comenzar con https://script.google.com/macros/s/...)");
+      if (!url) {
+        url = WEBHOOK_OFICIAL_DEFAULT;
+      } else if (!url.endsWith('/exec')) {
+        alert("⚠️ La URL del Webhook ingresada parece estar incompleta (le falta la terminación '/exec').\n\nSe ha completado automáticamente con la URL Oficial Institucional.");
+        url = WEBHOOK_OFICIAL_DEFAULT;
+        if (document.getElementById('inpUrlScript')) document.getElementById('inpUrlScript').value = WEBHOOK_OFICIAL_DEFAULT;
       }
 
       localStorage.removeItem("g2g_modo_offline");
-      localStorage.setItem("g2g_webhook_url", url || WEBHOOK_OFICIAL_DEFAULT);
+      localStorage.setItem("g2g_webhook_url", url);
       if (pin) localStorage.setItem("g2g_pin", pin);
       else localStorage.removeItem("g2g_pin");
       localStorage.setItem("g2g_auto_sync", chkAuto && chkAuto.checked ? "true" : "false");
@@ -3967,7 +3973,7 @@
     }
 
     async function probarConexionNube() {
-      const url = (document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "") || obtenerUrlWebhook();
+      const url = obtenerUrlWebhook();
       if (!url) {
         alert("Por favor ingrese primero la URL del Webhook de Google Apps Script.");
         return;
@@ -3979,7 +3985,15 @@
 
       try {
         const response = await fetch(url, { method: 'GET', redirect: 'follow' });
-        const res = await response.json();
+        const rawText = await response.text();
+        let res;
+        try {
+          res = JSON.parse(rawText);
+        } catch (eParse) {
+          localStorage.setItem("g2g_webhook_url", WEBHOOK_OFICIAL_DEFAULT);
+          throw new Error("El Webhook devolvió una página web de error en vez de JSON. Esto sucede cuando la URL estaba cortada. Se ha restaurado la URL oficial completa.");
+        }
+
         if (res && res.success) {
           const cant = res.count !== undefined ? res.count : (Array.isArray(res.data) ? res.data.length : 0);
           actualizarEstadoVisualNube('exito', 'Conexión Exitosa', `Disponibles en Nube: ${cant} controversias`);
@@ -3998,9 +4012,9 @@
     }
 
     async function descargarDesdeNube(mostrarAlertas = true) {
-      const url = obtenerUrlWebhook() || (document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "");
+      const url = obtenerUrlWebhook();
       if (!url) {
-        if (mostrarAlertas) alert("No hay ningún Webhook de Google Sheets configurado. Ingrese la URL en la configuración de la Nube.");
+        if (mostrarAlertas) alert("No hay ningún Webhook de Google Sheets configurado.");
         return;
       }
 
@@ -4008,7 +4022,14 @@
 
       try {
         const response = await fetch(url, { method: 'GET', redirect: 'follow' });
-        const res = await response.json();
+        const rawText = await response.text();
+        let res;
+        try {
+          res = JSON.parse(rawText);
+        } catch (eParse) {
+          localStorage.setItem("g2g_webhook_url", WEBHOOK_OFICIAL_DEFAULT);
+          throw new Error("Respuesta no válida de Google Sheets (HTML en vez de JSON). Se restableció la URL oficial.");
+        }
 
         if (res && res.success) {
           const datosNube = res.data;
@@ -4050,7 +4071,7 @@
     }
 
     async function enviarHaciaNube() {
-      const url = obtenerUrlWebhook() || (document.getElementById('inpUrlScript') ? document.getElementById('inpUrlScript').value.trim() : "");
+      const url = obtenerUrlWebhook();
       if (!url) {
         alert("Primero configure y guarde la URL del Webhook de Google Sheets.");
         abrirConfigNube();
@@ -4091,7 +4112,14 @@
           body: JSON.stringify(payload)
         });
 
-        const res = await response.json();
+        const rawText = await response.text();
+        let res;
+        try {
+          res = JSON.parse(rawText);
+        } catch (eParse) {
+          localStorage.setItem("g2g_webhook_url", WEBHOOK_OFICIAL_DEFAULT);
+          throw new Error("El servidor de Google devolvió una página HTML en lugar de JSON. Esto ocurre cuando la URL estaba cortada. Se ha restaurado la URL oficial para el próximo intento.");
+        }
 
         if (res && res.success) {
           const horaActual = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
