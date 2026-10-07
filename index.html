@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistema de Gestión de Controversias G2G | Despacho Digital</title>
+  <title>Matriz Legal G2G | Despacho Digital</title>
   
   <!-- TailwindCSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -68,7 +68,7 @@
           </div>
           <div class="min-w-0">
             <div class="flex items-center space-x-1.5">
-              <span class="font-bold text-sm sm:text-base tracking-tight text-white whitespace-nowrap">Controversias G2G</span>
+              <span class="font-bold text-sm sm:text-base tracking-tight text-white whitespace-nowrap">Matriz Legal</span>
               <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-brand-500/20 text-brand-300 rounded border border-brand-500/30 shrink-0">V2.2 Web</span>
             </div>
             <p class="text-[11px] text-slate-400 hidden xl:block truncate max-w-[240px]">Megaproyectos: NCC · EV4 · VESR · PSR</p>
@@ -226,7 +226,7 @@
       <div class="flex items-center justify-between">
         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
           <i data-lucide="bar-chart-3" class="w-4 h-4 text-brand-600"></i>
-          Distribución de Controversias y Carga Procesal en Tiempo Real
+          Distribución de la Matriz Legal y Carga Procesal en Tiempo Real
         </h3>
         <button onclick="toggleGraficosEjecutivos()" id="btnToggleGraficos" class="text-xs text-brand-600 hover:text-brand-800 font-semibold flex items-center gap-1 transition">
           <span id="lblToggleGraficos">Ocultar Gráficos</span>
@@ -354,7 +354,7 @@
           </div>
           <div class="min-w-0">
             <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2 truncate">
-              <span>Expedientes y Controversias en Cartera</span>
+              <span>Expedientes de la Matriz Legal</span>
               <span class="px-2.5 py-0.5 rounded-full text-xs bg-brand-100 text-brand-800 font-mono font-bold" id="lblTotalListados">0</span>
             </h3>
             <p class="text-[11px] text-slate-500 hidden sm:block">Control procesal, alertas preclusivas e impacto presupuestal</p>
@@ -374,13 +374,19 @@
             <span>+ Registrar Nuevo Caso</span>
           </button>
 
-          <!-- Alternar columnas en Tabla: Ejecutiva (9) vs Matriz Maestra (50) -->
+          <!-- Alternar columnas en Tabla: Jefatura vs Abogado vs Ingeniero vs Matriz Maestra (50) -->
           <div id="selectorColumnasTabla" class="hidden sm:flex items-center space-x-1 bg-slate-100 p-0.5 rounded-lg text-xs border border-slate-200">
-            <button onclick="cambiarModoColumnas('ejecutiva')" id="btnColsEjecutiva" class="px-2.5 py-1 rounded-md font-bold bg-white text-slate-800 shadow-sm transition" title="Vista Ejecutiva compacta (9 columnas clave)">
-              💼 Ejecutiva (9)
+            <button onclick="cambiarModoColumnas('ejecutiva')" id="btnColsEjecutiva" class="px-2.5 py-1 rounded-md font-bold bg-white text-slate-800 shadow-sm transition" title="Vista Ejecutiva para Jefatura / Directora">
+              📊 Vista Jefatura
             </button>
-            <button onclick="cambiarModoColumnas('completa')" id="btnColsCompleta" class="px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition" title="Vista Oficial Matriz Maestra (50 columnas completas con scroll horizontal)">
-              📊 Matriz Maestra (50 cols)
+            <button onclick="cambiarModoColumnas('abogado')" id="btnColsAbogado" class="px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition" title="Módulo Legal: Las 13 columnas del Abogado">
+              ⚖️ Módulo Legal (Abogado)
+            </button>
+            <button onclick="cambiarModoColumnas('ingeniero')" id="btnColsIngeniero" class="px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition" title="Módulo Técnico: WBS, ruta crítica, cuantía y mitigación del Ingeniero">
+              🏗️ Módulo Técnico (Ingeniero)
+            </button>
+            <button onclick="cambiarModoColumnas('completa')" id="btnColsCompleta" class="px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition" title="Matriz Maestra Oficial (50 columnas completas)">
+              📑 Matriz Maestra (50)
             </button>
           </div>
 
@@ -426,7 +432,7 @@
             <i data-lucide="scale" class="w-4 h-4"></i>
           </div>
           <div>
-            <h3 class="font-bold text-sm sm:text-base text-white" id="modalTitulo">Registro de Caso de Controversia</h3>
+            <h3 class="font-bold text-sm sm:text-base text-white" id="modalTitulo">Registro de Expediente - Matriz Legal</h3>
             <p class="text-xs text-slate-400">Control unificado bajo gobernanza G2G e Invierte.pe</p>
           </div>
         </div>
@@ -515,9 +521,34 @@
             </div>
           </div>
 
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Categoría del Problema Legal</label>
+              <input type="text" id="inpCategoriaProblema" placeholder="Ej. Conciliación, Trato Directo, Disputa DAAB..." class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">N° Expediente SISGEDO</label>
+              <input type="text" id="inpExpedienteSisgedo" placeholder="Ej. E-077328-2026 / I-067505-2026" class="w-full p-2 border border-slate-300 rounded-lg font-mono">
+            </div>
+          </div>
+
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Asunto / Descripción del Reclamo <span class="text-rose-500">*</span></label>
+            <label class="block font-bold text-slate-700 mb-1">Asunto / Descripción del Problema <span class="text-rose-500">*</span></label>
             <textarea id="inpAsunto" rows="2" required placeholder="Detalle sintético del objeto de la controversia y antecedentes..." class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"></textarea>
+          </div>
+
+          <!-- Campo Exclusivo del Abogado: Posición de PROVÍAS -->
+          <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-1.5">
+            <label class="block font-bold text-amber-900 text-xs flex items-center gap-1.5">
+              <i data-lucide="scale" class="w-4 h-4 text-amber-700"></i> Posición de PROVÍAS (DGP) / Conclusión Preliminar del Abogado
+            </label>
+            <textarea id="inpPosicionProvias" rows="2" placeholder="Análisis costo-beneficio legal (ej. Favorable a conciliar para evitar contingencia mayor / Esperar informe OAJ)..." class="w-full p-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white text-xs"></textarea>
+            <span class="text-[10px] text-amber-700 italic">Sustento estratégico para la Directora sobre conveniencia de conciliar, negociar o litigar.</span>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Documento(s) de Sustento / Antecedentes</label>
+            <input type="text" id="inpDocumentosSustento" placeholder="Ej. Informe N° 202-2026-MTC; Memorando N° 6411-2026; Informe OAJ N° 01052..." class="w-full p-2 border border-slate-300 rounded-lg">
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1206,178 +1237,364 @@
     // DATASET INICIAL REALISTA (Sincronizado con la Matriz G2G oficial)
     const CASOS_DEFAULT = [
       {
-        id: "NCC-TD-01",
-        proyecto: "NCC",
-        fase: "Diseño/Estudios",
-        tipoAtencion: "Trato directo",
-        regimen: "NEC4 ECC Opción C (Target)",
-        generador: "Contratista",
-        asunto: "Trato Directo 1: Interpretación de obligación contractual sobre geología y trazado de túneles",
-        docInicio: "Acta de Reunión N.° 01",
-        fechaInicio: "2026-09-18",
-        responsableConduccion: "Dirección de Estudios (Consultorías de Diseño)",
-        instanciaActual: "OAJ",
-        responsable: "Dr. Carlos Vega (Especialista Legal)",
-        estado: "En OAJ",
-        tipoPlazo: "Acuerdo de Acta",
-        fechaDerivacion: "2026-09-23",
-        fechaLimite: "2026-09-29",
-        accionPendiente: "Emitir opinión legal vinculante para definir posición institucional",
-        rutaCritica: "Sí",
-        wbs: "WBS-NCC-03.01",
-        hito: "Aprobación Entregable Técnico Geotécnico",
-        holgura: 0,
-        afectacionDias: 7,
-        mitigacion: "Escalar opinión legal urgente y mantener validación técnica paralela con PMO",
-        moneda: "PEN",
-        montoReclamado: 2500000,
-        incluyeIgv: "Sí",
-        escenarioBajo: 500000,
-        escenarioProbable: 1200000,
-        escenarioAlto: 2500000,
-        cobertura: 900000,
-        brecha: 300000,
-        fuente: "RO",
-        enlaceAcc: "https://acc.autodesk.com/docs/projects/ncc-g2g",
-        ultimaValidacionLegal: "2026-10-04",
-        validadorLegal: "Dr. Carlos Vega",
-        historial: [
-          { fecha: "2026-09-18", origen: "Contratista", destino: "PMO", doc: "Carta N° 045-2026", obs: "Ingreso de solicitud de trato directo" },
-          { fecha: "2026-09-23", origen: "Dirección de Estudios", destino: "OAJ", doc: "Memorando N° 112-2026", obs: "Solicitud de opinión legal" },
-          { fecha: "2026-10-04", origen: "OAJ", destino: "OAJ", doc: "Certificación Legal Periódica", obs: "Validación procesal conforme efectuada por Dr. Carlos Vega sin merituar cambios." }
-        ]
+            "id": "VESR-RCO-01",
+            "proyecto": "VESR",
+            "fase": "Contratación",
+            "tipoAtencion": "Reclamo contractual",
+            "categoriaProblema": "Conciliación - Caducidad del plazo",
+            "regimen": "LCE - TUO Ley N° 30225 y D.S. 344-2018-EF (Contratos en Curso)",
+            "generador": "Contratista",
+            "solicitanteContraparte": "Consorcio Lima Centro",
+            "asunto": "Consorcio Lima Centro: Reclamación por pago del Cuarto Entregable retenido por SEDAPAL (S/ 18,262.30). Propone conciliar con 10% de descuento (S/ 16,436.07).",
+            "docInicio": "Oficio N° 535-2025-MTC/20.15",
+            "fechaInicio": "2025-05-14",
+            "baseContractual": "Cláusula 16 del Contrato N° 117-2024-MTC/20.2 (30 días hábiles); D. Leg. N° 1559; Código Civil, Art. 2004.",
+            "responsableConduccion": "Dirección de Gestión de Proyectos (DGP)",
+            "instanciaActual": "OAJ",
+            "responsable": "Dr. Yorman Rivas (OAJ)",
+            "estado": "En OAJ",
+            "tipoPlazo": "Preclusivo / Caducidad (Fatal)",
+            "fechaDerivacion": "2026-09-29",
+            "fechaLimite": "2026-10-14",
+            "accionPendiente": "Esperar el informe concluyente de la OAJ antes de la audiencia de conciliación fijada para el 14/10/2026.",
+            "proximoHito": "Audiencia de Conciliación (14/10/2026) / Derivación a Procuraduría",
+            "fechaProximaRevision": "2026-10-06",
+            "rutaCritica": "Sí",
+            "wbs": "WBS-VESR-01",
+            "hito": "Conciliación del Cuarto Entregable",
+            "holgura": 9,
+            "afectacionDias": 0,
+            "tipoImpacto": "Costo",
+            "moneda": "PEN",
+            "montoReclamado": 18262.3,
+            "incluyeIgv": "Sí",
+            "escenarioBajo": 16436.07,
+            "escenarioProbable": 16436.07,
+            "escenarioAlto": 18262.3,
+            "cobertura": 0,
+            "brecha": 16436.07,
+            "fuente": "RO",
+            "probabilidad": "Alta",
+            "prioridad": "P1 - Crítica",
+            "semaforo": "Naranja",
+            "mitigacion": "Coordinar con OAJ para acelerar el pronunciamiento concluyente ante Procuraduría previo a la audiencia.",
+            "responsableMitigacion": "DGP / OAJ",
+            "fechaLimiteMitigacion": "2026-10-06",
+            "posicionProvias": "DGP favorable a conciliar: litigar arriesga pagar el monto íntegro más intereses y costos de defensa. El plazo de 30 días proviene de una ley inaplicable a este contrato, por lo que no bastaría para extinguir el derecho del contratista.",
+            "documentosSustento": "Informe N° 202-2026-MTC/20.15.3 (DGP); Memorando N° 6411-2026-MTC/07 (Procuraduría); Memorando reiterativo N° 6737-2026-MTC/07; Informe N° 01052-2026-MTC/20.3 (OAJ).",
+            "nivelRiesgoLegal": "Alto",
+            "expedienteSisgedo": "I-067505-2026",
+            "enlaceAcc": "https://acc.autodesk.com/docs/projects/vesr-g2g",
+            "observaciones": "La DGP ya remitió su posición; lo pendiente depende de la OAJ, que debe responder al reiterativo de Procuraduría.",
+            "ultimaValidacionLegal": "2026-10-06",
+            "validadorLegal": "Dr. Yorman Rivas",
+            "historial": [
+                  {
+                        "fecha": "2025-05-14",
+                        "origen": "Consorcio Lima Centro",
+                        "destino": "MTC",
+                        "doc": "Oficio N° 535-2025-MTC/20.15",
+                        "obs": "Inicio de reclamación por entregable retenido"
+                  },
+                  {
+                        "fecha": "2026-09-03",
+                        "origen": "OAJ",
+                        "destino": "DGP",
+                        "doc": "Informe N° 01052-2026-MTC/20.3",
+                        "obs": "Opinión legal preliminar"
+                  },
+                  {
+                        "fecha": "2026-09-29",
+                        "origen": "DGP",
+                        "destino": "OAJ",
+                        "doc": "Memorando N° 6737-2026",
+                        "obs": "Reiterativo para informe concluyente antes de audiencia"
+                  }
+            ]
       },
       {
-        id: "NCC-TD-02",
-        proyecto: "NCC",
-        fase: "Diseño/Estudios",
-        tipoAtencion: "Trato directo",
-        regimen: "NEC4 ECC Opción C (Target)",
-        generador: "Supervisor",
-        asunto: "Trato Directo 2: Reconocimiento de costos por mayor permanencia e impacto presupuestal",
-        docInicio: "Acta de Reunión N.° 02",
-        fechaInicio: "2026-09-23",
-        responsableConduccion: "Dirección de Estudios (Consultorías de Diseño)",
-        instanciaActual: "OPP",
-        responsable: "Lic. Maritza Gómez (Presupuesto)",
-        estado: "En OPP",
-        tipoPlazo: "Acuerdo de Acta",
-        fechaDerivacion: "2026-09-25",
-        fechaLimite: "2026-10-08",
-        accionPendiente: "Evaluar incidencia presupuestal y disponibilidad de recursos",
-        rutaCritica: "Sí",
-        wbs: "WBS-NCC-02.04",
-        hito: "Continuidad del servicio de supervisión",
-        holgura: 2,
-        afectacionDias: 5,
-        mitigacion: "Definir escenario preventivo de reprogramación de partidas",
-        moneda: "PEN",
-        montoReclamado: 4800000,
-        incluyeIgv: "Sí",
-        escenarioBajo: 900000,
-        escenarioProbable: 2000000,
-        escenarioAlto: 3800000,
-        cobertura: 1300000,
-        brecha: 700000,
-        fuente: "ROOC",
-        enlaceAcc: "https://acc.autodesk.com/docs/projects/ncc-g2g",
-        ultimaValidacionLegal: "2026-10-02",
-        validadorLegal: "Dr. Carlos Vega",
-        historial: [
-          { fecha: "2026-09-23", origen: "Supervisor", destino: "Dirección de Estudios", doc: "Acta N° 02", obs: "Acuerdos registrados" },
-          { fecha: "2026-09-25", origen: "Dirección de Estudios", destino: "OPP", doc: "Memorando N° 120-2026", obs: "Pase para certificación presupuestal" },
-          { fecha: "2026-10-02", origen: "Dirección de Estudios", destino: "OPP", doc: "Certificación Legal Periódica", obs: "Validación procesal conforme efectuada por Dr. Carlos Vega sin merituar cambios." }
-        ]
+            "id": "NCC-OTR-01",
+            "proyecto": "NCC",
+            "fase": "Diseño/Estudios",
+            "tipoAtencion": "Consulta legal especializada",
+            "categoriaProblema": "Competencia para reglamentar la Ley N° 32696",
+            "regimen": "LCE - Ley N° 32069 (Nueva Ley de Compras Públicas)",
+            "generador": "MTC",
+            "solicitanteContraparte": "DGPRTM - MTC / GORE Junín",
+            "asunto": "Conflicto de competencias sobre quién debe liderar la reglamentación de la Ley N° 32696 tras propuesta remitida por el Gobierno Regional de Junín.",
+            "docInicio": "Informe N° 1201-2026-MTC/18.01",
+            "fechaInicio": "2026-08-27",
+            "baseContractual": "Ley N° 32696; MOP de Provías Nacional, Arts. 8, 15, 29-A y 29-B; ROF del MTC, Arts. 96 a 100.",
+            "responsableConduccion": "Dirección de Gestión de Proyectos (DGP)",
+            "instanciaActual": "DGP",
+            "responsable": "Ing. Lorenzo Ruiz (DGP)",
+            "estado": "En evaluación técnica",
+            "tipoPlazo": "Preclusivo / Caducidad (Fatal)",
+            "fechaDerivacion": "2026-08-31",
+            "fechaLimite": "2026-09-01",
+            "accionPendiente": "Elaborar y trasladar a OPP y OAJ el proyecto técnico de reglamento y exposición de motivos con resumen de 3 entregables de PMO y propuesta GORE Junín.",
+            "proximoHito": "Traslado formal solicitando opinión a OPP y OAJ para posterior elevación ministerial",
+            "fechaProximaRevision": "2026-10-06",
+            "rutaCritica": "Sí",
+            "wbs": "WBS-NCC-01",
+            "hito": "Revisión de propuesta de reglamento del GORE Junín",
+            "holgura": 0,
+            "afectacionDias": 0,
+            "tipoImpacto": "Reputacional",
+            "moneda": "PEN",
+            "montoReclamado": 0,
+            "incluyeIgv": "No",
+            "escenarioBajo": 0,
+            "escenarioProbable": 0,
+            "escenarioAlto": 0,
+            "cobertura": 0,
+            "brecha": 0,
+            "fuente": "RO",
+            "probabilidad": "Alta",
+            "prioridad": "P1 - Crítica",
+            "semaforo": "Rojo",
+            "mitigacion": "Concluir de inmediato la revisión técnica en DGP para traslado formal a OPP y OAJ.",
+            "responsableMitigacion": "DGP / OPP / OAJ",
+            "fechaLimiteMitigacion": "2026-10-06",
+            "posicionProvias": "La DGP elaborará el proyecto técnico de reglamento y exposición de motivos limitado a lo estrictamente técnico, para opinión de OPP y OAJ y elevación ministerial a fin de que se evalúe participación del MEF.",
+            "documentosSustento": "Memorándum N° 2467-2026-MTC/20.3 (OAJ); Informe N° 1201-2026-MTC/18.01 (DPNTV); Oficio N° 0396-2026-GRJ/GR (GORE Junín).",
+            "nivelRiesgoLegal": "Alto",
+            "expedienteSisgedo": "E-070432-2026",
+            "enlaceAcc": "https://acc.autodesk.com/docs/projects/ncc-g2g",
+            "observaciones": "La DGP mantiene su desacuerdo sobre la competencia total respecto a la elaboración del reglamento, sin perjuicio de asumir el aspecto técnico.",
+            "ultimaValidacionLegal": "2026-10-05",
+            "validadorLegal": "Dr. Carlos Vega",
+            "historial": [
+                  {
+                        "fecha": "2026-08-27",
+                        "origen": "DPNTV",
+                        "destino": "DGP",
+                        "doc": "Informe N° 1201-2026-MTC/18.01",
+                        "obs": "Traslado de propuesta de reglamento de GORE Junín"
+                  },
+                  {
+                        "fecha": "2026-08-31",
+                        "origen": "OAJ",
+                        "destino": "DGP",
+                        "doc": "Memorándum N° 2467-2026-MTC/20.3",
+                        "obs": "Opinión sobre delimitación de competencias"
+                  }
+            ]
       },
       {
-        id: "EV4-DAB-01",
-        proyecto: "EV4",
-        fase: "Ejecución",
-        tipoAtencion: "DAB / DAAB (Junta de Disputas)",
-        regimen: "FIDIC Libro Rojo (Construcción Diseñada por Empleador)",
-        generador: "Contratista",
-        asunto: "Sometimiento a DAAB por liberación tardía de interferencias de redes de alta tensión",
-        docInicio: "Reference Memorial N° 01",
-        fechaInicio: "2026-08-10",
-        responsableConduccion: "Dirección de Obras (Ejecución y Supervisión)",
-        instanciaActual: "Procuraduría del MTC",
-        responsable: "Dr. Jorge Mendoza (Procurador Adjunto)",
-        estado: "En Procuraduría",
-        tipoPlazo: "Preclusivo / Caducidad (Fatal)",
-        fechaDerivacion: "2026-09-15",
-        fechaLimite: "2026-10-14",
-        accionPendiente: "Formular contestación y preparar audiencia técnica ante el Board",
-        rutaCritica: "Sí",
-        wbs: "WBS-EV4-05.01",
-        hito: "Habilitación de Tramo 2 y Puente Principal",
-        holgura: 0,
-        afectacionDias: 25,
-        mitigacion: "Coordinación estrecha con PMO para peritaje de demoras concurrentes",
-        moneda: "USD",
-        montoReclamado: 3200000,
-        incluyeIgv: "Sí",
-        escenarioBajo: 600000,
-        escenarioProbable: 1500000,
-        escenarioAlto: 3000000,
-        cobertura: 800000,
-        brecha: 700000,
-        fuente: "ROOC",
-        enlaceAcc: "https://acc.autodesk.com/docs/projects/ev4-g2g",
-        ultimaValidacionLegal: "2026-10-05",
-        validadorLegal: "Dr. Jorge Mendoza",
-        historial: [
-          { fecha: "2026-08-10", origen: "Contratista", destino: "DAB / Entidad", doc: "Reference N° 01", obs: "Inicio formal de controversia ante DAB" },
-          { fecha: "2026-09-15", origen: "Dirección de Obras", destino: "Procuraduría", doc: "Oficio N° 580-2026", obs: "Traslado de antecedentes para defensa" },
-          { fecha: "2026-10-05", origen: "Procuraduría del MTC", destino: "Procuraduría del MTC", doc: "Certificación Legal Periódica", obs: "Validación procesal conforme efectuada por Dr. Jorge Mendoza sin merituar cambios." }
-        ]
+            "id": "NCC-TDI-01",
+            "proyecto": "NCC",
+            "fase": "Diseño/Estudios",
+            "tipoAtencion": "Trato directo",
+            "categoriaProblema": "Trato Directo - Formalización contractual (Adenda N° 13)",
+            "regimen": "NEC4 ECC Opción C (Target Cost)",
+            "generador": "PMO",
+            "solicitanteContraparte": "Consorcio PMO Vías",
+            "asunto": "Consorcio PMO Vías: Regularización contractual y pago de prestaciones de la Gestión de Cambio N° 13, y formalización de prestaciones por ejecutar (Adenda N° 13).",
+            "docInicio": "Carta N° GENE-GB-PMO-GEN-CAR-0436-A",
+            "fechaInicio": "2026-07-30",
+            "baseContractual": "Contrato de Estado a Estado NCC; Gestión de Cambio N° 13 aprobada por Comité de Cambios (incremento neto € 11,803,027.19 incl. IGV; Anexos A, C y D).",
+            "responsableConduccion": "Dirección de Gestión de Proyectos (DGP)",
+            "instanciaActual": "DGP",
+            "responsable": "Ing. Lorenzo Ruiz (DGP)",
+            "estado": "En evaluación técnica",
+            "tipoPlazo": "Acuerdo de Acta",
+            "fechaDerivacion": "2026-09-30",
+            "fechaLimite": "2026-10-26",
+            "accionPendiente": "Tramitar la Certificación Presupuestal con OPP, revisar la Adenda N° 13 y anexos con OAJ y proceder a suscripción conforme a Hoja de Ruta.",
+            "proximoHito": "Tramitar Certificación Presupuestal ante OPP y formalizar Adenda N° 13",
+            "fechaProximaRevision": "2026-10-07",
+            "rutaCritica": "Sí",
+            "wbs": "WBS-NCC-02",
+            "hito": "Revisión de cronograma para la evaluación y suscripción de Adenda N° 13",
+            "holgura": 21,
+            "afectacionDias": 21,
+            "tipoImpacto": "Costo",
+            "moneda": "EUR",
+            "montoReclamado": 11803027.19,
+            "incluyeIgv": "Sí",
+            "escenarioBajo": 40000000,
+            "escenarioProbable": 45559684.95,
+            "escenarioAlto": 45559684.95,
+            "cobertura": 45559684.95,
+            "brecha": 0,
+            "fuente": "ROOC",
+            "probabilidad": "Alta",
+            "prioridad": "P2 - Alta",
+            "semaforo": "Naranja",
+            "mitigacion": "Realizar cronograma de actividades internas para agilizar certificación en OPP y revisión legal en OAJ.",
+            "responsableMitigacion": "DGP / OPP / OAJ",
+            "fechaLimiteMitigacion": "2026-10-19",
+            "posicionProvias": "Partes dan por cerrado el Trato Directo el 28/09/2026 con Hoja de Ruta consensuada, con compromiso de formalizar la Adenda N° 13 en octubre de 2026 conforme al Informe de Sustento Técnico ya aprobado.",
+            "documentosSustento": "Acta de Cierre de Trato Directo NCC (28/09/2026) y Anexo 1 - Hoja de Ruta; Carta N° GENE-GB-PMO-GEN-CAR-0436-A; Carta N° GENE-GB-PMO-GEN-CAR-0442-A.",
+            "nivelRiesgoLegal": "Medio",
+            "expedienteSisgedo": "E-077328-2026",
+            "enlaceAcc": "https://acc.autodesk.com/docs/projects/ncc-g2g",
+            "observaciones": "Queda pendiente respuesta del MTC a Secretaría General de RREE (Oficio N° 1660-2026-MTC/04 del 11/06/2026) sobre reconocimiento ante Embajada de Francia.",
+            "ultimaValidacionLegal": "2026-10-05",
+            "validadorLegal": "Dr. Carlos Vega",
+            "historial": [
+                  {
+                        "fecha": "2026-07-30",
+                        "origen": "Consorcio PMO Vías",
+                        "destino": "DGP",
+                        "doc": "Carta N° 0436-A",
+                        "obs": "Inicio de Trato Directo por Gestión de Cambio N° 13"
+                  },
+                  {
+                        "fecha": "2026-09-28",
+                        "origen": "DGP / PMO Vías",
+                        "destino": "Partes",
+                        "doc": "Acta de Cierre Trato Directo",
+                        "obs": "Suscripción de acuerdos y aprobación de Hoja de Ruta para Adenda N° 13"
+                  }
+            ]
       },
       {
-        id: "VESR-CE-03",
-        proyecto: "VESR",
-        fase: "Ejecución",
-        tipoAtencion: "Evento de Compensación (CE)",
-        regimen: "NEC4 ECC Opción C (Target)",
-        generador: "PMO",
-        asunto: "Instrucción de cambio por adecuación ambiental y rediseño de accesos viarios",
-        docInicio: "Instrucción PMO N° 018",
-        fechaInicio: "2026-09-01",
-        responsableConduccion: "Dirección de Infraestructura G2G (PMO)",
-        instanciaActual: "PMO",
-        responsable: "Ing. Pierre Dumont (PMO Vías)",
-        estado: "En PMO",
-        tipoPlazo: "Contractual Ordinario",
-        fechaDerivacion: "2026-09-20",
-        fechaLimite: "2026-10-25",
-        accionPendiente: "Auditar cotización de Costo Definido y validar impacto en Accepted Programme",
-        rutaCritica: "No",
-        wbs: "WBS-VESR-08.02",
-        hito: "Pavimentación y Señalización de Ramal A",
-        holgura: 14,
-        afectacionDias: 0,
-        mitigacion: "Optimizar subcontratación local",
-        moneda: "PEN",
-        montoReclamado: 1200000,
-        incluyeIgv: "Sí",
-        escenarioBajo: 400000,
-        escenarioProbable: 750000,
-        escenarioAlto: 1100000,
-        cobertura: 800000,
-        brecha: 0,
-        fuente: "RO",
-        enlaceAcc: "https://acc.autodesk.com/docs/projects/vesr-g2g",
-        ultimaValidacionLegal: "2026-10-05",
-        validadorLegal: "Dra. Patricia Alva",
-        historial: [
-          { fecha: "2026-09-01", origen: "PMO", destino: "Contratista", doc: "Instrucción N° 018", obs: "Notificación de CE" },
-          { fecha: "2026-10-05", origen: "Dirección de Infraestructura G2G (PMO)", destino: "PMO", doc: "Certificación Legal Periódica", obs: "Validación procesal conforme efectuada por Dra. Patricia Alva sin merituar cambios." }
-        ]
+            "id": "VESR-TDI-01",
+            "proyecto": "VESR",
+            "fase": "Ejecución",
+            "tipoAtencion": "Trato directo",
+            "categoriaProblema": "Trato Directo - Pago de prestaciones/entregables (Adenda VESR)",
+            "regimen": "NEC4 ECC Opción C (Target Cost)",
+            "generador": "PMO",
+            "solicitanteContraparte": "Consorcio PMO Vías",
+            "asunto": "Consorcio PMO Vías: Cierre del Trato Directo sobre pago de prestaciones adicionales reconocidas (entregables 2.6 a 3.20) y pago de prestaciones originarias (Adenda VESR).",
+            "docInicio": "Carta No. GENE-GB-PMO-GEN-CAR-0437-A",
+            "fechaInicio": "2026-07-30",
+            "baseContractual": "Contrato de Estado a Estado VESR; Anexos 1 y 2 del Acta de Cierre (total con IGV S/ 3,585,574.23; sin IGV S/ 3,038,622.22).",
+            "responsableConduccion": "Dirección de Gestión de Proyectos (DGP)",
+            "instanciaActual": "DGP",
+            "responsable": "Ing. Jimmy Pairazaman (DGP)",
+            "estado": "En evaluación PMO",
+            "tipoPlazo": "Acuerdo de Acta",
+            "fechaDerivacion": "2026-09-30",
+            "fechaLimite": "2026-10-31",
+            "accionPendiente": "PMO deberá presentar la versión C y propuesta final de Adenda para tramitar Certificación Presupuestal 2026 y suscripción.",
+            "proximoHito": "Presentación de versión C de propuesta de Adenda por parte de PMO Vías",
+            "fechaProximaRevision": "2026-10-07",
+            "rutaCritica": "Por determinar",
+            "wbs": "WBS-VESR-02",
+            "hito": "Pendiente de la entrega de documentación por PMO",
+            "holgura": 14,
+            "afectacionDias": 0,
+            "tipoImpacto": "Costo",
+            "moneda": "EUR",
+            "montoReclamado": 3585574.23,
+            "incluyeIgv": "Sí",
+            "escenarioBajo": 3038622.22,
+            "escenarioProbable": 13840316.53,
+            "escenarioAlto": 13840316.53,
+            "cobertura": 13840316.53,
+            "brecha": 0,
+            "fuente": "RO",
+            "probabilidad": "Alta",
+            "prioridad": "P3 - Media",
+            "semaforo": "Verde",
+            "mitigacion": "Coordinar con PMO a fin de agilizar la remisión de la Propuesta de Adenda versión C.",
+            "responsableMitigacion": "DGP",
+            "fechaLimiteMitigacion": "2026-10-07",
+            "posicionProvias": "Partes reconocen que los entregables han sido ejecutados, evaluados y aceptados sin controversia sobre su ejecución; los pagos se regularán en la Adenda de formalización.",
+            "documentosSustento": "Acta de Cierre de Trato Directo VESR (28/09/2026) y sus Anexos 1 y 2 - Hoja de Ruta.",
+            "nivelRiesgoLegal": "Medio",
+            "expedienteSisgedo": "E-078901-2026",
+            "enlaceAcc": "https://acc.autodesk.com/docs/projects/vesr-g2g",
+            "observaciones": "Los montos y condiciones de pago se regularán en la Adenda; verificar disponibilidad presupuestal en cada hito.",
+            "ultimaValidacionLegal": "2026-10-05",
+            "validadorLegal": "Dra. Patricia Alva",
+            "historial": [
+                  {
+                        "fecha": "2026-07-30",
+                        "origen": "Consorcio PMO Vías",
+                        "destino": "DGP",
+                        "doc": "Carta N° 0437-A",
+                        "obs": "Inicio de Trato Directo"
+                  },
+                  {
+                        "fecha": "2026-09-28",
+                        "origen": "DGP / PMO Vías",
+                        "destino": "Partes",
+                        "doc": "Acta de Cierre Trato Directo VESR",
+                        "obs": "Consenso de cierre técnico y suscripción de Hoja de Ruta"
+                  }
+            ]
+      },
+      {
+            "id": "VESR-NDD-01",
+            "proyecto": "VESR",
+            "fase": "Ejecución",
+            "tipoAtencion": "DAB / DAAB (Junta de Disputas)",
+            "categoriaProblema": "Notificación de Disconformidad de Decisión (NDD) - DAAB SEDAPAL",
+            "regimen": "FIDIC Libro Rojo (Construcción Diseñada por Empleador)",
+            "generador": "Entidad/PVN",
+            "solicitanteContraparte": "Dirección de Gestión de Proyectos (DGP)",
+            "asunto": "Dirección de Gestión de Proyectos: Notificación de Disconformidad de Decisión (NDD) ante evaluación incorrecta del Ingeniero ante cambios de materiales N° 01, 02 y 03.",
+            "docInicio": "CARTA No. VESR-F3-PMO-GEN-CAR-1247",
+            "fechaInicio": "2026-08-26",
+            "baseContractual": "Acuerdo Contractual 'Reubicación de Redes e Interferencias SEDAPAL' e Instrucción N° 05.",
+            "responsableConduccion": "Dirección de Gestión de Proyectos (DGP)",
+            "instanciaActual": "DGP",
+            "responsable": "Ing. Jimmy Pairazaman (DGP)",
+            "estado": "En evaluación técnica",
+            "tipoPlazo": "Contractual Ordinario",
+            "fechaDerivacion": "2026-09-30",
+            "fechaLimite": "2026-11-11",
+            "accionPendiente": "Formular el Informe Técnico-Legal conjunto con la PMO para someter formalmente la controversia ante el DAAB.",
+            "proximoHito": "Remitir formalmente la controversia al DAAB antes del 11/11/2026",
+            "fechaProximaRevision": "2026-10-12",
+            "rutaCritica": "Sí",
+            "wbs": "WBS-VESR-03",
+            "hito": "Determinación e impugnación de la Instrucción N° 05",
+            "holgura": 37,
+            "afectacionDias": 0,
+            "tipoImpacto": "Costo",
+            "moneda": "USD",
+            "montoReclamado": 1129220.93,
+            "incluyeIgv": "Sí",
+            "escenarioBajo": 500000,
+            "escenarioProbable": 1129220.93,
+            "escenarioAlto": 4200000,
+            "cobertura": 0,
+            "brecha": 0,
+            "fuente": "RO",
+            "probabilidad": "Media",
+            "prioridad": "P3 - Media",
+            "semaforo": "Naranja",
+            "mitigacion": "Realizar el Informe Técnico-Legal conjunto con la PMO a fin de refutar al DAAB lo determinado por el Ingeniero.",
+            "responsableMitigacion": "DGP / PMO",
+            "fechaLimiteMitigacion": "2026-10-12",
+            "posicionProvias": "Verificar nuevo formato y nuevo informe para remitir al DAAB en estricta coordinación con PMO Vías.",
+            "documentosSustento": "Carta PMO No. VESR-F3-PMO-GEN-CAR-1247; Instrucción N° 05; Informes técnicos SEDAPAL.",
+            "nivelRiesgoLegal": "Medio",
+            "expedienteSisgedo": "E-066608-2026",
+            "enlaceAcc": "https://acc.autodesk.com/docs/projects/vesr-g2g",
+            "observaciones": "Verificar nuevo formato y nuevo informe para remitir al DAAB, coordinado con la PMO Vías.",
+            "ultimaValidacionLegal": "2026-10-05",
+            "validadorLegal": "Dr. Jorge Mendoza",
+            "historial": [
+                  {
+                        "fecha": "2026-08-26",
+                        "origen": "PMO Vías",
+                        "destino": "DGP",
+                        "doc": "Carta N° 1247",
+                        "obs": "Notificación inicial sobre Instrucción N° 05"
+                  },
+                  {
+                        "fecha": "2026-09-30",
+                        "origen": "DGP",
+                        "destino": "PMO",
+                        "doc": "Memorando de Coordinación NDD",
+                        "obs": "Inicio de elaboración de informe técnico conjunto para DAAB"
+                  }
+            ]
       }
-    ];
+];
 
     // CONFIGURACIÓN OFICIAL POR DEFECTO DEL SISTEMA (Catálogos y Parámetros)
     const CONFIG_DEFAULT = {
-      direccionActiva: "G2G",
+      direccionActiva: "DGP",
       direcciones: [
+        { codigo: "DGP", nombre: "Dirección de Gestión de Proyectos (DGP)" },
         { codigo: "G2G", nombre: "Dirección de Infraestructura G2G (PMO)" },
         { codigo: "DE", nombre: "Dirección de Estudios (Consultorías de Diseño)" },
         { codigo: "DO", nombre: "Dirección de Obras (Ejecución y Supervisión)" },
@@ -2182,15 +2399,21 @@
     // ALTERNAR MODO DE COLUMNAS EN TABLA
     function cambiarModoColumnas(modo) {
       modoColumnasTabla = modo;
-      const btnE = document.getElementById('btnColsEjecutiva');
-      const btnC = document.getElementById('btnColsCompleta');
-      if (modo === 'ejecutiva') {
-        if (btnE) btnE.className = 'px-2.5 py-1 rounded-md font-bold bg-white text-slate-800 shadow-sm transition';
-        if (btnC) btnC.className = 'px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition';
-      } else {
-        if (btnC) btnC.className = 'px-2.5 py-1 rounded-md font-bold bg-white text-slate-800 shadow-sm transition';
-        if (btnE) btnE.className = 'px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition';
-      }
+      const btns = {
+        ejecutiva: document.getElementById('btnColsEjecutiva'),
+        abogado: document.getElementById('btnColsAbogado'),
+        ingeniero: document.getElementById('btnColsIngeniero'),
+        completa: document.getElementById('btnColsCompleta')
+      };
+      Object.keys(btns).forEach(k => {
+        if (btns[k]) {
+          if (k === modo) {
+            btns[k].className = 'px-2.5 py-1 rounded-md font-bold bg-white text-slate-900 shadow-sm transition border border-slate-200/80';
+          } else {
+            btns[k].className = 'px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900 transition';
+          }
+        }
+      });
       renderizarCasos();
     }
 
@@ -2287,7 +2510,7 @@
       tbody.innerHTML = '';
       cardsCont.innerHTML = '';
 
-      // 1. GENERACIÓN DINÁMICA DE CABECERAS SEGÚN MODO DE COLUMNAS
+      // 1. GENERACIÓN DINÁMICA DE CABECERAS SEGÚN MODO DE ESPECIALIDAD
       if (modoColumnasTabla === 'ejecutiva') {
         thead.innerHTML = `
           <tr>
@@ -2300,6 +2523,43 @@
             <th class="py-3 px-3 text-right">Exposición PEN</th>
             <th class="py-3 px-3 text-right">Brecha OPP</th>
             <th class="py-3 px-3 text-center">Acciones</th>
+          </tr>
+        `;
+      } else if (modoColumnasTabla === 'abogado') {
+        thead.innerHTML = `
+          <tr>
+            <th class="py-2.5 px-3 bg-slate-950 text-amber-300 font-bold sticky left-0 z-20 shadow-r">Acciones</th>
+            <th class="py-2.5 px-3">ID Caso / Proyecto</th>
+            <th class="py-2.5 px-3">Categoría Problema</th>
+            <th class="py-2.5 px-4 max-w-sm">Descripción del Problema Legal</th>
+            <th class="py-2.5 px-3">Base Contractual / Legal</th>
+            <th class="py-2.5 px-3">Estado Actual</th>
+            <th class="py-2.5 px-4 max-w-xs bg-amber-50 text-amber-900 font-bold">Posición de PROVÍAS / Conclusión</th>
+            <th class="py-2.5 px-2 text-center">Riesgo</th>
+            <th class="py-2.5 px-3">Documento(s) Sustento</th>
+            <th class="py-2.5 px-3">Instancia / Responsable</th>
+            <th class="py-2.5 px-3">Próxima Acción / Recomendación</th>
+            <th class="py-2.5 px-3 font-bold text-rose-700">Plazo / Audiencia</th>
+            <th class="py-2.5 px-3">Exp. SISGEDO</th>
+          </tr>
+        `;
+      } else if (modoColumnasTabla === 'ingeniero') {
+        thead.innerHTML = `
+          <tr>
+            <th class="py-2.5 px-3 bg-slate-950 text-amber-300 font-bold sticky left-0 z-20 shadow-r">Acciones</th>
+            <th class="py-2.5 px-3">ID Caso / Proyecto</th>
+            <th class="py-2.5 px-3 font-mono">Código WBS</th>
+            <th class="py-2.5 px-3">Hito / Entregable Afectado</th>
+            <th class="py-2.5 px-2 text-center">¿Ruta Crítica?</th>
+            <th class="py-2.5 px-2 text-center">Holgura (d)</th>
+            <th class="py-2.5 px-2 text-center">Impacto (d)</th>
+            <th class="py-2.5 px-3 text-right">Monto Reclamado</th>
+            <th class="py-2.5 px-2 text-center">Moneda</th>
+            <th class="py-2.5 px-3 text-right">Exposición PEN</th>
+            <th class="py-2.5 px-3 text-right">Brecha OPP PEN</th>
+            <th class="py-2.5 px-3 text-center">Prioridad</th>
+            <th class="py-2.5 px-4 max-w-xs">Medida de Mitigación Técnica</th>
+            <th class="py-2.5 px-3 text-center">CDE (ACC)</th>
           </tr>
         `;
       } else {
@@ -2361,7 +2621,7 @@
       }
 
       if (lista.length === 0) {
-        const colSpan = modoColumnasTabla === 'ejecutiva' ? 9 : 51;
+        const colSpan = modoColumnasTabla === 'ejecutiva' ? 9 : (modoColumnasTabla === 'abogado' ? 13 : (modoColumnasTabla === 'ingeniero' ? 14 : 51));
         tbody.innerHTML = `
           <tr>
             <td colspan="${colSpan}" class="text-center py-10 px-4">
@@ -2433,7 +2693,7 @@
             </td>
             <td class="py-3 px-4 max-w-xs">
               <p class="font-medium text-slate-800 line-clamp-1" title="${c.asunto}">${c.asunto}</p>
-              <span class="text-[10px] text-slate-400">${c.tipoAtencion} · ${c.regimen || 'G2G'}</span>
+              <span class="text-[10px] text-slate-400">${c.categoriaProblema || c.tipoAtencion} · ${c.regimen || 'G2G'}</span>
             </td>
             <td class="py-3 px-3">
               <span class="font-bold text-slate-800">${c.instanciaActual}</span>
@@ -2456,9 +2716,6 @@
             </td>
             <td class="py-3 px-3 text-center whitespace-nowrap">
               <div class="flex items-center justify-center space-x-1">
-                <button onclick="abrirModalValidarLegal('${c.id}')" title="Validar Legalmente (Sin Cambios)" class="p-1 rounded hover:bg-emerald-100 text-emerald-700">
-                  <i data-lucide="shield-check" class="w-4 h-4"></i>
-                </button>
                 <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Ejecutiva" class="p-1 rounded hover:bg-slate-200 text-slate-600">
                   <i data-lucide="eye" class="w-4 h-4"></i>
                 </button>
@@ -2471,6 +2728,51 @@
                 ${c.enlaceAcc ? `<a href="${c.enlaceAcc}" target="_blank" title="Abrir en Autodesk ACC" class="p-1 rounded hover:bg-blue-100 text-blue-600"><i data-lucide="external-link" class="w-4 h-4"></i></a>` : ''}
               </div>
             </td>
+          `;
+        } else if (modoColumnasTabla === 'abogado') {
+          tr.innerHTML = `
+            <td class="py-2.5 px-3 bg-white sticky left-0 z-10 border-r border-slate-200 text-center shadow-sm">
+              <div class="flex items-center justify-center space-x-1">
+                <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Legal" class="p-1 hover:bg-slate-200 rounded text-slate-600"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
+                <button onclick="abrirModalDerivar('${c.id}')" title="Derivar" class="p-1 hover:bg-brand-100 rounded text-brand-600"><i data-lucide="send" class="w-3.5 h-3.5"></i></button>
+                <button onclick="editarCaso('${c.id}')" title="Editar" class="p-1 hover:bg-amber-100 rounded text-amber-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+              </div>
+            </td>
+            <td class="py-2.5 px-3 font-mono font-bold text-slate-900 whitespace-nowrap">${c.id} <span class="text-xs text-slate-500 font-normal">(${c.proyecto})</span></td>
+            <td class="py-2.5 px-3 font-semibold text-slate-700 whitespace-nowrap">${c.categoriaProblema || c.tipoAtencion}</td>
+            <td class="py-2.5 px-4 text-slate-800 max-w-sm truncate" title="${c.asunto}">${c.asunto}</td>
+            <td class="py-2.5 px-3 text-slate-600 max-w-xs truncate" title="${c.baseContractual || c.regimen}">${c.baseContractual || c.regimen || '-'}</td>
+            <td class="py-2.5 px-3 whitespace-nowrap"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">${c.estado || 'En trámite'}</span></td>
+            <td class="py-2.5 px-4 bg-amber-50/70 text-amber-950 font-medium max-w-xs truncate" title="${c.posicionProvias || 'En evaluación'}">${c.posicionProvias || 'En evaluación'}</td>
+            <td class="py-2.5 px-2 text-center whitespace-nowrap"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.nivelRiesgoLegal === 'Alto' ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-amber-100 text-amber-800'}">${c.nivelRiesgoLegal || 'Medio'}</span></td>
+            <td class="py-2.5 px-3 text-slate-600 max-w-xs truncate" title="${c.documentosSustento || c.docInicio}">${c.documentosSustento || c.docInicio || '-'}</td>
+            <td class="py-2.5 px-3 whitespace-nowrap"><span class="font-bold text-slate-800">${c.instanciaActual}</span> <span class="text-[11px] text-slate-500 block truncate max-w-[120px]">${c.responsable || '-'}</span></td>
+            <td class="py-2.5 px-3 text-slate-700 max-w-xs truncate" title="${c.accionPendiente}">${c.accionPendiente || '-'}</td>
+            <td class="py-2.5 px-3 whitespace-nowrap"><span class="font-mono font-bold ${dias < 0 ? 'text-rose-600' : 'text-slate-800'}">${c.fechaLimite || '-'}</span> <span class="text-[10px] block ${dias < 0 ? 'text-rose-600 font-bold' : 'text-slate-500'}">${dias < 0 ? `Vencido (${Math.abs(dias)}d)` : `${dias}d rest.`}</span></td>
+            <td class="py-2.5 px-3 font-mono text-slate-600 whitespace-nowrap">${c.expedienteSisgedo || '-'}</td>
+          `;
+        } else if (modoColumnasTabla === 'ingeniero') {
+          tr.innerHTML = `
+            <td class="py-2.5 px-3 bg-white sticky left-0 z-10 border-r border-slate-200 text-center shadow-sm">
+              <div class="flex items-center justify-center space-x-1">
+                <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Técnica" class="p-1 hover:bg-slate-200 rounded text-slate-600"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
+                <button onclick="editarCaso('${c.id}')" title="Editar" class="p-1 hover:bg-amber-100 rounded text-amber-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                ${c.enlaceAcc ? `<a href="${c.enlaceAcc}" target="_blank" title="Abrir en Autodesk ACC" class="p-1 rounded hover:bg-blue-100 text-blue-600"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>` : ''}
+              </div>
+            </td>
+            <td class="py-2.5 px-3 font-mono font-bold text-slate-900 whitespace-nowrap">${c.id} <span class="text-xs text-slate-500 font-normal">(${c.proyecto})</span></td>
+            <td class="py-2.5 px-3 font-mono font-bold text-purple-700 whitespace-nowrap">${c.wbs || '-'}</td>
+            <td class="py-2.5 px-3 text-slate-800 max-w-xs truncate" title="${c.hito}">${c.hito || '-'}</td>
+            <td class="py-2.5 px-2 text-center whitespace-nowrap font-bold ${c.rutaCritica === 'Sí' ? 'text-purple-700' : 'text-slate-400'}">${c.rutaCritica === 'Sí' ? '<span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 text-[10px]">SÍ (WBS)</span>' : 'No'}</td>
+            <td class="py-2.5 px-2 text-center font-mono font-bold text-slate-700">${c.holgura ?? 0}</td>
+            <td class="py-2.5 px-2 text-center font-mono font-bold ${c.afectacionDias > 0 ? 'text-rose-600' : 'text-slate-600'}">${c.afectacionDias ?? 0}</td>
+            <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-800 whitespace-nowrap">${(c.montoReclamado || 0).toLocaleString('es-PE')}</td>
+            <td class="py-2.5 px-2 text-center font-bold text-slate-700">${c.moneda || 'PEN'}</td>
+            <td class="py-2.5 px-3 text-right font-mono font-bold text-blue-900 bg-blue-50/30 whitespace-nowrap">S/ ${(c.escenarioProbable || 0).toLocaleString('es-PE')}</td>
+            <td class="py-2.5 px-3 text-right font-mono font-bold whitespace-nowrap ${c.brecha > 0 ? 'text-rose-600 bg-rose-50/30' : 'text-slate-400'}">${c.brecha > 0 ? `S/ ${c.brecha.toLocaleString('es-PE')}` : 'Cubierto'}</td>
+            <td class="py-2.5 px-3 text-center whitespace-nowrap"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${calcs.prioridad === 'P1 - Crítica' ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-slate-100 text-slate-700'}">${calcs.prioridad}</span></td>
+            <td class="py-2.5 px-4 text-slate-700 max-w-xs truncate" title="${c.mitigacion}">${c.mitigacion || '-'}</td>
+            <td class="py-2.5 px-3 text-center whitespace-nowrap">${c.enlaceAcc ? `<a href="${c.enlaceAcc}" target="_blank" class="text-blue-600 hover:text-blue-800 font-mono text-[11px] underline">Abrir ACC</a>` : '-'}</td>
           `;
         } else {
           // VISTA COMPLETA: 50 COLUMNAS OFICIALES IDÉNTICAS AL EXCEL
@@ -2804,6 +3106,10 @@
       document.getElementById('inpRegimen').value = c.regimen || 'NEC4 ECC Opción C (Target)';
       document.getElementById('inpGenerador').value = c.generador || '';
       document.getElementById('inpAsunto').value = c.asunto;
+      document.getElementById('inpCategoriaProblema').value = c.categoriaProblema || '';
+      document.getElementById('inpExpedienteSisgedo').value = c.expedienteSisgedo || '';
+      document.getElementById('inpPosicionProvias').value = c.posicionProvias || '';
+      document.getElementById('inpDocumentosSustento').value = c.documentosSustento || '';
       document.getElementById('inpDocInicio').value = c.docInicio || '';
       document.getElementById('inpFechaInicio').value = c.fechaInicio || '';
       document.getElementById('inpInstanciaActual').value = c.instanciaActual;
@@ -2849,6 +3155,10 @@
         regimen: document.getElementById('inpRegimen').value,
         generador: document.getElementById('inpGenerador').value,
         asunto: document.getElementById('inpAsunto').value,
+        categoriaProblema: document.getElementById('inpCategoriaProblema') ? document.getElementById('inpCategoriaProblema').value : '',
+        expedienteSisgedo: document.getElementById('inpExpedienteSisgedo') ? document.getElementById('inpExpedienteSisgedo').value : '',
+        posicionProvias: document.getElementById('inpPosicionProvias') ? document.getElementById('inpPosicionProvias').value : '',
+        documentosSustento: document.getElementById('inpDocumentosSustento') ? document.getElementById('inpDocumentosSustento').value : '',
         docInicio: document.getElementById('inpDocInicio').value,
         fechaInicio: document.getElementById('inpFechaInicio').value,
         instanciaActual: document.getElementById('inpInstanciaActual').value,
@@ -3124,6 +3434,17 @@
           </div>
 
         </div>
+
+        <!-- Bloque Especial: Posición Institucional de PROVÍAS (Abogado) -->
+        ${c.posicionProvias ? `
+        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1">
+          <span class="font-bold text-amber-900 text-xs flex items-center gap-1.5">
+            <i data-lucide="scale" class="w-4 h-4 text-amber-700"></i> Posición Institucional de PROVÍAS (DGP) / Conclusión Legal:
+          </span>
+          <p class="text-amber-950 text-xs leading-relaxed italic">"${c.posicionProvias}"</p>
+          ${c.documentosSustento ? `<p class="text-[10px] text-amber-800 pt-1"><strong>Documentos de sustento:</strong> ${c.documentosSustento}</p>` : ''}
+        </div>
+        ` : ''}
 
         <!-- Botón de Acción Directa: Validación Legal sin Cambios -->
         <div class="flex items-center justify-between p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl">
