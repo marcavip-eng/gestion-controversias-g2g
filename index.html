@@ -579,8 +579,8 @@
         </button>
       </div>
 
-      <!-- Formulario Wizard Body -->
-      <form id="formCaso" onsubmit="guardarCaso(event)" class="p-5 overflow-y-auto space-y-4 flex-1 text-xs">
+      <!-- Formulario Wizard Body (Llenado Progresivo Sin Bloqueos) -->
+      <form id="formCaso" novalidate onsubmit="guardarCaso(event)" class="p-5 overflow-y-auto space-y-4 flex-1 text-xs">
         
         <input type="hidden" id="editIndex" value="-1">
 
@@ -598,11 +598,11 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block font-bold text-slate-700 mb-1">ID Caso <span class="text-rose-500">*</span></label>
-              <input type="text" id="inpIdCaso" required placeholder="Ej. NCC-TD-01" class="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold uppercase focus:ring-2 focus:ring-brand-500">
+              <input type="text" id="inpIdCaso" placeholder="Ej. NCC-TD-01 / EV4-CLM-05" class="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold uppercase focus:ring-2 focus:ring-brand-500">
             </div>
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Proyecto G2G <span class="text-rose-500">*</span></label>
-              <select id="inpProyecto" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+              <label class="block font-bold text-slate-700 mb-1">Proyecto G2G</label>
+              <select id="inpProyecto" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
                 <option value="NCC">NCC - Nueva Carretera Central</option>
                 <option value="EV4">EV4 - Eje Vial 4</option>
                 <option value="VESR">VESR - Vía Expresa Santa Rosa</option>
@@ -622,10 +622,12 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Tipo de Atención <span class="text-rose-500">*</span></label>
-              <select id="inpTipoAtencion" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+              <label class="block font-bold text-slate-700 mb-1">Tipo de Atención / Reclamo <span class="text-slate-400 font-normal text-[10px]">(Opcional)</span></label>
+              <select id="inpTipoAtencion" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                <option value="">-- Por definir / En blanco --</option>
                 <option value="Trato directo">Trato Directo</option>
                 <option value="Evento de Compensación (CE)">Evento de Compensación (NEC - CE)</option>
+                <option value="Reclamo FIDIC (Cl. 20)">Reclamo FIDIC (Cl. 20 / Claim)</option>
                 <option value="DAB">Dispute Board (DAB / DAAB)</option>
                 <option value="Arbitraje">Arbitraje Nacional / Internacional</option>
                 <option value="Controversia contractual">Controversia Contractual</option>
@@ -666,8 +668,8 @@
           </div>
 
           <div>
-            <label class="block font-bold text-slate-700 mb-1">Asunto / Descripción del Problema <span class="text-rose-500">*</span></label>
-            <textarea id="inpAsunto" rows="2" required placeholder="Detalle sintético del objeto de la controversia y antecedentes..." class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"></textarea>
+            <label class="block font-bold text-slate-700 mb-1">Asunto / Descripción del Problema</label>
+            <textarea id="inpAsunto" rows="2" placeholder="Detalle sintético del objeto de la controversia y antecedentes..." class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500"></textarea>
           </div>
 
           <!-- Campo Exclusivo del Abogado: Posición de PROVÍAS -->
@@ -707,8 +709,8 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Instancia Actual <span class="text-rose-500">*</span></label>
-              <select id="inpInstanciaActual" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 font-semibold">
+              <label class="block font-bold text-slate-700 mb-1">Instancia Actual</label>
+              <select id="inpInstanciaActual" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 font-semibold">
                 <option value="PMO">PMO (Asistencia Técnica Internacional)</option>
                 <option value="Dirección de Estudios">Dirección de Estudios (Entidad PVN)</option>
                 <option value="OAJ">OAJ (Oficina de Asesoría Jurídica)</option>
@@ -718,8 +720,8 @@
               </select>
             </div>
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Órgano de Conducción <span class="text-rose-500">*</span></label>
-              <select id="inpResponsableConduccion" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 font-semibold">
+              <label class="block font-bold text-slate-700 mb-1">Órgano de Conducción</label>
+              <select id="inpResponsableConduccion" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 font-semibold">
                 <!-- Poblado dinámicamente desde configSistema.direcciones -->
               </select>
             </div>
@@ -746,8 +748,8 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Tipo de Plazo <span class="text-rose-500">*</span></label>
-              <select id="inpTipoPlazo" required class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+              <label class="block font-bold text-slate-700 mb-1">Tipo de Plazo</label>
+              <select id="inpTipoPlazo" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
                 <option value="Preclusivo / Caducidad (Fatal)">⏱️ Preclusivo / Caducidad (Time-Bar Fatal)</option>
                 <option value="Contractual Ordinario">Contractual Ordinario</option>
                 <option value="Acuerdo de Acta">Acuerdo de Acta de Trato Directo</option>
@@ -759,7 +761,7 @@
               <input type="date" id="inpFechaDerivacion" class="w-full p-2 border border-slate-300 rounded-lg">
             </div>
             <div>
-              <label class="block font-bold text-slate-700 mb-1">Fecha Límite <span class="text-rose-500">*</span></label>
+              <label class="block font-bold text-slate-700 mb-1">Fecha Límite</label>
               <input type="date" id="inpFechaLimite" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 font-bold">
             </div>
           </div>
@@ -774,11 +776,11 @@
         <div id="tabContent3" class="space-y-4 hidden">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 mb-1">¿Afecta Ruta Crítica? <span class="text-rose-500">*</span></label>
-              <select id="inpRutaCritica" required class="w-full p-2 border border-slate-300 rounded-lg font-bold">
+              <label class="block font-bold text-slate-700 mb-1">¿Afecta Ruta Crítica?</label>
+              <select id="inpRutaCritica" class="w-full p-2 border border-slate-300 rounded-lg font-bold">
+                <option value="Por determinar">POR DETERMINAR (En análisis TIA con PMO)</option>
                 <option value="Sí">SÍ (Impacta Ruta Crítica)</option>
                 <option value="No">NO (Actividad Secundaria)</option>
-                <option value="Por determinar">POR DETERMINAR (En análisis TIA con PMO)</option>
               </select>
             </div>
             <div>
@@ -1992,6 +1994,10 @@
       if (inpTipo) {
         const valTipo = inpTipo.value;
         inpTipo.innerHTML = '';
+        const optVacio = document.createElement('option');
+        optVacio.value = '';
+        optVacio.textContent = '-- Por definir / En blanco --';
+        inpTipo.appendChild(optVacio);
         (configSistema.tiposAtencion || []).forEach(t => {
           const opt = document.createElement('option');
           opt.value = t;
@@ -3095,6 +3101,9 @@
                             (!c.escenarioProbable || parseFloat(c.escenarioProbable) === 0);
 
         const alertasFaltantes = [];
+        if (!c.tipoAtencion || c.tipoAtencion.trim() === '' || c.tipoAtencion === 'Por definir') {
+          alertasFaltantes.push('<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-rose-50 text-rose-800 border border-rose-200" title="Pendiente definir el tipo de atención o reclamo">⚠️ Tipo Atención</span>');
+        }
         if (!c.posicionProvias || c.posicionProvias.trim() === '') {
           alertasFaltantes.push('<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-50 text-amber-800 border border-amber-200" title="Pendiente pronunciamiento o conclusión legal">⚖️ Posición legal</span>');
         }
@@ -3818,54 +3827,69 @@
     }
 
     function guardarCaso(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const idx = parseInt(document.getElementById('editIndex').value);
-      const id = document.getElementById('inpIdCaso').value.trim();
+      let id = document.getElementById('inpIdCaso').value.trim();
+
+      if (!id) {
+        alert('Por favor ingrese al menos un ID único para el caso (ej. NCC-TD-01 o FIDIC-CLM-01).');
+        document.getElementById('inpIdCaso').focus();
+        return;
+      }
+
+      const asuntoVal = document.getElementById('inpAsunto').value.trim();
+      const tipoAtencionVal = document.getElementById('inpTipoAtencion').value.trim();
+      const proyectoVal = document.getElementById('inpProyecto').value || 'G2G';
+      const regimenVal = document.getElementById('inpRegimen').value || '';
+      const instanciaVal = document.getElementById('inpInstanciaActual').value || 'Dirección de Estudios';
+      const respConduccionVal = document.getElementById('inpResponsableConduccion').value || 'Dirección de Estudios';
+      const tipoPlazoVal = document.getElementById('inpTipoPlazo').value || 'Contractual Ordinario';
+      const rutaCriticaVal = document.getElementById('inpRutaCritica').value || 'Por determinar';
 
       const casoData = {
         id: id,
-        proyecto: document.getElementById('inpProyecto').value,
-        fase: document.getElementById('inpFase').value,
-        tipoAtencion: document.getElementById('inpTipoAtencion').value,
-        regimen: document.getElementById('inpRegimen').value,
-        generador: document.getElementById('inpGenerador').value,
-        asunto: document.getElementById('inpAsunto').value,
+        proyecto: proyectoVal,
+        fase: document.getElementById('inpFase').value || 'Ejecución',
+        tipoAtencion: tipoAtencionVal || 'Por definir',
+        regimen: regimenVal,
+        generador: document.getElementById('inpGenerador').value || '',
+        asunto: asuntoVal || '[Asunto pendiente de redacción]',
         categoriaProblema: document.getElementById('inpCategoriaProblema') ? document.getElementById('inpCategoriaProblema').value : '',
         expedienteSisgedo: document.getElementById('inpExpedienteSisgedo') ? document.getElementById('inpExpedienteSisgedo').value : '',
         posicionProvias: document.getElementById('inpPosicionProvias') ? document.getElementById('inpPosicionProvias').value : '',
         documentosSustento: document.getElementById('inpDocumentosSustento') ? document.getElementById('inpDocumentosSustento').value : '',
-        docInicio: document.getElementById('inpDocInicio').value,
-        fechaInicio: document.getElementById('inpFechaInicio').value,
-        instanciaActual: document.getElementById('inpInstanciaActual').value,
-        responsableConduccion: document.getElementById('inpResponsableConduccion').value,
-        responsable: document.getElementById('inpResponsable').value,
-        estado: document.getElementById('inpEstado').value,
-        tipoPlazo: document.getElementById('inpTipoPlazo').value,
-        fechaDerivacion: document.getElementById('inpFechaDerivacion').value,
-        fechaLimite: document.getElementById('inpFechaLimite').value,
-        accionPendiente: document.getElementById('inpAccionPendiente').value,
-        rutaCritica: document.getElementById('inpRutaCritica').value,
-        wbs: document.getElementById('inpWbs').value,
-        hito: document.getElementById('inpHito').value,
+        docInicio: document.getElementById('inpDocInicio').value || '',
+        fechaInicio: document.getElementById('inpFechaInicio').value || '',
+        instanciaActual: instanciaVal,
+        responsableConduccion: respConduccionVal,
+        responsable: document.getElementById('inpResponsable').value || '',
+        estado: document.getElementById('inpEstado').value || 'En curso',
+        tipoPlazo: tipoPlazoVal,
+        fechaDerivacion: document.getElementById('inpFechaDerivacion').value || '',
+        fechaLimite: document.getElementById('inpFechaLimite').value || '',
+        accionPendiente: document.getElementById('inpAccionPendiente').value || '',
+        rutaCritica: rutaCriticaVal,
+        wbs: document.getElementById('inpWbs').value || '',
+        hito: document.getElementById('inpHito').value || '',
         holgura: parseInt(document.getElementById('inpHolgura').value) || 0,
         afectacionDias: parseInt(document.getElementById('inpAfectacionDias').value) || 0,
-        mitigacion: document.getElementById('inpMitigacion').value,
-        moneda: document.getElementById('inpMoneda').value,
+        mitigacion: document.getElementById('inpMitigacion').value || '',
+        moneda: document.getElementById('inpMoneda').value || 'PEN',
         montoReclamado: parseFloat(document.getElementById('inpMontoReclamado').value) || 0,
-        incluyeIgv: document.getElementById('inpIncluyeIgv').value,
+        incluyeIgv: document.getElementById('inpIncluyeIgv').value || 'Sí',
         escenarioBajo: parseFloat(document.getElementById('inpEscenarioBajo').value) || 0,
         escenarioProbable: parseFloat(document.getElementById('inpEscenarioProbable').value) || 0,
         escenarioAlto: parseFloat(document.getElementById('inpEscenarioAlto').value) || 0,
         cobertura: parseFloat(document.getElementById('inpCobertura').value) || 0,
         brecha: parseFloat(document.getElementById('inpBrechaCalculada').value) || 0,
-        fuente: document.getElementById('inpFuente').value,
-        enlaceAcc: document.getElementById('inpEnlaceAcc').value,
+        fuente: document.getElementById('inpFuente').value || 'RO',
+        enlaceAcc: document.getElementById('inpEnlaceAcc').value || '',
         ultimaValidacionLegal: idx >= 0 ? casos[idx].ultimaValidacionLegal : new Date().toISOString().split('T')[0],
         validadorLegal: idx >= 0 ? casos[idx].validadorLegal : 'Registro Inicial',
         historial: idx >= 0 ? casos[idx].historial || [] : [{
           fecha: new Date().toISOString().split('T')[0],
           origen: "Registro Inicial",
-          destino: document.getElementById('inpInstanciaActual').value,
+          destino: instanciaVal,
           doc: document.getElementById('inpDocInicio').value || 'Alta de Caso',
           obs: "Registro formal en cartera de controversias"
         }]
@@ -3886,6 +3910,20 @@
       actualizarDashboard();
       renderizarCasos();
       cerrarModalCaso();
+
+      // Alertas progresivas amigables
+      const pendientes = [];
+      if (!tipoAtencionVal || tipoAtencionVal === 'Por definir') pendientes.push('Tipo de Atención');
+      if (!asuntoVal) pendientes.push('Asunto');
+      if (!casoData.posicionProvias) pendientes.push('Posición Legal');
+      if (!casoData.wbs) pendientes.push('WBS');
+      if (!casoData.escenarioProbable) pendientes.push('Cuantía OPP');
+
+      if (pendientes.length > 0) {
+        mostrarNotificacion(`Caso ${id} guardado progresivamente. Pendiente: ${pendientes.join(', ')}`, 'info');
+      } else {
+        mostrarNotificacion(`Caso ${id} guardado exitosamente con expediente completo.`, 'success');
+      }
     }
 
     // DERIVACIÓN RÁPIDA (1 CLIC PARA EL ABOGADO)
