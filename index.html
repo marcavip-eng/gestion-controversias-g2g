@@ -3003,6 +3003,22 @@
         const dias = calcs.diasDisponibles;
         const esCritico = calcs.prioridad === 'P1 - Crítica';
 
+        // Detección inteligente de información pendiente (Permite registro flexible y progresivo)
+        const faltanDatos = (!c.posicionProvias || c.posicionProvias.trim() === '') ||
+                            (!c.wbs || c.wbs.trim() === '') ||
+                            (!c.escenarioProbable || parseFloat(c.escenarioProbable) === 0);
+
+        const alertasFaltantes = [];
+        if (!c.posicionProvias || c.posicionProvias.trim() === '') {
+          alertasFaltantes.push('<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-50 text-amber-800 border border-amber-200" title="Pendiente pronunciamiento o conclusión legal">⚖️ Posición legal</span>');
+        }
+        if (!c.wbs || c.wbs.trim() === '') {
+          alertasFaltantes.push('<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-50 text-blue-800 border border-blue-200" title="Pendiente asignación de código WBS y ruta crítica">🏗️ WBS de obra</span>');
+        }
+        if (!c.escenarioProbable || parseFloat(c.escenarioProbable) === 0) {
+          alertasFaltantes.push('<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-700 border border-slate-200" title="Pendiente estimación cuantitativa de costos y brecha">💰 Cuantía OPP</span>');
+        }
+
         // 2. FILA DE TABLA (EJECUTIVA O MATRIZ COMPLETA DE 50 COLS)
         const tr = document.createElement('tr');
         tr.className = `hover:bg-slate-50/80 transition ${esCritico ? 'bg-rose-50/20' : ''}`;
@@ -3020,10 +3036,22 @@
                 ${calcs.esPlazoFatal ? `<span title="${configSistema.mensajeFatal}" class="text-rose-600 font-bold">⏱️</span>` : ''}
               </div>
               <span class="text-[11px] text-slate-500 font-semibold">${c.proyecto}</span>
+              ${faltanDatos ? `
+                <div class="mt-1 flex items-center gap-1 flex-wrap">
+                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-bold flex items-center gap-0.5" title="Faltan completar datos técnicos o legales">
+                    ⚠️ Incompleto
+                  </span>
+                </div>
+              ` : ''}
             </td>
             <td class="py-3 px-4 max-w-xs">
               <p class="font-medium text-slate-800 line-clamp-1" title="${c.asunto}">${c.asunto}</p>
               <span class="text-[10px] text-slate-400">${c.categoriaProblema || c.tipoAtencion} · ${c.regimen || 'G2G'}</span>
+              ${alertasFaltantes.length > 0 ? `
+                <div class="mt-1 flex items-center gap-1 flex-wrap">
+                  ${alertasFaltantes.join(' ')}
+                </div>
+              ` : ''}
             </td>
             <td class="py-3 px-3">
               <span class="font-bold text-slate-800">${c.instanciaActual}</span>
@@ -3046,6 +3074,9 @@
             </td>
             <td class="py-3 px-3 text-center whitespace-nowrap">
               <div class="flex items-center justify-center space-x-1">
+                <button onclick="abrirModalValidarLegal('${c.id}')" title="Validación Periódica Legal (Certificar Sin Cambios)" class="p-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                </button>
                 <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Ejecutiva" class="p-1 rounded hover:bg-slate-200 text-slate-600">
                   <i data-lucide="eye" class="w-4 h-4"></i>
                 </button>
@@ -3063,12 +3094,16 @@
           tr.innerHTML = `
             <td class="py-2.5 px-3 bg-white sticky left-0 z-10 border-r border-slate-200 text-center shadow-sm">
               <div class="flex items-center justify-center space-x-1">
+                <button onclick="abrirModalValidarLegal('${c.id}')" title="Validación Periódica Legal" class="p-1 bg-emerald-50 hover:bg-emerald-100 rounded text-emerald-700 border border-emerald-300"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i></button>
                 <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Legal" class="p-1 hover:bg-slate-200 rounded text-slate-600"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
                 <button onclick="abrirModalDerivar('${c.id}')" title="Derivar" class="p-1 hover:bg-brand-100 rounded text-brand-600"><i data-lucide="send" class="w-3.5 h-3.5"></i></button>
-                <button onclick="editarCaso('${c.id}')" title="Editar" class="p-1 hover:bg-amber-100 rounded text-amber-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                <button onclick="editarCasoComo('${c.id}', 'abogado')" title="Editar como Abogado" class="p-1 hover:bg-amber-100 rounded text-amber-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
               </div>
             </td>
-            <td class="py-2.5 px-3 font-mono font-bold text-slate-900 whitespace-nowrap">${c.id} <span class="text-xs text-slate-500 font-normal">(${c.proyecto})</span></td>
+            <td class="py-2.5 px-3 font-mono font-bold text-slate-900 whitespace-nowrap">
+              ${c.id} <span class="text-xs text-slate-500 font-normal">(${c.proyecto})</span>
+              ${(!c.posicionProvias || c.posicionProvias.trim() === '') ? '<span class="block text-[9px] text-amber-700 font-bold">⚠️ Falta Posición Legal</span>' : ''}
+            </td>
             <td class="py-2.5 px-3 font-semibold text-slate-700 whitespace-nowrap">${c.categoriaProblema || c.tipoAtencion}</td>
             <td class="py-2.5 px-4 text-slate-800 max-w-sm truncate" title="${c.asunto}">${c.asunto}</td>
             <td class="py-2.5 px-3 text-slate-600 max-w-xs truncate" title="${c.baseContractual || c.regimen}">${c.baseContractual || c.regimen || '-'}</td>
@@ -3086,11 +3121,15 @@
             <td class="py-2.5 px-3 bg-white sticky left-0 z-10 border-r border-slate-200 text-center shadow-sm">
               <div class="flex items-center justify-center space-x-1">
                 <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Técnica" class="p-1 hover:bg-slate-200 rounded text-slate-600"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
-                <button onclick="editarCaso('${c.id}')" title="Editar" class="p-1 hover:bg-amber-100 rounded text-amber-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                <button onclick="editarCasoComo('${c.id}', 'ingeniero')" title="Editar como Ingeniero (WBS & Costos)" class="p-1 hover:bg-blue-100 rounded text-blue-700"><i data-lucide="hard-hat" class="w-3.5 h-3.5"></i></button>
                 ${c.enlaceAcc ? `<a href="${c.enlaceAcc}" target="_blank" title="Abrir en Autodesk ACC" class="p-1 rounded hover:bg-blue-100 text-blue-600"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>` : ''}
               </div>
             </td>
-            <td class="py-2.5 px-3 font-mono font-bold text-slate-900 whitespace-nowrap">${c.id} <span class="text-xs text-slate-500 font-normal">(${c.proyecto})</span></td>
+            <td class="py-2.5 px-3 font-mono font-bold text-slate-900 whitespace-nowrap">
+              ${c.id} <span class="text-xs text-slate-500 font-normal">(${c.proyecto})</span>
+              ${(!c.wbs || c.wbs.trim() === '') ? '<span class="block text-[9px] text-blue-700 font-bold">⚠️ Falta WBS</span>' : ''}
+              ${(!c.escenarioProbable || parseFloat(c.escenarioProbable) === 0) ? '<span class="block text-[9px] text-slate-500 font-bold">⚠️ Falta Cuantía OPP</span>' : ''}
+            </td>
             <td class="py-2.5 px-3 font-mono font-bold text-purple-700 whitespace-nowrap">${c.wbs || '-'}</td>
             <td class="py-2.5 px-3 text-slate-800 max-w-xs truncate" title="${c.hito}">${c.hito || '-'}</td>
             <td class="py-2.5 px-2 text-center whitespace-nowrap font-bold ${c.rutaCritica === 'Sí' ? 'text-purple-700' : 'text-slate-400'}">${c.rutaCritica === 'Sí' ? '<span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 text-[10px]">SÍ (WBS)</span>' : 'No'}</td>
@@ -3351,6 +3390,9 @@
               ${c.responsable || 'Sin asignar'}
             </span>
             <div class="flex items-center space-x-1">
+              <button onclick="abrirModalValidarLegal('${c.id}')" title="Validación Periódica Legal (Certificar Sin Cambios)" class="px-2 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-[11px] flex items-center gap-1 border border-emerald-300 transition">
+                <i data-lucide="shield-check" class="w-3 h-3 text-emerald-600"></i> Validar
+              </button>
               <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Ejecutiva" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-[11px]">
                 Ficha
               </button>
@@ -3483,6 +3525,15 @@
         const b = document.getElementById(`tabBtn${i}`);
         if (!c || !b) continue;
 
+        // Si el perfil es abogado, las pestañas 3 y 4 deben permanecer estrictamente ocultas
+        if (perfilEdicionActual === 'abogado' && (i === 3 || i === 4)) {
+          b.classList.add('hidden');
+          c.classList.add('hidden');
+          continue;
+        } else {
+          b.classList.remove('hidden');
+        }
+
         if (i === tab) {
           c.classList.remove('hidden');
           b.className = 'py-3 border-b-2 border-brand-600 text-brand-700 flex items-center gap-1.5 whitespace-nowrap font-bold';
@@ -3570,7 +3621,11 @@
         if (encontrada) selModal.value = encontrada.nombre;
       }
 
-      cambiarTabWizard(1);
+      // Ajustar perfil según modo activo de visualización
+      const perfilInicial = modoColumnasTabla === 'abogado' ? 'abogado' : (modoColumnasTabla === 'ingeniero' ? 'ingeniero' : 'completo');
+      cambiarPerfilEdicion(perfilInicial);
+
+      cambiarTabWizard(perfilInicial === 'ingeniero' ? 3 : 1);
       document.getElementById('modalCaso').classList.remove('hidden');
       lucide.createIcons();
     }
@@ -3625,7 +3680,11 @@
       document.getElementById('inpFuente').value = c.fuente || 'RO';
       document.getElementById('inpEnlaceAcc').value = c.enlaceAcc || '';
 
-      cambiarTabWizard(1);
+      // Ajustar perfil según modo activo si no se especificó
+      const perfilInicial = modoColumnasTabla === 'abogado' ? 'abogado' : (modoColumnasTabla === 'ingeniero' ? 'ingeniero' : 'completo');
+      cambiarPerfilEdicion(perfilInicial);
+
+      cambiarTabWizard(perfilInicial === 'ingeniero' ? 3 : 1);
       document.getElementById('modalCaso').classList.remove('hidden');
       lucide.createIcons();
     }
