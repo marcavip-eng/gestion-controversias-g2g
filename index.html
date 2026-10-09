@@ -634,13 +634,19 @@
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">Régimen Contractual</label>
-              <select id="inpRegimen" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+              <select id="inpRegimen" onchange="actualizarPreviewRegimenModal()" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
                 <option value="NEC4 ECC Opción C (Target)">NEC4 ECC Opción C (Target Cost)</option>
                 <option value="NEC3/4 ECC Opción A">NEC3/NEC4 ECC Opción A (Precio Fijo)</option>
-                <option value="FIDIC Libro Rojo">FIDIC Libro Rojo (Construcción)</option>
-                <option value="FIDIC Libro Amarillo">FIDIC Libro Amarillo (Diseño y Construcción)</option>
-                <option value="Ley N° 32069 / TUO 30225">Ley de Contrataciones del Estado</option>
+                <option value="FIDIC Libro Rojo (Construcción Diseñada por Empleador)">FIDIC Libro Rojo (Construcción Diseñada por Empleador)</option>
+                <option value="FIDIC Libro Amarillo (Diseño y Construcción EPC Ligero)">FIDIC Libro Amarillo (Diseño y Construcción EPC Ligero)</option>
+                <option value="FIDIC Libro Plata (Llave en Mano / EPC)">FIDIC Libro Plata (Llave en Mano / EPC)</option>
+                <option value="FIDIC Libro Esmeralda (Obras Subterráneas y Túneles)">FIDIC Libro Esmeralda (Obras Subterráneas y Túneles)</option>
+                <option value="FIDIC Libro Blanco (Servicios de Consultoría y Supervisión)">FIDIC Libro Blanco (Servicios de Consultoría y Supervisión)</option>
+                <option value="FIDIC Libro Verde (Contrato Abreviado de Obras Menores)">FIDIC Libro Verde (Contrato Abreviado de Obras Menores)</option>
+                <option value="LCE - Ley N° 32069 (Nueva Ley de Compras Públicas)">LCE - Ley N° 32069 (Nueva Ley de Compras Públicas)</option>
+                <option value="LCE - TUO Ley N° 30225 y D.S. 344-2018-EF (Contratos en Curso)">LCE - TUO Ley N° 30225 y D.S. 344-2018-EF (Contratos en Curso)</option>
               </select>
+              <div id="previewBadgeRegimenModal" class="mt-1.5 flex items-center gap-1.5"></div>
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">Generador / Solicitante</label>
@@ -874,9 +880,14 @@
 
         <!-- Botones de Acción del Modal -->
         <div class="pt-4 border-t border-slate-200 flex items-center justify-between">
-          <button type="button" onclick="cerrarModalCaso()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 rounded-lg font-medium text-slate-700 transition">
-            Cancelar
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="cerrarModalCaso()" class="px-4 py-2 border border-slate-300 hover:bg-slate-100 rounded-lg font-medium text-slate-700 transition">
+              Cancelar
+            </button>
+            <button type="button" id="btnModalEliminarCaso" onclick="eliminarCasoActualDesdeModal()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-lg font-bold text-xs flex items-center gap-1.5 transition hidden">
+              <i data-lucide="trash-2" class="w-4 h-4 text-rose-600"></i> Eliminar Caso
+            </button>
+          </div>
           <div class="flex items-center space-x-2">
             <button type="button" id="btnWizardPrev" onclick="navegarWizard(-1)" class="px-3 py-2 border border-slate-300 rounded-lg font-medium text-slate-600 hover:bg-slate-100 hidden">
               Anterior
@@ -2002,6 +2013,7 @@
           inpReg.appendChild(opt);
         });
         if (valReg) inpReg.value = valReg;
+        if (typeof actualizarPreviewRegimenModal === 'function') actualizarPreviewRegimenModal();
       }
 
       // 5. Fases
@@ -2322,6 +2334,80 @@
       if (caso.estado === "Cerrado") return false;
       const calcs = calcularCamposOficialesMatriz(caso);
       return calcs.prioridad === "P1 - Crítica";
+    }
+
+    // BADGES DE COLORES OFICIALES PARA CADA SUITE CONTRACTUAL FIDIC, NEC Y LCE
+    function obtenerBadgeRegimen(regimen) {
+      if (!regimen) return '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">G2G</span>';
+      const r = regimen.toLowerCase();
+      
+      // 1. FIDIC LIBRO ROJO (Construcción Diseñada por el Empleador) - ROJO
+      if (r.includes('rojo') || r.includes('red book') || (r.includes('fidic') && r.includes('red'))) {
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-900 border border-rose-300 shadow-sm" title="${regimen}">
+          <span class="w-2 h-2 rounded-full bg-rose-600 shrink-0"></span>📕 FIDIC Rojo
+        </span>`;
+      }
+      // 2. FIDIC LIBRO AMARILLO (Diseño y Construcción EPC Ligero) - AMARILLO / ÁMBAR
+      if (r.includes('amarillo') || r.includes('yellow book') || (r.includes('fidic') && r.includes('yellow'))) {
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-950 border border-amber-300 shadow-sm" title="${regimen}">
+          <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>📒 FIDIC Amarillo
+        </span>`;
+      }
+      // 3. FIDIC LIBRO PLATA (Llave en Mano / EPC / Silver Book) - GRIS PLATA METALIZADO
+      if (r.includes('plata') || r.includes('silver book') || (r.includes('fidic') && r.includes('silver'))) {
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-900 border border-slate-400 shadow-sm" title="${regimen}">
+          <span class="w-2 h-2 rounded-full bg-slate-500 shrink-0"></span>🪙 FIDIC Plata
+        </span>`;
+      }
+      // 4. FIDIC LIBRO ESMERALDA (Obras Subterráneas y Túneles) - VERDE ESMERALDA
+      if (r.includes('esmeralda') || r.includes('emerald book') || (r.includes('fidic') && r.includes('emerald'))) {
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-sm" title="${regimen}">
+          <span class="w-2 h-2 rounded-full bg-emerald-600 shrink-0"></span>📗 FIDIC Esmeralda
+        </span>`;
+      }
+      // 5. FIDIC LIBRO BLANCO (Consultoría y Supervisión / White Book) - BLANCO / PERLA
+      if (r.includes('blanco') || r.includes('white book') || (r.includes('fidic') && r.includes('white'))) {
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-50 text-slate-800 border border-slate-300 shadow-sm" title="${regimen}">
+          <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span>📑 FIDIC Blanco
+        </span>`;
+      }
+      // 6. FIDIC LIBRO VERDE (Contrato Corto de Obras Menores / Green Book) - VERDE LIMA
+      if (r.includes('verde') || r.includes('green book') || (r.includes('fidic') && r.includes('green'))) {
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-lime-100 text-lime-900 border border-lime-300 shadow-sm" title="${regimen}">
+          <span class="w-2 h-2 rounded-full bg-lime-600 shrink-0"></span>🌱 FIDIC Verde
+        </span>`;
+      }
+      // FIDIC GENÉRICO
+      if (r.includes('fidic')) {
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200 shadow-sm" title="${regimen}">
+          <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>📘 FIDIC
+        </span>`;
+      }
+      // NEC3 / NEC4 (Target C, Suma Alzada A, PSC)
+      if (r.includes('nec4') || r.includes('nec3') || r.includes('nec')) {
+        const sub = (r.includes('opción c') || r.includes('opcion c')) ? 'Op. C' :
+                    (r.includes('opción a') || r.includes('opcion a')) ? 'Op. A' :
+                    r.includes('psc') ? 'PSC' : '';
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-300 shadow-sm" title="${regimen}">
+          <span class="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>📘 NEC4 ${sub}
+        </span>`;
+      }
+      // LEY DE CONTRATACIONES DEL ESTADO (Ley 32069 / TUO Ley 30225)
+      if (r.includes('32069') || r.includes('30225') || r.includes('lce') || r.includes('ley')) {
+        const sub = r.includes('32069') ? 'Ley 32069' : 'TUO 30225';
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-300 shadow-sm" title="${regimen}">
+          <span class="w-2 h-2 rounded-full bg-purple-600 shrink-0"></span>🏛️ LCE ${sub}
+        </span>`;
+      }
+      return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200" title="${regimen}">${regimen}</span>`;
+    }
+
+    function actualizarPreviewRegimenModal() {
+      const el = document.getElementById('previewBadgeRegimenModal');
+      const inp = document.getElementById('inpRegimen');
+      if (el && inp) {
+        el.innerHTML = obtenerBadgeRegimen(inp.value);
+      }
     }
 
     // ACTUALIZACIÓN DE KPIS DEL TABLERO
@@ -3046,7 +3132,10 @@
             </td>
             <td class="py-3 px-4 max-w-xs">
               <p class="font-medium text-slate-800 line-clamp-1" title="${c.asunto}">${c.asunto}</p>
-              <span class="text-[10px] text-slate-400">${c.categoriaProblema || c.tipoAtencion} · ${c.regimen || 'G2G'}</span>
+              <div class="flex items-center gap-1.5 flex-wrap mt-1">
+                <span class="text-[10px] text-slate-500 font-medium">${c.categoriaProblema || c.tipoAtencion}</span>
+                ${obtenerBadgeRegimen(c.regimen)}
+              </div>
               ${alertasFaltantes.length > 0 ? `
                 <div class="mt-1 flex items-center gap-1 flex-wrap">
                   ${alertasFaltantes.join(' ')}
@@ -3086,6 +3175,9 @@
                 <button onclick="editarCaso('${c.id}')" title="Editar Expediente" class="p-1 rounded hover:bg-amber-100 text-amber-600">
                   <i data-lucide="edit-3" class="w-4 h-4"></i>
                 </button>
+                <button onclick="eliminarCaso('${c.id}')" title="Eliminar Caso" class="p-1 rounded hover:bg-rose-100 text-rose-600">
+                  <i data-lucide="trash-2" class="w-4 h-4 text-rose-600"></i>
+                </button>
                 ${c.enlaceAcc ? `<a href="${c.enlaceAcc}" target="_blank" title="Abrir en Autodesk ACC" class="p-1 rounded hover:bg-blue-100 text-blue-600"><i data-lucide="external-link" class="w-4 h-4"></i></a>` : ''}
               </div>
             </td>
@@ -3098,6 +3190,7 @@
                 <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Legal" class="p-1 hover:bg-slate-200 rounded text-slate-600"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
                 <button onclick="abrirModalDerivar('${c.id}')" title="Derivar" class="p-1 hover:bg-brand-100 rounded text-brand-600"><i data-lucide="send" class="w-3.5 h-3.5"></i></button>
                 <button onclick="editarCasoComo('${c.id}', 'abogado')" title="Editar como Abogado" class="p-1 hover:bg-amber-100 rounded text-amber-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                <button onclick="eliminarCaso('${c.id}')" title="Eliminar Caso" class="p-1 hover:bg-rose-100 rounded text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i></button>
               </div>
             </td>
             <td class="py-2.5 px-3 font-mono font-bold text-slate-900 whitespace-nowrap">
@@ -3106,7 +3199,7 @@
             </td>
             <td class="py-2.5 px-3 font-semibold text-slate-700 whitespace-nowrap">${c.categoriaProblema || c.tipoAtencion}</td>
             <td class="py-2.5 px-4 text-slate-800 max-w-sm truncate" title="${c.asunto}">${c.asunto}</td>
-            <td class="py-2.5 px-3 text-slate-600 max-w-xs truncate" title="${c.baseContractual || c.regimen}">${c.baseContractual || c.regimen || '-'}</td>
+            <td class="py-2.5 px-3 whitespace-nowrap">${obtenerBadgeRegimen(c.baseContractual || c.regimen)}</td>
             <td class="py-2.5 px-3 whitespace-nowrap"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">${c.estado || 'En trámite'}</span></td>
             <td class="py-2.5 px-4 bg-amber-50/70 text-amber-950 font-medium max-w-xs truncate" title="${c.posicionProvias || 'En evaluación'}">${c.posicionProvias || 'En evaluación'}</td>
             <td class="py-2.5 px-2 text-center whitespace-nowrap"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.nivelRiesgoLegal === 'Alto' ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-amber-100 text-amber-800'}">${c.nivelRiesgoLegal || 'Medio'}</span></td>
@@ -3122,11 +3215,16 @@
               <div class="flex items-center justify-center space-x-1">
                 <button onclick="verFichaCaso('${c.id}')" title="Ver Ficha Técnica" class="p-1 hover:bg-slate-200 rounded text-slate-600"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
                 <button onclick="editarCasoComo('${c.id}', 'ingeniero')" title="Editar como Ingeniero (WBS & Costos)" class="p-1 hover:bg-blue-100 rounded text-blue-700"><i data-lucide="hard-hat" class="w-3.5 h-3.5"></i></button>
+                <button onclick="eliminarCaso('${c.id}')" title="Eliminar Caso" class="p-1 hover:bg-rose-100 rounded text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i></button>
                 ${c.enlaceAcc ? `<a href="${c.enlaceAcc}" target="_blank" title="Abrir en Autodesk ACC" class="p-1 rounded hover:bg-blue-100 text-blue-600"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>` : ''}
               </div>
             </td>
             <td class="py-2.5 px-3 font-mono font-bold text-slate-900 whitespace-nowrap">
-              ${c.id} <span class="text-xs text-slate-500 font-normal">(${c.proyecto})</span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span>${c.id}</span>
+                <span class="text-xs text-slate-500 font-normal">(${c.proyecto})</span>
+                ${obtenerBadgeRegimen(c.regimen)}
+              </div>
               ${(!c.wbs || c.wbs.trim() === '') ? '<span class="block text-[9px] text-blue-700 font-bold">⚠️ Falta WBS</span>' : ''}
               ${(!c.escenarioProbable || parseFloat(c.escenarioProbable) === 0) ? '<span class="block text-[9px] text-slate-500 font-bold">⚠️ Falta Cuantía OPP</span>' : ''}
             </td>
@@ -3152,6 +3250,7 @@
                 <button onclick="verFichaCaso('${c.id}')" title="Ficha" class="p-1 hover:bg-slate-200 rounded text-slate-600"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
                 <button onclick="abrirModalDerivar('${c.id}')" title="Derivar" class="p-1 hover:bg-brand-100 rounded text-brand-600"><i data-lucide="send" class="w-3.5 h-3.5"></i></button>
                 <button onclick="editarCaso('${c.id}')" title="Editar" class="p-1 hover:bg-amber-100 rounded text-amber-600"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                <button onclick="eliminarCaso('${c.id}')" title="Eliminar Caso" class="p-1 hover:bg-rose-100 rounded text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i></button>
               </div>
             </td>
             <td class="py-2.5 px-3 font-mono font-bold text-slate-900">${c.id}</td>
@@ -3163,7 +3262,7 @@
             <td class="py-2.5 px-3 text-slate-600">${c.solicitanteContraparte || c.generador || '-'}</td>
             <td class="py-2.5 px-3 text-slate-600">${c.docInicio || '-'}</td>
             <td class="py-2.5 px-3 font-mono text-slate-600">${c.fechaInicio || '-'}</td>
-            <td class="py-2.5 px-3 text-slate-600">${c.baseContractual || c.regimen || '-'}</td>
+            <td class="py-2.5 px-3 whitespace-nowrap">${obtenerBadgeRegimen(c.baseContractual || c.regimen)}</td>
             <td class="py-2.5 px-3 text-slate-600">${c.responsableConduccion || 'Dirección de Estudios'}</td>
             <td class="py-2.5 px-3 font-bold text-slate-800">${c.instanciaActual}</td>
             <td class="py-2.5 px-3 text-slate-600">${c.responsable || 'Sin asignar'}</td>
@@ -3328,9 +3427,10 @@
         card.innerHTML = `
           <div class="flex items-start justify-between">
             <div>
-              <div class="flex items-center gap-1.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-extrabold text-sm text-slate-900 font-mono">${c.id}</span>
                 <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${c.proyecto}</span>
+                ${obtenerBadgeRegimen(c.regimen)}
                 ${calcs.esPlazoFatal ? `<span class="text-rose-600 font-bold" title="${configSistema.mensajeFatal}">⏱️ FATAL</span>` : ''}
               </div>
               <p class="text-xs font-semibold text-slate-800 mt-1 line-clamp-2">${c.asunto}</p>
@@ -3392,6 +3492,9 @@
               </button>
               <button onclick="abrirModalDerivar('${c.id}')" title="Pase a otra Instancia" class="px-1.5 py-1 rounded bg-slate-50 hover:bg-slate-100 text-slate-600 font-medium text-[11px] border border-slate-200">
                 Pase
+              </button>
+              <button onclick="eliminarCaso('${c.id}')" title="Eliminar Caso" class="p-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
               </button>
             </div>
           </div>
@@ -3613,6 +3716,11 @@
       const perfilInicial = modoColumnasTabla === 'abogado' ? 'abogado' : (modoColumnasTabla === 'ingeniero' ? 'ingeniero' : 'completo');
       cambiarPerfilEdicion(perfilInicial);
 
+      // En nuevo caso, ocultar botón de eliminar
+      const btnEliminarModal = document.getElementById('btnModalEliminarCaso');
+      if (btnEliminarModal) btnEliminarModal.classList.add('hidden');
+      actualizarPreviewRegimenModal();
+
       cambiarTabWizard(perfilInicial === 'ingeniero' ? 3 : 1);
       document.getElementById('modalCaso').classList.remove('hidden');
       lucide.createIcons();
@@ -3668,6 +3776,11 @@
       document.getElementById('inpFuente').value = c.fuente || 'RO';
       document.getElementById('inpEnlaceAcc').value = c.enlaceAcc || '';
 
+      // Mostrar botón de eliminar caso al editar
+      const btnEliminarModal = document.getElementById('btnModalEliminarCaso');
+      if (btnEliminarModal) btnEliminarModal.classList.remove('hidden');
+      actualizarPreviewRegimenModal();
+
       // Ajustar perfil según modo activo si no se especificó
       const perfilInicial = modoColumnasTabla === 'abogado' ? 'abogado' : (modoColumnasTabla === 'ingeniero' ? 'ingeniero' : 'completo');
       cambiarPerfilEdicion(perfilInicial);
@@ -3675,6 +3788,33 @@
       cambiarTabWizard(perfilInicial === 'ingeniero' ? 3 : 1);
       document.getElementById('modalCaso').classList.remove('hidden');
       lucide.createIcons();
+    }
+
+    // ELIMINAR CASO CON CONFIRMACIÓN
+    function eliminarCaso(id) {
+      const idx = casos.findIndex(c => c.id === id);
+      if (idx === -1) {
+        alert('El caso no fue encontrado en el sistema.');
+        return;
+      }
+      const c = casos[idx];
+      const confirmacion = confirm(`¿Está seguro de eliminar definitivamente el caso:\n\nID: ${c.id}\nProyecto: ${c.proyecto}\nAsunto: ${c.asunto}\n\n⚠️ Esta acción borrará el expediente del sistema local de controversias.`);
+      if (!confirmacion) return;
+
+      casos.splice(idx, 1);
+      guardarEnStorage();
+      actualizarDashboard();
+      renderizarCasos();
+      cerrarModalCaso();
+      cerrarModalFicha();
+      mostrarNotificacion(`Caso ${id} eliminado con éxito`, 'info');
+    }
+
+    function eliminarCasoActualDesdeModal() {
+      const idx = parseInt(document.getElementById('editIndex').value);
+      if (idx >= 0 && casos[idx]) {
+        eliminarCaso(casos[idx].id);
+      }
     }
 
     function guardarCaso(e) {
@@ -3910,6 +4050,7 @@
             <div class="flex flex-wrap items-center gap-2">
               <span class="text-xl font-black text-slate-900 font-mono tracking-tight">${c.id}</span>
               <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-800">${c.proyecto}</span>
+              ${obtenerBadgeRegimen(c.regimen)}
               <span class="px-2.5 py-0.5 rounded text-xs font-bold border ${sem.badge}">${sem.label}</span>
               ${c.tipoPlazo && c.tipoPlazo.includes("Preclusivo") ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white animate-pulse">⏱️ PLAZO FATAL</span>' : ''}
             </div>
@@ -4053,6 +4194,21 @@
             </a>
           </div>
         ` : ''}
+
+        <!-- BARRA DE ACCIONES INFERIOR DE LA FICHA -->
+        <div class="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <button onclick="eliminarCaso('${c.id}')" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-lg font-bold text-xs flex items-center gap-1.5 transition">
+            <i data-lucide="trash-2" class="w-4 h-4 text-rose-600"></i> Eliminar Caso
+          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="cerrarModalFicha(); editarCaso('${c.id}')" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg font-bold text-xs shadow-sm flex items-center gap-1.5 transition">
+              <i data-lucide="edit-3" class="w-4 h-4"></i> Editar Expediente
+            </button>
+            <button onclick="cerrarModalFicha()" class="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-medium text-xs transition">
+              Cerrar
+            </button>
+          </div>
+        </div>
       `;
 
       document.getElementById('fichaContenido').innerHTML = html;
